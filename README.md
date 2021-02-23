@@ -30,13 +30,7 @@ Set your F1Laps API key in the config.py. You can get your API key from [https:/
 F1LAPS_API_KEY = "YOUR_API_KEY"
 ```
 
-Once you start the script, it will show the IP and port it's receiving packages on, like so:
-```bash
-2021-02-19 19:34:42   Set your F1 game telemetry IP to:   192.168.4.20
-2021-02-19 19:34:42   Set your F1 game telemetry port to: 20777
-```
-
-In your F1 game settings (Settings > Telemetry), change the IP and port accordingly.
+In your F1 game settings (Settings > Telemetry), make sure to change the Telemetry IP according to your machine's IP address. Keep the port to the default value.
 
 ## Testing
 You can run all unit tests with this command:
@@ -45,7 +39,7 @@ python3 -m unittest discover
 ```
 
 ## Desktop Apps
-You can build Mac and Windows apps via PyInstaller.
+You can build Mac and Windows apps via PyInstaller, which offer a graphical user interface for running this script.
 
 **Mac** 
 
