@@ -2,8 +2,8 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 import json
 
-from f1laps_telemetry_2020.session import Session
-from f1laps_telemetry_2020.f1laps import F1LapsAPI
+from receiver.session import Session
+from receiver.f1laps import F1LapsAPI
 
 
 class SessionBaseTests(TestCase):
@@ -75,21 +75,21 @@ class SessionAPITests(TestCase):
         self.session.lap_number_current = 2
         self.session.lap_list = {1: {"sector_1_time_ms" : 10001, "sector_2_time_ms": 20001, "sector_3_time_ms": 30001, "lap_number": 1, "car_race_position": 1, "pit_status": 0}}
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.lap_create')
+    @patch('receiver.session.F1LapsAPI.lap_create')
     def test_single_lap_success(self, mock_lap_create_api):
         # set session_type to time_trial to test single lap
         self.session.session_type = 12
         mock_lap_create_api.return_value = MagicMock(status_code=201) 
         self.assertEqual(self.session.process_lap_in_f1laps(1), True)
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.lap_create')
+    @patch('receiver.session.F1LapsAPI.lap_create')
     def test_single_lap_fail(self, mock_lap_create_api):
         # set session_type to time_trial to test single lap
         self.session.session_type = 12
         mock_lap_create_api.return_value = MagicMock(status_code=404, content=json.dumps({"error": "it didnt work"}))
         self.assertEqual(self.session.process_lap_in_f1laps(1), False)
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_create')
+    @patch('receiver.session.F1LapsAPI.session_create')
     def test_session_create_success(self, mock_session_create_api):
         # set session_type to race to test session
         self.session.session_type = 10
@@ -99,7 +99,7 @@ class SessionAPITests(TestCase):
         self.assertEqual(self.session.process_lap_in_f1laps(1), True)
         self.assertEqual(self.session.f1_laps_session_id, "astonmartin4tw")
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_update')
+    @patch('receiver.session.F1LapsAPI.session_update')
     def test_session_update_success(self, mock_session_update_api):
         # set session_type to race to test session
         self.session.session_type = 10
@@ -108,7 +108,7 @@ class SessionAPITests(TestCase):
         mock_session_update_api.return_value = MagicMock(status_code=200)
         self.assertEqual(self.session.process_lap_in_f1laps(1), True)
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_update')
+    @patch('receiver.session.F1LapsAPI.session_update')
     def test_session_update_error(self, mock_session_update_api):
         # set session_type to race to test session
         self.session.session_type = 10
@@ -117,9 +117,9 @@ class SessionAPITests(TestCase):
         mock_session_update_api.return_value = MagicMock(status_code=404, content=json.dumps({"error": "it didnt work"}))
         self.assertEqual(self.session.process_lap_in_f1laps(1), False)
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_update')
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_list')
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_create')
+    @patch('receiver.session.F1LapsAPI.session_update')
+    @patch('receiver.session.F1LapsAPI.session_list')
+    @patch('receiver.session.F1LapsAPI.session_create')
     def test_session_create_error_list_success_update(self, mock_session_create_api, mock_session_list_api, mock_session_update_api):
         # set session_type to race to test session
         self.session.session_type = 10
@@ -131,8 +131,8 @@ class SessionAPITests(TestCase):
         self.assertEqual(self.session.process_lap_in_f1laps(1), True)
         self.assertEqual(self.session.f1_laps_session_id, "astonmartin4tw")
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_list')
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_create')
+    @patch('receiver.session.F1LapsAPI.session_list')
+    @patch('receiver.session.F1LapsAPI.session_create')
     def test_session_create_error_list_error(self, mock_session_create_api, mock_session_list_api):
         # set session_type to race to test session
         self.session.session_type = 10
@@ -142,7 +142,7 @@ class SessionAPITests(TestCase):
         mock_session_list_api.return_value = MagicMock(status_code=200, content=json.dumps({"results": []}))
         self.assertEqual(self.session.process_lap_in_f1laps(1), False)
 
-    @patch('f1laps_telemetry_2020.session.F1LapsAPI.session_create')
+    @patch('receiver.session.F1LapsAPI.session_create')
     def test_session_create_error_400(self, mock_session_create_api):
         # set session_type to race to test session
         self.session.session_type = 10

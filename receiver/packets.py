@@ -1,4 +1,4 @@
-from f1laps_telemetry_2020.session import Session
+from receiver.session import Session
 from lib.logger import log
 
 

@@ -1,17 +1,21 @@
+import threading
 import socket
-import multiprocessing
 import f1_2020_telemetry.packets
 
 from lib.logger import log
-from f1laps_telemetry_2020.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
-                                          FinalClassificationPacket, LapPacket, CarStatusPacket
-from f1laps_telemetry_2020.helpers import get_local_ip
+from receiver.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
+                             FinalClassificationPacket, LapPacket, CarStatusPacket
+from receiver.helpers import get_local_ip
 
 
 DEFAULT_PORT = 20777
 
 
-class RaceReceiver(multiprocessing.Process):
+class ActiveSocket:
+    socket = None
+
+
+class RaceReceiver(threading.Thread):
 
     def __init__(self, f1laps_api_key, host_ip=None, host_port=None):
         """
@@ -21,33 +25,59 @@ class RaceReceiver(multiprocessing.Process):
 
         super(RaceReceiver, self).__init__()
 
+        # This thread needs to be a daemon so we can easily quit it
+        # With normal thread, Python wont stop our loop
+        self.daemon = True
+        # Also, we need a way to kill it - which isn't easy
+        # Best way I've found so far is an Event that can be set
+        self.kill_event = threading.Event()
+
         # Network settings
         self.host_ip   = host_ip or get_local_ip()
         self.host_port = host_port or int(DEFAULT_PORT)
 
-        log.warning("")
-        log.warning("*************************************************")
-        log.warning("Set your F1 game telemetry IP to:   %s" % self.host_ip)
-        log.warning("Set your F1 game telemetry port to: %s" % self.host_port)
-        log.warning("*************************************************")
-        log.warning("")
+        log.debug("*************************************************")
+        log.debug("Set your F1 game telemetry IP to:   %s" % self.host_ip)
+        log.debug("Set your F1 game telemetry port to: %s" % self.host_port)
+        log.debug("*************************************************")
 
-        # Bind socket
-        self.udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.udp_socket.bind((self.host_ip, self.host_port))
-
+        # Get previously opened socket, or create new one
+        self.udp_socket = self.get_socket()
+        
         # local session session
         self.session = None
 
         # f1laps api key
         self.f1laps_api_key = f1laps_api_key
 
+        log.info("Receiver initiated")
+
+
+    def get_socket(self):
+        """ Get ActiveSocket or initiate it """
+        if not ActiveSocket.socket:
+            new_socket = self.open_socket()
+            ActiveSocket.socket = new_socket
+            return new_socket
+        else:
+            return ActiveSocket.socket
+
+
+    def open_socket(self):
+        new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        # The SO_REUSEADDR setting allows us to reuse sockets
+        # Which may be necessary when a user restarts sessions
+        # I'm not 100% sure though
+        new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        new_socket.bind((self.host_ip, self.host_port))
+        log.debug("Socket opened and bound")
+        return new_socket
+
 
     def kill(self):
-        self.terminate()
-        self.udp_socket.close()
-        log.info("Race Receiver process has been terminated")
-        
+        self.kill_event.set()
+        log.info("Receiver terminated")
+
     
     def run(self):
         """
@@ -58,9 +88,9 @@ class RaceReceiver(multiprocessing.Process):
         """
         # Starting an endless loop to continuously listen for UDP packets
         # until user aborts or process is terminated
-        log.info("Telemetry data receiver is now running successfully")
+        log.debug("Receiver started running")
         
-        while True:
+        while not self.kill_event.is_set():
             incoming_udp_packet = self.udp_socket.recv(2048)
             packet = f1_2020_telemetry.packets.unpack_udp_packet(incoming_udp_packet)
 
