@@ -45,10 +45,21 @@ python3 -m unittest discover
 ```
 
 ## Desktop Apps
-You can build Mac and Windows apps via PyInstaller:
+You can build Mac and Windows apps via PyInstaller.
+
+**Mac** 
+
 ```bash
-pyinstaller f1lapsapp.py -F -i app-icon.icns
+pyinstaller f1lapsapp.py -F -w -i app-icon.icns
 ```
+
+**Windows** 
+
+```bash
+pyinstaller f1lapsapp.py -F -w -i app-icon.ico
+```
+
+**Commands**
 
 * `-F`: creates a one-file bundled executable
 * `-w`: do not provide a console window
