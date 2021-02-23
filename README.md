@@ -10,18 +10,9 @@ This package lets you sync F1 game data into [F1Laps](https://www.f1laps.com) au
 
 ## Installation & Usage
 
-There are two use cases for this package:
-
-**1. Run it directly locally to upload your F1 telemetry data into F1Laps. See the full installation and usage guide below.**
-
 Please check out our comprehensive documentation here:
 
 **[F1Laps Telemetry Sync User Documentation](https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7)**
-
-**2. Use it as a package in your own project. You can import this package via pip:**
-
-`python3 -m pip install f1laps-telemetry-2020`
-
 
 ## Configuration
 
