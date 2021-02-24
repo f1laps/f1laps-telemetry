@@ -1,5 +1,5 @@
-from f1laps_telemetry_2020.receiver import RaceReceiver
-from f1laps_telemetry_2020.helpers import asciiart
+from receiver.receiver import RaceReceiver
+from receiver.helpers import asciiart
 
 import config
 

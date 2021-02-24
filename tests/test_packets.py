@@ -1,8 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from f1laps_telemetry_2020.session import Session
-from f1laps_telemetry_2020.packets import SessionPacket, LapPacket, FinalClassificationPacket, CarStatusPacket
+from receiver.session import Session
+from receiver.packets import SessionPacket, LapPacket, FinalClassificationPacket, CarStatusPacket
 
 
 MOCK_PLAYER_CAR_INDEX = 0
