@@ -38,16 +38,16 @@ You can build Mac and Windows apps via PyInstaller, which offer a graphical user
 
 ```bash
 # Run pyinstaller directly
-pyinstaller f1lapsapp.py --windowed --icon=images/app-icon.icns
+pyinstaller app.py --windowed --icon=images/app-icon.icns
 
 # If you need to specifiy a certain Python version
-python3 -m PyInstaller f1lapsapp.py --windowed --icon=images/app-icon.icns
+python3 -m PyInstaller app.py --windowed --icon=images/app-icon.icns
 ```
 
 **Windows** 
 
 ```bash
-pyinstaller f1lapsapp.py --onefile --windowed --icon=images/app-icon.ico
+pyinstaller app.py --onefile --windowed --icon=images/app-icon.ico
 ```
 
 ## Credits & Contributions
