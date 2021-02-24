@@ -3,7 +3,7 @@
 
 This package lets you sync F1 game data into [F1Laps](https://www.f1laps.com) automatically. It receives telemetry packets via the UDP protocol in your local network.
 
-![Screenshot](screenshot.png)
+![Screenshot](images/screenshot.png)
 
 ## Requirements & Installation
 
@@ -37,20 +37,18 @@ You can build Mac and Windows apps via PyInstaller, which offer a graphical user
 **Mac** 
 
 ```bash
-pyinstaller f1lapsapp.py -F -w -i app-icon.icns
+# Run pyinstaller directly
+pyinstaller f1lapsapp.py --windowed --icon=images/app-icon.icns
+
+# If you need to specifiy a certain Python version
+python3 -m PyInstaller f1lapsapp.py --windowed --icon=images/app-icon.icns
 ```
 
 **Windows** 
 
 ```bash
-pyinstaller f1lapsapp.py -F -w -i app-icon.ico
+pyinstaller f1lapsapp.py --onefile --windowed --icon=images/app-icon.ico
 ```
-
-**Commands**
-
-* `-F`: creates a one-file bundled executable
-* `-w`: do not provide a console window
-* `-i app-icon.icns`: use F1Laps app icon
 
 ## Credits & Contributions
 
