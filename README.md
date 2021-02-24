@@ -3,6 +3,8 @@
 
 This package lets you sync F1 game data into [F1Laps](https://www.f1laps.com) automatically. It receives telemetry packets via the UDP protocol in your local network.
 
+![Screenshot](screenshot.png)
+
 ## Requirements & Installation
 
 * Python 3
