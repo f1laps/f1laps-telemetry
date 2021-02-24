@@ -47,7 +47,7 @@ python3 -m PyInstaller app.py --windowed --icon=images/app-icon.icns
 **Windows** 
 
 ```bash
-pyinstaller app.py --onefile --windowed --icon=images/app-icon.ico
+pyinstaller app.py --onefile --windowed --uac-admin --icon=images/app-icon.ico
 ```
 
 ## Credits & Contributions
