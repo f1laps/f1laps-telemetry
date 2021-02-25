@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QPlainTextEdit, QFrame
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 import logging
 
 from lib.logger import log
@@ -16,14 +17,16 @@ class QTextEditLogger(logging.Handler):
     def emit(self, record):
         msg = self.format(record)
         self.widget.appendPlainText(msg)
+        self.widget.verticalScrollBar().setValue(self.widget.verticalScrollBar().maximum()) 
 
 
 class MainWindow(QWidget):
     
-    def __init__(self):
+    def __init__(self, app_version):
         super().__init__()
         self.api_key_field = None
         self.start_button = None
+        self.app_version = app_version
 
         # Draw the windw UI
         self.init_ui()
@@ -75,12 +78,15 @@ class MainWindow(QWidget):
         status_heading_label.setObjectName("statusHeadingLabel")
         logger_field = QTextEditLogger(self)
         logger_field.widget.setObjectName("loggerField")
-        logger_field.setFormatter(logging.Formatter('%(asctime)s - %(levelname)-8s - %(message)s'))
+        logger_field.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
         log.addHandler(logger_field)
         help_text_label = QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
         help_text_label.setOpenExternalLinks(True)
+        app_version_label = QLabel()
+        app_version_label.setText("You're using F1Laps Telemetry version %s" % self.app_version)
+        app_version_label.setObjectName("appVersionLabel")
 
         # Draw layout
         layout = QVBoxLayout()
@@ -104,6 +110,7 @@ class MainWindow(QWidget):
         layout.addWidget(status_heading_label)
         layout.addWidget(logger_field.widget)
         layout.addWidget(help_text_label)
+        layout.addWidget(app_version_label)
 
         layout.setContentsMargins(40, 32, 40, 35)
         

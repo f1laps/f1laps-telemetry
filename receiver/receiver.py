@@ -49,8 +49,8 @@ class RaceReceiver(threading.Thread):
 
         # f1laps api key
         self.f1laps_api_key = f1laps_api_key
-
-        log.info("Receiver initiated")
+ 
+        log.info("Telemetry receiver started & ready for race data")
 
 
     def get_socket(self):
@@ -76,7 +76,7 @@ class RaceReceiver(threading.Thread):
 
     def kill(self):
         self.kill_event.set()
-        log.info("Receiver terminated")
+        log.info("Telemetry receiver stopped")
 
     
     def run(self):

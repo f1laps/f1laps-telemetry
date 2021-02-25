@@ -62,10 +62,10 @@ class LapPacket:
         # If we're on a new lap, we calculate the final last lap data and then push to F1Laps
         if new_lap_started:
             last_lap_number = session.lap_number_current - 1
-            log.info("*************************************************")
-            log.info("New lap #%s started" % session.lap_number_current)
-            log.info("Lap time of last lap #%s: %s" % (last_lap_number, lap_data.lastLapTime))
-            log.info("*************************************************")
+            log.debug("*************************************************")
+            log.info("New lap started (#%s in current session)" % session.lap_number_current)
+            log.debug("Lap time of last lap #%s: %s" % (last_lap_number, lap_data.lastLapTime))
+            log.debug("*************************************************")
             
             # Check if we know about the last lap 
             # (maybe the user just started this script in the middle of the session)

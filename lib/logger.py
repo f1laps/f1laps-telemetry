@@ -1,6 +1,6 @@
 import logging
 
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"
 
 # create main logger
 logging.basicConfig(format='%(asctime)s - %(levelname)-8s - %(message)s')
