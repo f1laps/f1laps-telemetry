@@ -96,7 +96,7 @@ class MainWindow(QWidget):
         
         self.setLayout(layout)
         self.setWindowTitle("F1Laps Telemetry") 
-        self.resize(400, 300)
+        self.resize(500, 300)
         log.info("Welcome to F1Laps Telemetry! You will see all logging in this text field.")
 
 
