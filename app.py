@@ -3,7 +3,6 @@ from pathlib import Path
 import sys
 import os
 
-from lib.logger import log
 from gui.window import MainWindow
 from gui.styles import GUI_STYLES
 
