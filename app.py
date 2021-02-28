@@ -22,5 +22,5 @@ if __name__ == '__main__':
         exit_code = app.exec_()
         sys.exit(exit_code)
     except Exception as ex:
-        log.error("Encountered exception %s on main thread" % ex)
+        log.error("Encountered exception %s on main thread" % ex, exc_info=True)
         raise Exception

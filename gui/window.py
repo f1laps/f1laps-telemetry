@@ -147,7 +147,7 @@ class MainWindow(QWidget):
             receiver_thread = RaceReceiver(api_key)
             receiver_thread.start()
         except Exception as ex:
-            log.error("Encountered exception %s on receiver thread" % ex)
+            log.error("Encountered exception %s on receiver thread" % ex, exc_info=True)
             raise Exception
         log.debug("Session initiated and started")
         return receiver_thread
