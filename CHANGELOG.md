@@ -4,13 +4,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## 0.1.2 - 2021-02-28
  
-Beta testing bug fixes, cleanup, stability and more.
+Local app information now sent to F1Laps for debugging; potential fixes for app crashes.
  
 ### Added
 - The version and OS name are now passed to F1Laps via custom headers for easier support
 
-### Fixed
-- Fixed random app crashes
+### Changed
+- The logging field was moved to a separate console window. While this is a slightly worse user interface experience, we believe it to fix some random app crashes.
  
 ## 0.1.1 - 2021-02-25
  

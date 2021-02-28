@@ -8,19 +8,17 @@ from gui.window import MainWindow
 from gui.styles import GUI_STYLES
 
 
-try:
-    if __name__ == '__main__':
-        # Create App
-        app = QApplication(sys.argv)
-        app.setStyleSheet(GUI_STYLES)
 
-        # Create & show UI window
-        window = MainWindow()
-        window.show()
-        raise OSError('Emulated exception to be traced back to')
+if __name__ == '__main__':
+    # Create App
+    app = QApplication(sys.argv)
+    app.setStyleSheet(GUI_STYLES)
 
-        # Handle window close
-        exit_code = app.exec_()
-        sys.exit(exit_code)
-except Exception as ex:
-    log.error("Encountered exception %s on main thread" % ex, exc_info=True)
+    # Create & show UI window
+    window = MainWindow()
+    
+    window.show()
+
+    # Handle window close
+    exit_code = app.exec_()
+    sys.exit(exit_code)
