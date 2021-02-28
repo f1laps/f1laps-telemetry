@@ -1,4 +1,7 @@
+import platform
 import requests
+
+import config
 
 
 class F1LapsAPI:
@@ -7,12 +10,10 @@ class F1LapsAPI:
     def __init__(self, api_key):
         self.api_key  = api_key
         self.base_url = 'https://www.f1laps.com/api/'
+        self.version  = config.VERSION
 
     def call_api(self, method, endpoint, params=None):
-        headers = {
-            'Content-Type' : 'application/json',
-            'Authorization': 'Token %s' % self.api_key
-        }
+        headers = self._get_headers()
         if method == "GET":
             return requests.get(endpoint , headers=headers)
         elif method == "POST":
@@ -83,6 +84,17 @@ class F1LapsAPI:
         endpoint = self.base_url + "f12020/grandprixs/sessions/?udp_session_uid=%s" % session_uid
         method   = "GET"
         return self.call_api(method, endpoint)
+
+    def _get_headers(self):
+        return {
+            'Content-Type'      : 'application/json',
+            'Authorization'     : 'Token %s' % self.api_key,
+            'X-F1Laps-App'      : 'F1Laps Telemetry v%s' % self.version,
+            'X-F1Laps-Platform' : self._get_platform()
+        }
+
+    def _get_platform(self):
+        return "%s %s" % (platform.system(), platform.release())
 
 
 

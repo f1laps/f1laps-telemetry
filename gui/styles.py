@@ -26,6 +26,7 @@ QPushButton#startStopButton {
     margin-top: 20px;
     margin-bottom: 30px;
     margin-left: 6px;
+    height: 40px;
     padding-top: 15px;
     padding-bottom: 15px;
     padding-left: 30px;

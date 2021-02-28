@@ -1,32 +1,20 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QPlainTextEdit, QFrame
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QFrame
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
 import logging
 
 from lib.logger import log
 from receiver.receiver import RaceReceiver
 from receiver.helpers import get_local_ip
-
-
-class QTextEditLogger(logging.Handler):
-    def __init__(self, parent):
-        super().__init__()
-        self.widget = QPlainTextEdit(parent)
-        self.widget.setReadOnly(True)
-
-    def emit(self, record):
-        msg = self.format(record)
-        self.widget.appendPlainText(msg)
-        self.widget.verticalScrollBar().setValue(self.widget.verticalScrollBar().maximum()) 
+import config
 
 
 class MainWindow(QWidget):
     
-    def __init__(self, app_version):
+    def __init__(self):
         super().__init__()
         self.api_key_field = None
         self.start_button = None
-        self.app_version = app_version
+        self.app_version = config.VERSION
 
         # Draw the windw UI
         self.init_ui()
@@ -73,13 +61,7 @@ class MainWindow(QWidget):
         horizontal_line.setFrameShape(QFrame.HLine)
         horizontal_line.setFrameShadow(QFrame.Sunken)
         horizontal_line.setObjectName("horizontalLine")
-        status_heading_label = QLabel()
-        status_heading_label.setText("Status")
-        status_heading_label.setObjectName("statusHeadingLabel")
-        logger_field = QTextEditLogger(self)
-        logger_field.widget.setObjectName("loggerField")
-        logger_field.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-        log.addHandler(logger_field)
+
         help_text_label = QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
@@ -107,8 +89,6 @@ class MainWindow(QWidget):
 
         # Status & help
         layout.addWidget(horizontal_line)
-        layout.addWidget(status_heading_label)
-        layout.addWidget(logger_field.widget)
         layout.addWidget(help_text_label)
         layout.addWidget(app_version_label)
 
@@ -116,7 +96,7 @@ class MainWindow(QWidget):
         
         self.setLayout(layout)
         self.setWindowTitle("F1Laps Telemetry") 
-        self.resize(800, 500)
+        self.resize(500, 300)
         log.info("Welcome to F1Laps Telemetry! You will see all logging in this text field.")
 
 

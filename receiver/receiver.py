@@ -17,7 +17,7 @@ class ActiveSocket:
 
 class RaceReceiver(threading.Thread):
 
-    def __init__(self, f1laps_api_key, host_ip=None, host_port=None):
+    def __init__(self, f1laps_api_key, host_ip=None, host_port=None, run_as_daemon=True):
         """
         Init the receiver with all attributes needed to 
         push data to F1Laps
@@ -25,9 +25,10 @@ class RaceReceiver(threading.Thread):
 
         super(RaceReceiver, self).__init__()
 
-        # This thread needs to be a daemon so we can easily quit it
+        # For the UI app, the thread needs to be a daemon so we can easily quit it
         # With normal thread, Python wont stop our loop
-        self.daemon = True
+        # For CLI, we need a normal thread in order to directly control it
+        self.daemon = run_as_daemon
         # Also, we need a way to kill it - which isn't easy
         # Best way I've found so far is an Event that can be set
         self.kill_event = threading.Event()

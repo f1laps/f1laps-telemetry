@@ -7,6 +7,6 @@ import config
 if __name__ == '__main__':
     asciiart()
     # Initiative receiver
-    race_receiver = RaceReceiver(config.F1LAPS_API_KEY)
+    race_receiver = RaceReceiver(f1laps_api_key=config.F1LAPS_API_KEY, run_as_daemon=False)
     # Listen to packages
     race_receiver.start()
