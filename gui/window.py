@@ -43,29 +43,27 @@ class MainWindow(QWidget):
         ip_value_label = QLabel()
         ip_value_label.setText("2) Check your F1 game Telemetry IP setting")
         ip_value_label.setObjectName("ipValueLabel")
+        ip_value_label.setContentsMargins(0, 20, 0, 0)
         ip_value_help_text_label = QLabel()
         ip_value_help_text_label.setText("You can ignore this step if you're running this program on the same computer as the F1 game. Otherwise, open Settings --> Telemetry in the F1 game, and make sure the IP setting is set to this value.")
         ip_value_help_text_label.setObjectName("ipValueHelpTextLabel")
         ip_value_help_text_label.setWordWrap(True)
         self.ip_value = QLabel()
         self.ip_value.setObjectName("ipValueField")
+        self.ip_value.setContentsMargins(0, 5, 0, 20)
 
         # Start/Stop button
         start_button = QPushButton('Start Telemetry')
         start_button.setObjectName("startStopButton")
         start_button.clicked.connect(lambda: self.start_button_click())
+        start_button.setFixedSize(160, 45)
         self.start_button = start_button
-
-        # Status logging & help text
-        horizontal_line = QFrame()
-        horizontal_line.setFrameShape(QFrame.HLine)
-        horizontal_line.setFrameShadow(QFrame.Sunken)
-        horizontal_line.setObjectName("horizontalLine")
 
         help_text_label = QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
         help_text_label.setOpenExternalLinks(True)
+        help_text_label.setContentsMargins(0, 40, 0, 0)
         app_version_label = QLabel()
         app_version_label.setText("You're using F1Laps Telemetry version %s" % self.app_version)
         app_version_label.setObjectName("appVersionLabel")
@@ -84,19 +82,17 @@ class MainWindow(QWidget):
         layout.addWidget(self.ip_value)
 
         # Start button
-        layout.addWidget(start_button)
-        layout.setAlignment(start_button, Qt.AlignLeft)
+        layout.addWidget(start_button, alignment=Qt.AlignCenter)
 
         # Status & help
-        layout.addWidget(horizontal_line)
         layout.addWidget(help_text_label)
         layout.addWidget(app_version_label)
 
-        layout.setContentsMargins(40, 32, 40, 35)
+        layout.setContentsMargins(30, 30, 30, 30)
         
         self.setLayout(layout)
         self.setWindowTitle("F1Laps Telemetry") 
-        self.resize(500, 300)
+        #self.resize(500, 600)
         log.info("Welcome to F1Laps Telemetry! You will see all logging in this text field.")
 
 
