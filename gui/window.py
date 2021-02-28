@@ -6,6 +6,7 @@ import logging
 from lib.logger import log
 from receiver.receiver import RaceReceiver
 from receiver.helpers import get_local_ip
+import config
 
 
 class QTextEditLogger(logging.Handler):
@@ -22,11 +23,11 @@ class QTextEditLogger(logging.Handler):
 
 class MainWindow(QWidget):
     
-    def __init__(self, app_version):
+    def __init__(self):
         super().__init__()
         self.api_key_field = None
         self.start_button = None
-        self.app_version = app_version
+        self.app_version = config.VERSION
 
         # Draw the windw UI
         self.init_ui()

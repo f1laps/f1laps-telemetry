@@ -6,8 +6,6 @@ import os
 from gui.window import MainWindow
 from gui.styles import GUI_STYLES
 
-VERSION = "0.1.1"
-
 
 if __name__ == '__main__':
     # Create App
@@ -15,7 +13,7 @@ if __name__ == '__main__':
     app.setStyleSheet(GUI_STYLES)
 
     # Create & show UI window
-    window = MainWindow(app_version=VERSION)
+    window = MainWindow()
     window.show()
 
     # Handle window close
