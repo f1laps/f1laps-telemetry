@@ -143,8 +143,12 @@ class MainWindow(QWidget):
         # Get API key from input field
         api_key = self.api_key_field.text()
         # Start receiver thread
-        receiver_thread = RaceReceiver(api_key)
-        receiver_thread.start()
+        try:
+            receiver_thread = RaceReceiver(api_key)
+            receiver_thread.start()
+        except Exception as ex:
+            log.error("Encountered exception %s on receiver thread" % ex)
+            raise Exception
         log.debug("Session initiated and started")
         return receiver_thread
 

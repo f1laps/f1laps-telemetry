@@ -5,17 +5,22 @@ import os
 
 from gui.window import MainWindow
 from gui.styles import GUI_STYLES
+from lib.logger import log
 
 
 if __name__ == '__main__':
-    # Create App
-    app = QApplication(sys.argv)
-    app.setStyleSheet(GUI_STYLES)
+    try:
+        # Create App
+        app = QApplication(sys.argv)
+        app.setStyleSheet(GUI_STYLES)
 
-    # Create & show UI window
-    window = MainWindow()
-    window.show()
+        # Create & show UI window
+        window = MainWindow()
+        window.show()
 
-    # Handle window close
-    exit_code = app.exec_()
-    sys.exit(exit_code)    
+        # Handle window close
+        exit_code = app.exec_()
+        sys.exit(exit_code)
+    except Exception as ex:
+        log.error("Encountered exception %s on main thread" % ex)
+        raise Exception
