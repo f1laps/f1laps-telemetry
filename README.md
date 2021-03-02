@@ -47,7 +47,7 @@ python3 -m PyInstaller app.py --noconsole --name F1Laps --icon=images/app-icon.i
 **Windows** 
 
 ```bash
-pyinstaller app.py --onefile --name F1Laps --icon=images/app-icon.ico
+pyinstaller app.py --onefile --noconsole --name F1Laps --icon=images/app-icon.ico
 ```
 
 ## Credits & Contributions
