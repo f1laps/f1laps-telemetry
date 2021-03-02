@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 Now providing a separate debugging executable too.
 
 ### Added
-- A separate debugging executable that also displays the console will now be provided too
+- A separate console executable for easier debugging will now be provided too
 - The app now checks for the most recent version and recommends upgrading
 
 ### Changed
