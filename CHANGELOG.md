@@ -4,10 +4,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## 0.1.3 - 2021-03-02
  
-Logging to a text file instead of a separate console window.
+Now providing a separate debugging executable too.
+
+### Added
+- A separate debugging executable that also displays the console will now be provided too
+- The app now checks for the most recent version and recommends upgrading
 
 ### Changed
-- UI cleanup
+- UI cleanup incl. clearer indication when app is running
 
 
 ## 0.1.2 - 2021-02-28

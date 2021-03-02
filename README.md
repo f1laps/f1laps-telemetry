@@ -37,10 +37,6 @@ You can build Mac and Windows apps via PyInstaller, which offer a graphical user
 **Mac** 
 
 ```bash
-# Run pyinstaller directly
-pyinstaller app.py --onefile --name F1Laps --icon=images/app-icon.icns
-
-# If you need to specifiy a certain Python version
 python3 -m PyInstaller app.py --noconsole --name F1Laps --icon=images/app-icon.icns
 ```
 

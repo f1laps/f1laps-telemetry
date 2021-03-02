@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout, QFrame
 from PyQt5.QtCore import Qt
 import logging
+import requests
 
 from lib.logger import log
 from receiver.receiver import RaceReceiver
@@ -16,11 +17,15 @@ class MainWindow(QWidget):
         self.start_button = None
         self.app_version = config.VERSION
 
-        # Draw the windw UI
+        # Draw the window UI
         self.init_ui()
 
         # Show the IP to the user
         self.set_ip()
+
+        # Check if there's a new version
+        self.check_version()
+
 
         # Track if we have an active receiver
         # A receiver process can only run once
@@ -53,46 +58,51 @@ class MainWindow(QWidget):
         self.ip_value.setContentsMargins(0, 5, 0, 20)
 
         # Start/Stop button
-        start_button = QPushButton('Start Telemetry')
-        start_button.setObjectName("startStopButton")
-        start_button.clicked.connect(lambda: self.start_button_click())
-        start_button.setFixedSize(160, 45)
-        self.start_button = start_button
+        self.start_button = QPushButton('Start Telemetry')
+        self.start_button.setObjectName("startButton")
+        self.start_button.clicked.connect(lambda: self.start_button_click())
+        self.start_button.setFixedSize(160, 45)
+        self.status_label = QLabel()
+        self.status_label.setText("Status: not started")
+        self.status_label.setObjectName("statusLabel")
+        self.status_label.setFixedSize(100, 15)
 
         help_text_label = QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
         help_text_label.setOpenExternalLinks(True)
-        help_text_label.setContentsMargins(0, 40, 0, 0)
+        help_text_label.setContentsMargins(0, 35, 0, 0)
         app_version_label = QLabel()
         app_version_label.setText("You're using F1Laps Telemetry version %s" % self.app_version)
         app_version_label.setObjectName("appVersionLabel")
+        self.check_app_version_label = QLabel()
+        self.check_app_version_label.setObjectName("appVersionCheckLabel")
+        self.check_app_version_label.setOpenExternalLinks(True)
 
         # Draw layout
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
         # API key section
-        layout.addWidget(api_key_field_label)
-        layout.addWidget(api_key_help_text_label)
-        layout.addWidget(self.api_key_field)
+        self.layout.addWidget(api_key_field_label)
+        self.layout.addWidget(api_key_help_text_label)
+        self.layout.addWidget(self.api_key_field)
 
         # IP section
-        layout.addWidget(ip_value_label)
-        layout.addWidget(ip_value_help_text_label)
-        layout.addWidget(self.ip_value)
+        self.layout.addWidget(ip_value_label)
+        self.layout.addWidget(ip_value_help_text_label)
+        self.layout.addWidget(self.ip_value)
 
         # Start button
-        layout.addWidget(start_button, alignment=Qt.AlignCenter)
+        self.layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
+        self.layout.addWidget(self.status_label, alignment=Qt.AlignCenter)
 
         # Status & help
-        layout.addWidget(help_text_label)
-        layout.addWidget(app_version_label)
-
-        layout.setContentsMargins(30, 30, 30, 30)
+        self.layout.addWidget(help_text_label)
+        self.layout.addWidget(app_version_label)
+        self.layout.setContentsMargins(30, 30, 30, 30)
         
-        self.setLayout(layout)
+        self.setLayout(self.layout)
         self.setWindowTitle("F1Laps Telemetry") 
-        #self.resize(500, 600)
         log.info("Welcome to F1Laps Telemetry! You will see all logging in this text field.")
 
 
@@ -100,15 +110,30 @@ class MainWindow(QWidget):
         self.ip_value.setText(get_local_ip())
 
 
+    def check_version(self):
+        try:
+            response = requests.get("https://www.f1laps.com/api/f12020/telemetry/app/version/current/")
+            version = response.json()['version']
+            if version != self.app_version:
+                self.check_app_version_label.setText("There's a new program version available (%s).&nbsp;<a href='https://www.f1laps.com/api/telemetry_apps'>Upgrade now!</a>" % version)
+                self.layout.addWidget(self.check_app_version_label)
+        except Exception as ex:
+            log.warning("Couldn't get most recent version from F1Laps due to: %s" % ex)
+
+
     def start_button_click(self):
         if not self.session:
             log.info("Starting new session")
             self.session = self.start_telemetry()
             self.start_button.setText("Stop Telemetry")
+            self.start_button.setStyleSheet("background-color: #B91C1C;")
+            self.status_label.setText("Status: running")
         else:
             log.info("Stopping session")
             self.session = self.stop_telemetry()
             self.start_button.setText("Start Telemetry")
+            self.start_button.setStyleSheet("background-color: #4338CA;")
+            self.status_label.setText("Status: stopped")
 
 
     def start_telemetry(self):

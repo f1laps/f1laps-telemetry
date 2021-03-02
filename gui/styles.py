@@ -3,27 +3,34 @@ GUI_STYLES = """
 QLabel#apiKeyFieldLabel, QLabel#ipValueLabel, QLabel#statusHeadingLabel {
     font-size: 15px;
     font-weight: bold;
+    color: #111827;
 }
 
 QLabel#ipValueField{
     font-weight: bold;
     font-size: 14px;
+    color: #111827;
 }
 
 QLabel#statusHeadingLabel {
     color: #4B5563;
 }
 
-QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel {
+QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel, QLabel#statusLabel {
     font-size: 10px;
     color: #6B7280;
 }
 
-QPushButton#startStopButton {
-    background-color: #6D28D9;
+QLabel#appVersionCheckLabel {
+    font-size: 10px;
+    color: #B91C1C;
+}
+
+QPushButton#startButton {
+    background-color: #4338CA;
     color: white;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: bold;border: 0;
 }
 
 #loggerField {
