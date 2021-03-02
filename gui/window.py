@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QVBoxLayout
 from PyQt5.QtCore import Qt
 import logging
 
-from lib.logger import log
+from lib.logger import log, get_path
 from receiver.receiver import RaceReceiver
 from receiver.helpers import get_local_ip
 import config
@@ -42,6 +42,7 @@ class MainWindow(QWidget):
         # 2) Check IP section
         ip_value_label = QLabel()
         ip_value_label.setText("2) Check your F1 game Telemetry IP setting")
+        ip_value_label.setText(get_path())
         ip_value_label.setObjectName("ipValueLabel")
         ip_value_label.setContentsMargins(0, 20, 0, 0)
         ip_value_help_text_label = QLabel()

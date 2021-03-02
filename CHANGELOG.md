@@ -2,6 +2,14 @@
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 0.1.3 - 2021-03-02
+ 
+Logging to a text file instead of a separate console window.
+
+### Changed
+- UI cleanup
+
+
 ## 0.1.2 - 2021-02-28
  
 Local app information now sent to F1Laps for debugging; potential fixes for app crashes.
