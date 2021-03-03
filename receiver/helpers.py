@@ -13,6 +13,7 @@ def get_local_ip():
         return s.getsockname()[0]
     except Exception as ex:
         raise Exception("Local host IP couldn't be found")
+        
 
 def asciiart():
     log.critical("")

@@ -1,41 +1,36 @@
 GUI_STYLES = """
 
 QLabel#apiKeyFieldLabel, QLabel#ipValueLabel, QLabel#statusHeadingLabel {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: bold;
-}
-
-QLineEdit#apiKeyField {
-    margin-bottom: 20px;
+    color: #111827;
 }
 
 QLabel#ipValueField{
     font-weight: bold;
+    font-size: 14px;
+    color: #111827;
 }
 
 QLabel#statusHeadingLabel {
     color: #4B5563;
 }
 
-QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel {
-    font-size: 9px;
+QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel, QLabel#statusLabel {
+    font-size: 10px;
     color: #6B7280;
 }
 
-QPushButton#startStopButton {
-    margin-top: 20px;
-    margin-bottom: 30px;
-    margin-left: 6px;
-    height: 40px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-left: 30px;
-    padding-right: 30px;
-    background-color: #6D28D9;
+QLabel#appVersionCheckLabel {
+    font-size: 10px;
+    color: #B91C1C;
+}
+
+QPushButton#startButton {
+    background-color: #4338CA;
     color: white;
     font-size: 14px;
-    font-weight: bold;
-    border: 0;
+    font-weight: bold;border: 0;
 }
 
 #loggerField {

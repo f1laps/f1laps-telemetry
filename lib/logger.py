@@ -1,15 +1,20 @@
+#!/usr/bin/env python3
 import logging
 
-LOG_LEVEL = "INFO"
+
+LOG_LEVEL  = "INFO"
+LOG_FORMAT = "%(asctime)s - %(levelname)-8s - %(message)s"
 
 # create main logger
-logging.basicConfig(format='%(asctime)s - %(levelname)-8s - %(message)s')
+logging.basicConfig(
+    level    = LOG_LEVEL,
+    format   = LOG_FORMAT,
+    handlers = [
+        logging.StreamHandler()
+    ]
+)
 log = logging.getLogger(__name__)
-
-# set log level
-log_level = logging.getLevelName(LOG_LEVEL)
-log.setLevel(log_level)
 
 # disable logging of modules
 logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("urllib3" ).setLevel(logging.WARNING)
