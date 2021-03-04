@@ -4,6 +4,7 @@ import logging
 import requests
 
 from lib.logger import log
+from lib.file_handler import ConfigFile
 from receiver.receiver import RaceReceiver
 from receiver.helpers import get_local_ip
 import config
@@ -14,6 +15,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.api_key_field = None
+        self.api_key = ConfigFile().get_api_key()
         self.start_button = None
         self.app_version = config.VERSION
 
@@ -25,7 +27,6 @@ class MainWindow(QWidget):
 
         # Check if there's a new version
         self.check_version()
-
 
         # Track if we have an active receiver
         # A receiver process can only run once
@@ -43,6 +44,7 @@ class MainWindow(QWidget):
         api_key_help_text_label.setOpenExternalLinks(True)
         self.api_key_field = QLineEdit()
         self.api_key_field.setObjectName("apiKeyField")
+        self.api_key_field.setText(self.api_key)
 
         # 2) Check IP section
         ip_value_label = QLabel()
@@ -110,6 +112,13 @@ class MainWindow(QWidget):
         self.ip_value.setText(get_local_ip())
 
 
+    def get_api_key(self):
+        """ Get API key from user input field and store it in local file """
+        api_key = self.api_key_field.text()
+        ConfigFile().set_api_key(api_key)
+        return api_key
+
+
     def check_version(self):
         try:
             response = requests.get("https://www.f1laps.com/api/f12020/telemetry/app/version/current/")
@@ -141,7 +150,7 @@ class MainWindow(QWidget):
             log.error("A new session can't be started when another one is active")
             return self.session
         # Get API key from input field
-        api_key = self.api_key_field.text()
+        api_key = self.get_api_key()
         # Start receiver thread
         receiver_thread = RaceReceiver(api_key)
         receiver_thread.start()
