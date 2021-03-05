@@ -1,11 +1,8 @@
 # Change Log
- 
-The format is based on [Keep a Changelog](http://keepachangelog.com/).
-
 
 ## 0.1.4 - 2021-03-
  
-Now saving your API key after initial entry.
+Now your API key will be saved in a separate config file after initial entry.
 
 ### Added
 - When you've entered an API key once, it will be shown again the next time you open the program
