@@ -123,8 +123,14 @@ class MainWindow(QWidget):
         try:
             response = requests.get("https://www.f1laps.com/api/f12020/telemetry/app/version/current/")
             version = response.json()['version']
-            if version != self.app_version:
-                self.check_app_version_label.setText("There's a new program version available (%s).&nbsp;<a href='https://www.f1laps.com/api/telemetry_apps'>Upgrade now!</a>" % version)
+            user_version_int = int(self.app_version.replace(".", ""))
+            current_version_int = int(version.replace(".", ""))
+            if version >= self.app_version:
+                self.check_app_version_label.setText("There's a new version available (%s).&nbsp;<a href='https://www.f1laps.com/api/telemetry_apps'>Download new version now!</a>" % version)
+                self.layout.addWidget(self.check_app_version_label)
+            elif version <= self.app_version:
+                self.check_app_version_label.setText("This is a pre-release version (stable version is %s)." % version)
+                self.check_app_version_label.setStyleSheet("color: #059669;")
                 self.layout.addWidget(self.check_app_version_label)
         except Exception as ex:
             log.warning("Couldn't get most recent version from F1Laps due to: %s" % ex)

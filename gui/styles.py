@@ -23,7 +23,7 @@ QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, Q
 
 QLabel#appVersionCheckLabel {
     font-size: 10px;
-    color: #B91C1C;
+    color: #B45309;
 }
 
 QPushButton#startButton {
