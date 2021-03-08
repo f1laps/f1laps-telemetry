@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.1.4 - 2021-03-
+## 0.1.4 - 2021-03-08
  
 Now your API key will be saved in a separate config file after initial entry.
 
