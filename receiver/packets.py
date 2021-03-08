@@ -33,6 +33,7 @@ class SessionPacket:
             session.weather_ids.append(packet.weather)
         return session
 
+
 class LapPacket:
     """ Process lap packets """
     def process(self, packet, session):
@@ -147,6 +148,11 @@ class ParticipantsPacket:
         """
         Track is unique to a session. Only set it once.
         """
+        for participant in packet.participants:
+            log.warning("Driver ID %s" % participant.driverId)
+            log.warning("Team ID %s" % participant.teamId)
+            log.warning("Name %s" % participant.name)
+            log.warning("Tele %s" % participant.yourTelemetry)
         if session.team_id:
             return False
         else:
