@@ -9,6 +9,7 @@ Now your API key will be saved in a separate config file after initial entry.
 
 ### Changed
 - The version check field now displays pre-release versions
+- UI: added F1Laps logo, horizontal lines and more vertical spacing
 
 
 ## 0.1.3 - 2021-03-03
