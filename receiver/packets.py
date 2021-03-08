@@ -33,6 +33,7 @@ class SessionPacket:
             session.weather_ids.append(packet.weather)
         return session
 
+
 class LapPacket:
     """ Process lap packets """
     def process(self, packet, session):

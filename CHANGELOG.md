@@ -1,6 +1,15 @@
 # Change Log
+
+## 0.1.4 - 2021-03-08
  
-The format is based on [Keep a Changelog](http://keepachangelog.com/).
+Now your API key will be saved in a separate config file after initial entry.
+
+### Added
+- When you've entered an API key once, it will be shown again the next time you open the program. A second file called "f1laps_configuration.txt" is created in the same folder that the program itself is stored. You can safely delete or move this file anytime.
+
+### Changed
+- The version check field now displays pre-release versions
+- UI: added F1Laps logo, horizontal lines and more vertical spacing
 
 
 ## 0.1.3 - 2021-03-03
