@@ -7,7 +7,7 @@ import logging
 import requests
 
 from lib.logger import log
-from lib.file_handler import ConfigFile
+from lib.file_handler import ConfigFile, get_path_temporary
 from receiver.receiver import RaceReceiver
 from receiver.helpers import get_local_ip
 import config
@@ -55,7 +55,7 @@ class MainWindow(QWidget):
 
     def init_ui(self):
         # 1) Logo & heading
-        logo_label = QSvgWidget('logo.svg')
+        logo_label = QSvgWidget(get_path_temporary('logo.svg'))
         logo_label.setFixedSize(100, 28)
 
         # 1) Enter API key section
