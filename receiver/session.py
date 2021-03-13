@@ -2,6 +2,7 @@ import json
 import f1_2020_telemetry.types
 
 from receiver.f1laps import F1LapsAPI
+from receiver.telemetry import Telemetry
 from lib.logger import log
 
 
@@ -34,6 +35,11 @@ class Session:
         # Attributes set with the setup package
         ###################################################
         self.setup = {}
+
+        ###################################################
+        # Attributes set with the telemetry package
+        ###################################################
+        self.telemetry = Telemetry()
 
         ###################################################
         # Attributes set with the final classification
