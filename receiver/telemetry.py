@@ -1,4 +1,6 @@
 from lib.logger import log
+from lib.file_handler import get_path_executable_parent
+import json
 
 class Telemetry:
     """
@@ -25,6 +27,7 @@ class Telemetry:
                 continue
             else:
                 frame[key] = value
+        #log.info(self.current_lap.frame_dict)
 
     def start_new_lap(self, number):
         """ New lap started in game """
@@ -57,7 +60,18 @@ class TelemetryLap:
         #has_all_necessary_data = ?
         if False:#has_all_necessary_data:
             self.process_in_f1laps()
-        log.info("Completed lap %s with frame dict %s" % (self.number, self.frame_dict))
+        log.info("---------------------------------------------------------------------")
+        log.info("---------------------------------------------------------------------")
+        log.info("---------------------------------------------------------------------")
+        log.info("Completed lap %s with frame dict:" % self.number)
+        #log.info(self.frame_dict)
+        try:
+            file_name = "telemetry_dump_test1_lap%s.txt" % self.number
+            with open(get_path_executable_parent(file_name), 'w+') as f: 
+                f.write(json.dumps(self.frame_dict))
+            log.info("Wrote to file %s" % file_name)
+        except Exception as ex:
+            log.info("Could not write to config file: %s" % ex)
         return True
 
     def process_in_f1laps(self):

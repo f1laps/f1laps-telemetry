@@ -33,7 +33,7 @@ def get_path_temporary(file_name):
     except Exception as ex:
         log.debug("Could not find sys._MEIPASS (%s)" % ex)
     if not bundle_dir:
-        bundle_dir = path.abspath(path.dirname(__file__))
+        bundle_dir = path.abspath(path.dirname(path.dirname(__file__)))
     path_to_file = path.abspath(path.join(bundle_dir, file_name))
     return path_to_file
 
@@ -63,8 +63,6 @@ class ConfigFile:
         self.api_key = api_key
         self._write(self.api_key)
         log.debug("Saved API key in config file")
-
-    
 
     def _write(self, value):
         api_key_config_text = "%s=%s" % (self.api_key_field_name, value)
