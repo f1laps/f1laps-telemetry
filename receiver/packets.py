@@ -112,7 +112,7 @@ class LapPacket:
         # update telemetry too
         frame = packet.header.frameIdentifier
         session.telemetry.set(frame, lap_time     = total_lap_time,
-                                     lap_distance = lap_data.totalDistance)
+                                     lap_distance = lap_data.lapDistance)
         return session
 
     def update_session_last_lap(self, packet, session, last_lap_number):

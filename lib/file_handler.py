@@ -64,8 +64,6 @@ class ConfigFile:
         self._write(self.api_key)
         log.debug("Saved API key in config file")
 
-    
-
     def _write(self, value):
         api_key_config_text = "%s=%s" % (self.api_key_field_name, value)
         try:
