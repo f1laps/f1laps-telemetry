@@ -27,7 +27,7 @@ class Telemetry:
                 continue
             else:
                 frame[key] = value
-        #log.info(self.current_lap.frame_dict)
+        self.current_lap.update_distance_dict(frame_number)
 
     def start_new_lap(self, number):
         """ New lap started in game """
@@ -52,28 +52,88 @@ class TelemetryLap:
     DRS                 int     0/1         1 byte
     """
     def __init__(self, number):
+        # Current lap number
         self.number = number
+
+        # DICTS
+        # frame_dict = keyed by frame id
+        # distance_dict = keyed by lap distance
         self.frame_dict = {}
+        self.distance_dict = {}
+
+        # Constants
+        self.MAX_FRAME_GO_BACK_NUMBER = 10
+
+    def update_distance_dict(self, frame_number):
+        this_frame = self.frame_dict.get(frame_number)
+        if not this_frame:
+            return
+        if this_frame.get("lap_distance"):
+            lap_distance = this_frame["lap_distance"]
+            # order matters since we're not setting keys
+            self.distance_dict[lap_distance] = [
+                this_frame.get("lap_time"),
+                this_frame.get("speed"),
+                this_frame.get("brake"),
+                this_frame.get("throttle"),
+                this_frame.get("gear"),
+                this_frame.get("steer"),
+                this_frame.get("drs")
+            ]
+        self.clean_up_flashbacks(frame_number)
+
+    def clean_up_flashbacks(self, frame_number):
+        """
+        A flashback keeps increasing frames, but sets lap_distance back
+        This messes up charts that are distance-indexed
+        When a user goes back in lap distance, we delete all "reverted" distance values
+        """
+        test_last_frame_number = frame_number
+        last_frame_number_found = None
+        for i in range(1, self.MAX_FRAME_GO_BACK_NUMBER):
+            test_last_frame_number = test_last_frame_number - 1
+            if test_last_frame_number in self.frame_dict \
+               and self.frame_dict[test_last_frame_number].get("lap_distance"):
+                last_frame_number_found = test_last_frame_number
+                break
+        if not last_frame_number_found:
+            return
+        last_distance_value = self.frame_dict[last_frame_number_found]["lap_distance"]
+        current_distance_value = self.frame_dict[frame_number]["lap_distance"]
+        if current_distance_value < last_distance_value:
+            for key in list(self.distance_dict):
+                if key > current_distance_value:
+                    self.distance_dict.pop(key, None)
 
     def complete(self):
         """ Wrap up this lap """
-        #has_all_necessary_data = ?
-        if False:#has_all_necessary_data:
-            self.process_in_f1laps()
+        if self.is_complete_lap():
+            #self.process_in_f1laps()
+            self.process_in_file_temp()
+        return True
+
+    def is_complete_lap(self):
+        return len(self.distance_dict) > 1000
+
+    def process_in_file_temp(self):
         log.info("---------------------------------------------------------------------")
         log.info("---------------------------------------------------------------------")
         log.info("---------------------------------------------------------------------")
         log.info("Completed lap %s with frame dict:" % self.number)
-        #log.info(self.frame_dict)
         try:
-            file_name = "telemetry_dump_test1_lap%s.txt" % self.number
+            # frames
+            file_name = "telemetry_dump_test2_lap%s_frames.txt" % self.number
             with open(get_path_executable_parent(file_name), 'w+') as f: 
                 f.write(json.dumps(self.frame_dict))
             log.info("Wrote to file %s" % file_name)
+            # distance
+            file_name = "telemetry_dump_test2_lap%s_distance.txt" % self.number
+            with open(get_path_executable_parent(file_name), 'w+') as f: 
+                f.write(json.dumps(self.distance_dict))
+            log.info("Wrote to file %s" % file_name)
         except Exception as ex:
             log.info("Could not write to config file: %s" % ex)
-        return True
 
     def process_in_f1laps(self):
         """ Send complete data to F1Laps """
-        log.info()
+        pass
