@@ -68,18 +68,25 @@ class TelemetryLap:
         this_frame = self.frame_dict.get(frame_number)
         if not this_frame:
             return
-        if this_frame.get("lap_distance"):
-            lap_distance = this_frame["lap_distance"]
+        if this_frame.get("lap_distance") and this_frame["lap_distance"] > 0:
+            lap_distance = round(this_frame["lap_distance"], 2)
             # order matters since we're not setting keys
-            self.distance_dict[lap_distance] = [
-                this_frame.get("lap_time"),
-                this_frame.get("speed"),
-                this_frame.get("brake"),
-                this_frame.get("throttle"),
-                this_frame.get("gear"),
-                this_frame.get("steer"),
-                this_frame.get("drs")
-            ]
+            if not self.distance_dict.get(lap_distance):
+                self.distance_dict[lap_distance] = [None, None, None, None, None, None, None]
+            if this_frame.get("lap_time") is not None:
+                self.distance_dict[lap_distance][0] = round(this_frame["lap_time"], 0)
+            if this_frame.get("speed") is not None:
+                self.distance_dict[lap_distance][1] = this_frame["speed"]
+            if this_frame.get("brake") is not None:
+                self.distance_dict[lap_distance][2] = round(this_frame["brake"], 3)
+            if this_frame.get("throttle") is not None:
+                self.distance_dict[lap_distance][3] = round(this_frame["throttle"], 3)
+            if this_frame.get("gear") is not None:
+                self.distance_dict[lap_distance][4] = this_frame["gear"]
+            if this_frame.get("steer") is not None:
+                self.distance_dict[lap_distance][5] = round(this_frame["steer"], 3)
+            if this_frame.get("drs") is not None:
+                self.distance_dict[lap_distance][6] = this_frame["drs"]
         self.clean_up_flashbacks(frame_number)
 
     def clean_up_flashbacks(self, frame_number):
