@@ -7,7 +7,12 @@ class Telemetry:
     Stores current telemetry data in memory.
     """
     def __init__(self):
-        self.current_lap = None
+        self.current_lap_number = None
+        self.lap_dict = {}
+
+    @property
+    def current_lap(self):
+        return self.lap_dict.get(self.current_lap_number)
 
     def frame(self, frame_number):
         if not self.current_lap:
@@ -29,14 +34,26 @@ class Telemetry:
                 frame[key] = value
         self.current_lap.update_distance_dict(frame_number)
 
+    def get_telemetry_api_dict(self, lap_number):
+        tl = self.lap_dict.get(lap_number)
+        if tl:
+            return tl.distance_dict
+        return None
+
     def start_new_lap(self, number):
         """ New lap started in game """
-        if self.current_lap and number == self.current_lap.number:
+        if self.current_lap_number and number == self.current_lap_number:
             log.info("TelemetryLap number %s already started" % number)
             return None
-        if self.current_lap:
-            self.current_lap.complete()
-        self.current_lap = TelemetryLap(number)
+        # Update current lap number and add to dict
+        self.current_lap_number = number
+        self.lap_dict[number] = TelemetryLap(number)
+        # Remove all laps that are not current or last
+        if len(self.lap_dict) > 2:
+            for key in list(self.lap_dict):
+                if key != number and key != (number-1):
+                    self.lap_dict.pop(key, None)
+                    log.debug("Deleted telemetry of lap %s" % key)
 
 
 class TelemetryLap:
@@ -68,7 +85,7 @@ class TelemetryLap:
         this_frame = self.frame_dict.get(frame_number)
         if not this_frame:
             return
-        if this_frame.get("lap_distance") and this_frame["lap_distance"] > 0:
+        if this_frame.get("lap_distance") and isinstance(this_frame["lap_distance"], int) and this_frame["lap_distance"] > 0:
             lap_distance = round(this_frame["lap_distance"], 2)
             # order matters since we're not setting keys
             if not self.distance_dict.get(lap_distance):
@@ -116,7 +133,8 @@ class TelemetryLap:
         """ Wrap up this lap """
         if self.is_complete_lap():
             #self.process_in_f1laps()
-            self.process_in_file_temp()
+            #self.process_in_file_temp()
+            pass
         return True
 
     def is_complete_lap(self):
@@ -141,6 +159,3 @@ class TelemetryLap:
         except Exception as ex:
             log.info("Could not write to config file: %s" % ex)
 
-    def process_in_f1laps(self):
-        """ Send complete data to F1Laps """
-        pass

@@ -22,7 +22,8 @@ class F1LapsAPI:
             return requests.put(endpoint , headers=headers, json=params)
 
     def lap_create(self, track_id, team_id, conditions, game_mode, 
-                   sector_1_time, sector_2_time, sector_3_time, setup_data):
+                   sector_1_time, sector_2_time, sector_3_time, setup_data, 
+                   telemetry_data):
         """ Create a Lap in F1Laps """
         endpoint = self.base_url + "f12020/laps/"
         method   = "POST"
@@ -34,7 +35,8 @@ class F1LapsAPI:
             'sector_1_time_ms': sector_1_time,
             'sector_2_time_ms': sector_2_time,
             'sector_3_time_ms': sector_3_time,
-            'setup': setup_data
+            'setup': setup_data,
+            'telemetry_data': telemetry_data
         }
         return self.call_api(method, endpoint, params)
 

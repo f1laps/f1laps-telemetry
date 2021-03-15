@@ -69,14 +69,15 @@ class Session:
         """ Send Lap to F1Laps """
         log.info("Sending lap %s to F1Laps" % lap_number)
         response = F1LapsAPI(self.f1laps_api_key).lap_create(
-                        track_id      = self.track_id,
-                        team_id       = self.team_id,
-                        conditions    = self.map_weather_ids_to_f1laps_token(),
-                        game_mode     = "time_trial", # hardcoded as the only supported value
-                        sector_1_time = self.lap_list[lap_number]["sector_1_time_ms"],
-                        sector_2_time = self.lap_list[lap_number]["sector_2_time_ms"],
-                        sector_3_time = self.lap_list[lap_number]["sector_3_time_ms"],
-                        setup_data    = self.setup
+                        track_id       = self.track_id,
+                        team_id        = self.team_id,
+                        conditions     = self.map_weather_ids_to_f1laps_token(),
+                        game_mode      = "time_trial", # hardcoded as the only supported value
+                        sector_1_time  = self.lap_list[lap_number]["sector_1_time_ms"],
+                        sector_2_time  = self.lap_list[lap_number]["sector_2_time_ms"],
+                        sector_3_time  = self.lap_list[lap_number]["sector_3_time_ms"],
+                        setup_data     = self.setup,
+                        telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
                     )
         if response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
@@ -217,7 +218,8 @@ class Session:
                         "sector_3_time_ms"    : lap_object['sector_3_time_ms'],
                         "car_race_position"   : lap_object['car_race_position'],
                         "pit_status"          : lap_object['pit_status'],
-                        "tyre_compound_visual": lap_object.get('tyre_compound_visual')
+                        "tyre_compound_visual": lap_object.get('tyre_compound_visual'),
+                        "telemetry_data"      : self.telemetry.get_telemetry_api_dict(lap_number)
                     })
         return lap_times
 
