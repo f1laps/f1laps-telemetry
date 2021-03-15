@@ -18,8 +18,6 @@ class FileHandlerTest(TestCase):
     def test_file_handler_write(self):
         self.config.set_api_key("test")
 
-class PathFunctionsTest(TestCase):
-
     def test_get_path_executable_parent(self):
         path = get_path_executable_parent("f1laps_configuration.txt")
         self.assertTrue("f1laps_configuration.txt" in path)

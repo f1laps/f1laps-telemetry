@@ -45,8 +45,8 @@ class SessionBaseTests(TestCase):
             2: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 2, "car_race_position": 1, "pit_status": 1, "tyre_compound_visual": 8},
         }
         self.assertEqual(session.get_f1laps_lap_times_list(), [
-            {'car_race_position': 1, 'lap_number': 1, 'pit_status': 0, 'sector_1_time_ms': 10001, 'sector_2_time_ms': 20001, 'sector_3_time_ms': 30001, "tyre_compound_visual": None}, 
-            {'car_race_position': 1, 'lap_number': 2, 'pit_status': 1, 'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 30002, "tyre_compound_visual": 8}
+            {'car_race_position': 1, 'lap_number': 1, 'pit_status': 0, 'sector_1_time_ms': 10001, 'sector_2_time_ms': 20001, 'sector_3_time_ms': 30001, "tyre_compound_visual": None, 'telemetry_data': None,}, 
+            {'car_race_position': 1, 'lap_number': 2, 'pit_status': 1, 'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 30002, "tyre_compound_visual": 8, 'telemetry_data': None,}
             ])
         # incomplete lap should not be returned
         session.lap_list = {
@@ -55,8 +55,8 @@ class SessionBaseTests(TestCase):
             3: {"sector_1_time_ms" : 10002, "sector_2_time_ms": None , "sector_3_time_ms": 30002, "lap_number": 3, "car_race_position": 1, "pit_status": 1},
         }
         self.assertEqual(session.get_f1laps_lap_times_list(), [
-            {'car_race_position': 1, 'lap_number': 1, 'pit_status': 0, 'sector_1_time_ms': 10001, 'sector_2_time_ms': 20001, 'sector_3_time_ms': 30001, "tyre_compound_visual": None}, 
-            {'car_race_position': 1, 'lap_number': 2, 'pit_status': 1, 'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 30002, "tyre_compound_visual": 16}
+            {'car_race_position': 1, 'lap_number': 1, 'pit_status': 0, 'sector_1_time_ms': 10001, 'sector_2_time_ms': 20001, 'sector_3_time_ms': 30001, "tyre_compound_visual": None, 'telemetry_data': None,}, 
+            {'car_race_position': 1, 'lap_number': 2, 'pit_status': 1, 'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 30002, "tyre_compound_visual": 16, 'telemetry_data': None,}
             ])
 
     def test_get_track_name(self):

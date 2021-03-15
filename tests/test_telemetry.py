@@ -10,9 +10,13 @@ class TelemetryTests(TestCase):
         # initialize
         telemetry = Telemetry()
         self.assertEqual(telemetry.current_lap, None)
+        self.assertEqual(telemetry.current_lap_number, None)
+        self.assertEqual(telemetry.lap_dict, {})
         # start new lap
         telemetry.start_new_lap(1)
         self.assertEqual(telemetry.current_lap.number, 1)
+        self.assertEqual(telemetry.current_lap_number, 1)
+        self.assertEqual(telemetry.lap_dict[1], telemetry.current_lap)
         self.assertEqual(telemetry.current_lap.frame_dict, {})
         # start same lap again - no problem
         telemetry.start_new_lap(1)
@@ -21,7 +25,17 @@ class TelemetryTests(TestCase):
         # start new lap
         telemetry.start_new_lap(2)
         self.assertEqual(telemetry.current_lap.number, 2)
+        self.assertEqual(telemetry.current_lap_number, 2)
+        self.assertEqual(telemetry.lap_dict[2], telemetry.current_lap)
+        self.assertEqual(telemetry.lap_dict[1].number, 1)
         self.assertEqual(telemetry.current_lap.frame_dict, {})
+        # a third lap deletes lap 1
+        telemetry.start_new_lap(3)
+        self.assertEqual(telemetry.current_lap.number, 3)
+        self.assertEqual(telemetry.lap_dict[3], telemetry.current_lap)
+        self.assertEqual(telemetry.lap_dict[2].number, 2)
+        self.assertEqual(1 in telemetry.lap_dict, False)
+        self.assertEqual(2 in telemetry.lap_dict, True)
 
     def test_set_frame_value(self):
         telemetry = Telemetry()
@@ -47,7 +61,17 @@ class TelemetryTests(TestCase):
         self.assertEqual(telemetry.current_lap.frame_dict[1000]["speed"], 300)
         self.assertEqual(telemetry.current_lap.frame_dict[1000]["brake"], 0.01)
 
-class TelemetryTests(TestCase):
+    def test_get_telemetry_api_dict(self):
+        telemetry = Telemetry()
+        telemetry.start_new_lap(1)
+        telemetry.set(1000, speed=200, lap_distance=10)
+        distance_dict = telemetry.get_telemetry_api_dict(1)
+        self.assertEqual(distance_dict, {10: [None, 200, None, None, None, None, None]})
+        distance_dict = telemetry.get_telemetry_api_dict(2)
+        self.assertEqual(distance_dict, None)
+
+
+class TelemetryLapTests(TestCase):
 
     def test_is_complete_lap(self):
         telemetry = Telemetry()
