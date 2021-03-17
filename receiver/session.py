@@ -67,7 +67,6 @@ class Session:
 
     def create_lap_in_f1laps(self, lap_number):
         """ Send Lap to F1Laps """
-        log.info("Sending lap %s to F1Laps" % lap_number)
         response = F1LapsAPI(self.f1laps_api_key).lap_create(
                         track_id       = self.track_id,
                         team_id        = self.team_id,
