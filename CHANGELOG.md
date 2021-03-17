@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.1.5 - 2021-03-17
+
+Sessions will now be correctly posted even if you re-start the app during a session.
+
+### Fixed
+- Session with existing UDP Session UID error response now are handled properly (HTTP 400 instead of HTTP 403)
+
+
 ## 0.1.4 - 2021-03-08
  
 Now your API key will be saved in a separate config file after initial entry.

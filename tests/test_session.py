@@ -125,7 +125,7 @@ class SessionAPITests(TestCase):
         self.session.session_type = 10
         # make sure we don't have a f1laps id in the session yet
         self.session.f1_laps_session_id = None
-        mock_session_create_api.return_value = MagicMock(status_code=403, content=json.dumps({"error": "already exists"}))
+        mock_session_create_api.return_value = MagicMock(status_code=400, content=json.dumps({"error": "already exists"}))
         mock_session_list_api.return_value = MagicMock(status_code=200, content=json.dumps({"results": [{"id": "astonmartin4tw"}]}))
         mock_session_update_api.return_value = MagicMock(status_code=200)
         self.assertEqual(self.session.process_lap_in_f1laps(1), True)
@@ -138,17 +138,17 @@ class SessionAPITests(TestCase):
         self.session.session_type = 10
         # make sure we don't have a f1laps id in the session yet
         self.session.f1_laps_session_id = None
-        mock_session_create_api.return_value = MagicMock(status_code=403, content=json.dumps({"error": "already exists"}))
+        mock_session_create_api.return_value = MagicMock(status_code=400, content=json.dumps({"error": "already exists"}))
         mock_session_list_api.return_value = MagicMock(status_code=200, content=json.dumps({"results": []}))
         self.assertEqual(self.session.process_lap_in_f1laps(1), False)
 
     @patch('receiver.session.F1LapsAPI.session_create')
-    def test_session_create_error_400(self, mock_session_create_api):
+    def test_session_create_error_401(self, mock_session_create_api):
         # set session_type to race to test session
         self.session.session_type = 10
         # make sure we don't have a f1laps id in the session yet
         self.session.f1_laps_session_id = None
-        mock_session_create_api.return_value = MagicMock(status_code=400, content=json.dumps({"error": "already exists"}))
+        mock_session_create_api.return_value = MagicMock(status_code=401, content=json.dumps({"error": "invalid token"}))
         self.assertEqual(self.session.process_lap_in_f1laps(1), False)
         
 
