@@ -9,7 +9,7 @@ KEY_INDEX_MAP = {
     "brake"       : 3,
     "throttle"    : 4,
     "gear"        : 5,
-    "stear"       : 6,
+    "steer"       : 6,
     "drs"         : 7,
 }
 
@@ -20,7 +20,7 @@ KEY_ROUND_MAP = {
     "brake"       : 3,
     "throttle"    : 3,
     "gear"        : 0,
-    "stear"       : 3,
+    "steer"       : 3,
     "drs"         : 0,
 }
 
@@ -166,14 +166,9 @@ class TelemetryLap:
         log.info("Completed lap %s with frame dict:" % self.number)
         try:
             # frames
-            file_name = "telemetry_dump_test2_lap%s_frames.txt" % self.number
+            file_name = "telemetry_dump_test4_lap%s_frames.txt" % self.number
             with open(get_path_executable_parent(file_name), 'w+') as f: 
                 f.write(json.dumps(self.frame_dict))
-            log.info("Wrote to file %s" % file_name)
-            # distance
-            file_name = "telemetry_dump_test2_lap%s_distance.txt" % self.number
-            with open(get_path_executable_parent(file_name), 'w+') as f: 
-                f.write(json.dumps(self.distance_dict))
             log.info("Wrote to file %s" % file_name)
         except Exception as ex:
             log.info("Could not write to config file: %s" % ex)
