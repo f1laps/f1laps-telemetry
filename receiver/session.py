@@ -112,7 +112,7 @@ class Session:
             # The call may have failed because this session was already posted to F1Laps
             # But we haven't stored the ID locally (e.g. when user restarts script during a session)
             # We'll try to get the F1Laps ID via GET list call, then try again
-            if response.status_code == 403 and not self.f1_laps_session_id:
+            if response.status_code == 400 and not self.f1_laps_session_id:
                 retrieved_f1_laps_session_id = self.retrieve_f1laps_session_id()
                 if retrieved_f1_laps_session_id:
                     self.f1_laps_session_id = retrieved_f1_laps_session_id
