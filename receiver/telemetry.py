@@ -45,6 +45,8 @@ class Telemetry:
         if self.current_lap_number and number == self.current_lap_number:
             log.info("TelemetryLap number %s already started" % number)
             return None
+        if self.current_lap:
+            self.current_lap.complete()
         # Update current lap number and add to dict
         self.current_lap_number = number
         self.lap_dict[number] = TelemetryLap(number)
@@ -76,6 +78,7 @@ class TelemetryLap:
         # frame_dict = keyed by frame id
         # distance_dict = keyed by lap distance
         self.frame_dict = {}
+        self.frame_dict_clean = {}
         self.distance_dict = {}
 
         # Constants
@@ -85,6 +88,30 @@ class TelemetryLap:
         this_frame = self.frame_dict.get(frame_number)
         if not this_frame:
             return
+        
+        #### CLEAN FRAME DICT
+        self.frame_dict_clean[this_frame] = []
+        if not self.frame_dict_clean.get(this_frame):
+            self.frame_dict_clean[this_frame] = [None, None, None, None, None, None, None, None]
+        fdc = self.frame_dict_clean[this_frame]
+        if this_frame.get("lap_time") is not None:
+            fdc[0] = round(this_frame["lap_time"], 0)
+        if this_frame.get("speed") is not None:
+            fdc[1] = this_frame["speed"]
+        if this_frame.get("brake") is not None:
+            fdc[2] = round(this_frame["brake"], 3)
+        if this_frame.get("throttle") is not None:
+            fdc[3] = round(this_frame["throttle"], 3)
+        if this_frame.get("gear") is not None:
+            fdc[4] = this_frame["gear"]
+        if this_frame.get("steer") is not None:
+            fdc[5] = round(this_frame["steer"], 3)
+        if this_frame.get("drs") is not None:
+            fdc[6] = this_frame["drs"]
+        if this_frame.get("lap_distance") is not None:
+            fdc[7] = round(this_frame["lap_distance"], 2)
+
+        #### DISTANCE DICT
         try:
             lap_distance = int(this_frame["lap_distance"])
         except:
@@ -137,8 +164,8 @@ class TelemetryLap:
         """ Wrap up this lap """
         if self.is_complete_lap():
             #self.process_in_f1laps()
-            #self.process_in_file_temp()
-            pass
+            self.process_in_file_temp()
+            #pass
         return True
 
     def is_complete_lap(self):
