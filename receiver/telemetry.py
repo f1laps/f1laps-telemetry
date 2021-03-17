@@ -85,7 +85,11 @@ class TelemetryLap:
         this_frame = self.frame_dict.get(frame_number)
         if not this_frame:
             return
-        if this_frame.get("lap_distance") and isinstance(this_frame["lap_distance"], int) and this_frame["lap_distance"] > 0:
+        try:
+            lap_distance = int(this_frame["lap_distance"])
+        except:
+            lap_distance = None
+        if lap_distance and lap_distance > 0:
             lap_distance = round(this_frame["lap_distance"], 2)
             # order matters since we're not setting keys
             if not self.distance_dict.get(lap_distance):
