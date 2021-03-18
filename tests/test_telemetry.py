@@ -71,7 +71,35 @@ class TelemetryTests(TestCase):
 
 class TelemetryLapTests(TestCase):
 
-    def test_clean_up_flashbacks(self):
+    def test_clean_frame(self):
+        telemetry = Telemetry()
+        telemetry.start_new_lap(1)
+        tl = telemetry.current_lap
+        telemetry.set(1000, speed=300, lap_distance=50)
+        telemetry.set(1001, speed=301, lap_distance=51)
+        telemetry.set(1002, speed=302, lap_distance=52)
+        self.assertEqual(tl.frame_dict, {
+            1000: [50, None, 300, None, None, None, None, None],
+            1001: [51, None, 301, None, None, None, None, None],
+            1002: [52, None, 302, None, None, None, None, None],
+        })
+        telemetry.set(1003, speed=303, lap_distance=51)
+        self.assertEqual(tl.frame_dict, {
+            1000: [50, None, 300, None, None, None, None, None],
+            1001: [51, None, 301, None, None, None, None, None],
+            1002: [52, None, 302, None, None, None, None, None],
+        })
+        telemetry.set(1004, speed=304, lap_distance=52)
+        telemetry.set(1005, speed=305, lap_distance=53)
+        self.assertEqual(tl.frame_dict, {
+            1000: [50, None, 300, None, None, None, None, None],
+            1001: [51, None, 301, None, None, None, None, None],
+            1002: [52, None, 302, None, None, None, None, None],
+            1005: [53, None, 305, None, None, None, None, None],
+        })
+
+
+    """def test_clean_up_flashbacks(self):
         telemetry = Telemetry()
         telemetry.start_new_lap(1)
         tl = telemetry.current_lap
@@ -106,7 +134,7 @@ class TelemetryLapTests(TestCase):
             1001: [51, None, 301, None, None, None, None, None],
             1008: [52, None, 202, None, None, None, None, None],
             1009: [53, None, 203, None, None, None, None, None]
-            })
+            })"""
         
         
 
