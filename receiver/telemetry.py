@@ -102,6 +102,10 @@ class TelemetryLap:
         # Each holds a list of the telemetry values
         self.frame_dict = {}
 
+        # Ensure we're incrementing lap distance
+        # If we don't, we need to remove the dict
+        self.last_lap_distance = None
+
         # DEPRECATE
         #self.frame_dict_clean = {}
         #self.distance_dict = {}
@@ -113,10 +117,40 @@ class TelemetryLap:
         frame = self.frame_dict.get(frame_number)
         if not frame:
             return
-        if frame[KEY_INDEX_MAP["lap_distance"]] and frame[KEY_INDEX_MAP["lap_distance"]] < 0:
+        if frame[KEY_INDEX_MAP["lap_distance"]]:
+            current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
             # Delete frames that are pre lap start
-            self.frame_dict.pop(frame_number)
-        self.clean_up_flashbacks(frame_number)
+            if current_distance < 0:
+                self.frame_dict.pop(frame_number)
+            else:
+                # Kill frame if distance was decreased
+                if self.last_lap_distance and self.last_lap_distance >= current_distance:
+                    self.frame_dict.pop(frame_number)
+                else:
+                    self.last_lap_distance = current_distance
+        #self.clean_up_flashbacks(frame_number)    
+
+    def complete(self):
+        """ Wrap up this lap """
+        #if self.is_complete_lap():
+        #self.process_in_f1laps()
+        #self.process_in_file_temp()
+        #pass
+        return True
+
+    def process_in_file_temp(self):
+        log.info("---------------------------------------------------------------------")
+        log.info("---------------------------------------------------------------------")
+        log.info("---------------------------------------------------------------------")
+        log.info("Completed lap %s with frame dict:" % self.number)
+        try:
+            # frames
+            file_name = "telemetry_dump_test4_lap%s_frames.txt" % self.number
+            with open(get_path_executable_parent(file_name), 'w+') as f: 
+                f.write(json.dumps(self.frame_dict))
+            log.info("Wrote to file %s" % file_name)
+        except Exception as ex:
+            log.info("Could not write to config file: %s" % ex)
 
     def clean_up_flashbacks(self, frame_number):
         """
@@ -150,28 +184,6 @@ class TelemetryLap:
                     self.frame_dict.pop(decreasing_frame_number)
                 else:
                     break
-
-    def complete(self):
-        """ Wrap up this lap """
-        #if self.is_complete_lap():
-        #self.process_in_f1laps()
-        self.process_in_file_temp()
-        #pass
-        return True
-
-    def process_in_file_temp(self):
-        log.info("---------------------------------------------------------------------")
-        log.info("---------------------------------------------------------------------")
-        log.info("---------------------------------------------------------------------")
-        log.info("Completed lap %s with frame dict:" % self.number)
-        try:
-            # frames
-            file_name = "telemetry_dump_test4_lap%s_frames.txt" % self.number
-            with open(get_path_executable_parent(file_name), 'w+') as f: 
-                f.write(json.dumps(self.frame_dict))
-            log.info("Wrote to file %s" % file_name)
-        except Exception as ex:
-            log.info("Could not write to config file: %s" % ex)
 
     """def update_distance_dict(self, frame_number):
         this_frame = self.frame_dict.get(frame_number)
