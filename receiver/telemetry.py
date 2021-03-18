@@ -122,9 +122,9 @@ class TelemetryLap:
             # Delete frames that are pre lap start
             if current_distance < 0:
                 self.frame_dict.pop(frame_number)
-            else:
+            elif current_distance and current_distance > 0:
                 # Kill frame if distance was decreased
-                if self.last_lap_distance and self.last_lap_distance >= current_distance:
+                if self.last_lap_distance and self.last_lap_distance > current_distance:
                     self.frame_dict.pop(frame_number)
                 else:
                     self.last_lap_distance = current_distance
@@ -158,6 +158,8 @@ class TelemetryLap:
         This messes up charts that are distance-indexed
         When a user goes back in lap distance, we delete all "reverted" frames
         """
+        if frame_number not in self.frame_dict:
+            return
         test_last_frame_number = frame_number
         last_frame_number_found = None
         distance_key = KEY_INDEX_MAP["lap_distance"]
@@ -173,7 +175,7 @@ class TelemetryLap:
         # Which implies that the user flashbacked
         last_distance_value = self.frame_dict[last_frame_number_found][distance_key]
         current_distance_value = self.frame_dict[frame_number][distance_key]
-        if current_distance_value < last_distance_value:
+        if current_distance_value and last_distance_value and current_distance_value < last_distance_value:
             # Delete all frames where distance value is greater than current distance
             total_frame_count = len(self.frame_dict)
             decreasing_frame_number = frame_number
