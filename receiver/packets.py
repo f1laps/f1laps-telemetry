@@ -151,7 +151,7 @@ class TelemetryPacket:
     """ Process telemetry packets """
     def process(self, packet, session):
         """
-        We get tyre info from this packet
+        We get telemetry info from this packet
         Store it continuously
         """
         return self.update_session(packet, session)
