@@ -108,6 +108,7 @@ class LapPacket:
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = pit_status
+        session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
 
         # update telemetry too
         frame = packet.header.frameIdentifier
