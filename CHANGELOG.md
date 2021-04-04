@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.2.0 - INSERTDATE
+
+This version supports car telemetry data sync.
+
+### New
+- Car telemetry is now pushed into F1Laps
+- Q1 and Q2 sessions can now be assigned to seasons in F1Laps
+- TOBEDONE: Lap status (invalid / valid) is now saved in F1Laps
+
+### Fixed
+- TOBEDONE: Spectator mode won't break the app
+
 ## 0.1.5 - 2021-03-17
 
 Sessions will now be correctly posted even if you re-start the app during a session.
