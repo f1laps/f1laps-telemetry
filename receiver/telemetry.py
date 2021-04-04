@@ -102,6 +102,8 @@ class TelemetryLap:
             return
         if frame[KEY_INDEX_MAP["lap_distance"]]:
             current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
+            if not isinstance(current_distance, float) and not isinstance(current_distance, int):
+                return
             # Delete frames that are pre lap start
             if current_distance < 0:
                 self.frame_dict.pop(frame_number)

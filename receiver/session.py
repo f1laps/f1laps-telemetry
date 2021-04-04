@@ -180,11 +180,11 @@ class Session:
             2: "practice_2",
             3: "practice_3",
             4: "practice_1", # short practice
-            5: "qualifying",
-            6: "qualifying",
-            7: "qualifying",
-            8: "qualifying",
-            9: "qualifying",
+            5: "qualifying_1", # q1
+            6: "qualifying_2", # q2
+            7: "qualifying", # q3
+            8: "qualifying", # short q
+            9: "qualifying", # osq
             10: "race",
             11: "race",
             12: "time_trial",
