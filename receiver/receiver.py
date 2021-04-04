@@ -102,7 +102,8 @@ class RaceReceiver(threading.Thread):
             # it returns a new session object for new sessions
             if isinstance(packet, f1_2020_telemetry.packets.PacketSessionData_V1):
                 self.session = SessionPacket().process(packet, self.session)
-                self.session.f1laps_api_key = self.f1laps_api_key
+                if self.session:
+                    self.session.f1laps_api_key = self.f1laps_api_key
 
             # dont do anything else if there isnt a session set
             if self.session:

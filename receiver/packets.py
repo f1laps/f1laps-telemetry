@@ -14,6 +14,10 @@ class SessionPacket:
             return self.update_session(packet, session)
 
     def create_session(self, packet, session):
+        # if the user is spectating, we don't create a session
+        if packet.isSpectating:
+            log.debug("Spectating mode - no data is synced wiht F1Laps")
+            return None
         packet_session_uid = packet.header.sessionUID
         session = Session(session_uid=packet_session_uid)
         session.session_type = packet.sessionType

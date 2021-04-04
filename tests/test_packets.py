@@ -9,7 +9,7 @@ MOCK_PLAYER_CAR_INDEX = 0
 
 def get_packet_mock():
     packet_header = MagicMock(sessionUID="vettel2021", playerCarIndex=MOCK_PLAYER_CAR_INDEX)
-    return MagicMock(header=packet_header)
+    return MagicMock(header=packet_header, isSpectating=0)
 
 
 class SessionPacketTest(TestCase):
@@ -17,7 +17,7 @@ class SessionPacketTest(TestCase):
     def test_session_initial(self):
         packet = get_packet_mock()
         new_session = SessionPacket().process(packet, None)
-        self.assertEqual(new_session != None, True)
+        self.assertTrue(new_session != None)
 
     def test_session_existing(self):
         existing_session = Session(session_uid="vettel2021")
@@ -37,6 +37,13 @@ class SessionPacketTest(TestCase):
         self.assertEqual(new_session.track_id, 5)
         self.assertEqual(new_session.session_type, 10)
         self.assertEqual(new_session.weather_ids, [1])
+
+    def test_session_new_spectating(self):
+        """ Assert that when a user is spectating, no session is created """
+        packet = get_packet_mock()
+        packet.isSpectating = 1
+        new_session = SessionPacket().process(packet, None)
+        self.assertEqual(new_session, None)
 
     def test_session_weather_changes(self):
         # add first value
