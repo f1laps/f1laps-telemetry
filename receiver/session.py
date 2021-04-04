@@ -76,6 +76,7 @@ class Session:
                         sector_2_time  = self.lap_list[lap_number]["sector_2_time_ms"],
                         sector_3_time  = self.lap_list[lap_number]["sector_3_time_ms"],
                         setup_data     = self.setup,
+                        is_valid       = self.lap_list[lap_number].get("is_valid", True),
                         telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
                     )
         if response.status_code == 201:
