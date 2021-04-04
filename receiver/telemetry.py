@@ -65,6 +65,7 @@ class Telemetry:
 
     def start_new_lap(self, number):
         """ New lap started in game """
+        log.info("Start new lap %s" % number)
         if self.current_lap_number and number == self.current_lap_number:
             log.info("TelemetryLap number %s already started" % number)
             return None
@@ -92,24 +93,53 @@ class TelemetryLap:
         # Each holds a list of the telemetry values
         self.frame_dict = {}
 
+        # Store which frames got popped 
+        self.frames_popped_list = []
+
         # Ensure we're incrementing lap distance
         # If we don't, we need to remove the dict
         self.last_lap_distance = None
 
+        self.MAX_FLASHBACK_DISTANCE_METERS = 1500
+        self.MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
+
     def clean_frame(self, frame_number):
         frame = self.frame_dict.get(frame_number)
+        current_distance = None
         if not frame:
             return
+        # Check if we popped this frame before - if so, don't populate it again
+        if frame_number in self.frames_popped_list:
+            self.frame_dict.pop(frame_number)
+            return 
         if frame[KEY_INDEX_MAP["lap_distance"]]:
             current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
+            if not current_distance:
+                return
             if not isinstance(current_distance, float) and not isinstance(current_distance, int):
                 return
-            # Delete frames that are pre lap start
+            # Delete frames that are pre session first line cross start
             if current_distance < 0:
                 self.frame_dict.pop(frame_number)
-            elif current_distance and current_distance > 0:
-                # Kill frame if distance was decreased
-                if self.last_lap_distance and self.last_lap_distance > current_distance:
-                    self.frame_dict.pop(frame_number)
-                else:
-                    self.last_lap_distance = current_distance
+                self.frames_popped_list.append(frame_number)
+                return
+            # If we have current and last lap distance, check that we're incrementing the distance
+            elif self.last_lap_distance:    
+                # Check if last distance was higher - this means something unexpected happened
+                if self.last_lap_distance > current_distance:
+                    # First, if current distance is SLIGHLY less than last distance, we assume its a flashback
+                    # We pop any frame that has a greater distance
+                    if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
+                        log.info("Assuming a flashback happened - deleting all future frames")
+                        for frame_key, frame_value in self.frame_dict.items():
+                            if frame_value[KEY_INDEX_MAP["lap_distance"]] and frame_value[KEY_INDEX_MAP["lap_distance"]] > current_distance:
+                                self.frame_dict.pop(frame_key)
+                    # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
+                    # And lap distance pre line cross is NOT negative (also weird!)
+                    # So if we drop the current distance down to a super small number, we assume a new lap was started
+                    if current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                        log.info("Assuming a new lap started based on distance delta - killing all old frames")
+                        self.frame_dict = {'frame_number': frame}
+        # Set the last distance value for future frames
+        self.last_lap_distance = current_distance
+        #log.info("Frame %s: last distance %s | CD %s" % (frame_number, self.last_lap_distance, current_distance))
