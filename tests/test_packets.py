@@ -9,7 +9,7 @@ MOCK_PLAYER_CAR_INDEX = 0
 
 def get_packet_mock():
     packet_header = MagicMock(sessionUID="vettel2021", playerCarIndex=MOCK_PLAYER_CAR_INDEX)
-    return MagicMock(header=packet_header)
+    return MagicMock(header=packet_header, isSpectating=0)
 
 
 class SessionPacketTest(TestCase):
@@ -17,7 +17,7 @@ class SessionPacketTest(TestCase):
     def test_session_initial(self):
         packet = get_packet_mock()
         new_session = SessionPacket().process(packet, None)
-        self.assertEqual(new_session != None, True)
+        self.assertTrue(new_session != None)
 
     def test_session_existing(self):
         existing_session = Session(session_uid="vettel2021")
@@ -37,6 +37,13 @@ class SessionPacketTest(TestCase):
         self.assertEqual(new_session.track_id, 5)
         self.assertEqual(new_session.session_type, 10)
         self.assertEqual(new_session.weather_ids, [1])
+
+    def test_session_new_spectating(self):
+        """ Assert that when a user is spectating, no session is created """
+        packet = get_packet_mock()
+        packet.isSpectating = 1
+        new_session = SessionPacket().process(packet, None)
+        self.assertEqual(new_session, None)
 
     def test_session_weather_changes(self):
         # add first value
@@ -71,7 +78,7 @@ class LapPacketTest(TestCase):
         packet = get_packet_mock()
         packet.lapData = [MagicMock(currentLapNum=1, currentLapTime=1, sector1TimeInMS=1000, sector2TimeInMS=0, pitStatus=0, carPosition=1)]
         session = LapPacket().process(packet, session)
-        self.assertEqual(session.lap_list, {1: {'sector_1_time_ms': 1000, 'sector_2_time_ms': 0, 'sector_3_time_ms': 0, 'lap_number': 1, 'car_race_position': 1, 'pit_status': 0}})
+        self.assertEqual(session.lap_list, {1: {'sector_1_time_ms': 1000, 'sector_2_time_ms': 0, 'sector_3_time_ms': 0, 'lap_number': 1, 'car_race_position': 1, 'pit_status': 0, 'is_valid': True}})
         self.assertEqual(session.lap_number_current, 1)
 
 
@@ -80,10 +87,14 @@ class LapPacketTest(TestCase):
         session.lap_number_current = 2
         session.lap_list = { 2: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 2, "car_race_position": 1, "pit_status": 1}}
         packet = get_packet_mock()
-        packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4)]
+        packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4, currentLapInvalid=0)]
         session = LapPacket().process(packet, session)
-        self.assertEqual(session.lap_list, {2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2}})
+        self.assertEqual(session.lap_list, {2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2, 'is_valid': True}})
         self.assertEqual(session.lap_number_current, 2)
+        # invalid lap
+        packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4, currentLapInvalid=1)]
+        session = LapPacket().process(packet, session)
+        self.assertEqual(session.lap_list, {2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2, 'is_valid': False}})
 
     def test_lap_new_without_old(self):
         session = Session(session_uid="vettel2021")        
@@ -92,21 +103,21 @@ class LapPacketTest(TestCase):
         packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4, lastLapTime=60.006)]
         session = LapPacket().process(packet, session)
         self.assertEqual(session.lap_list, {
-                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2}
+                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2, 'is_valid': True}
                     })
         self.assertEqual(session.lap_number_current, 2)
 
     def test_lap_new_with_old(self):
         session = Session(session_uid="vettel2021")        
         session.lap_number_current = 1
-        session.lap_list = { 1: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1}}
+        session.lap_list = { 1: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True}}
         session.process_lap_in_f1laps = MagicMock()
         packet = get_packet_mock()
         packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4, lastLapTime=60.006)]
         session = LapPacket().process(packet, session)
         self.assertEqual(session.lap_list, {
-                    1: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1},
-                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2}
+                    1: {"sector_1_time_ms" : 10002, "sector_2_time_ms": 20002, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True},
+                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2, 'is_valid': True}
                     })
         self.assertEqual(session.lap_number_current, 2)
         session.process_lap_in_f1laps.assert_called_with(1)
@@ -114,14 +125,14 @@ class LapPacketTest(TestCase):
     def test_lap_new_with_old_without_sector_2(self):
         session = Session(session_uid="vettel2021")
         session.lap_number_current = 1
-        session.lap_list = { 1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1}}
+        session.lap_list = { 1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True}}
         session.process_lap_in_f1laps = MagicMock()
         packet = get_packet_mock()
         packet.lapData = [MagicMock(currentLapNum=2, currentLapTime=80, sector1TimeInMS=10002, sector2TimeInMS=20002, pitStatus=2, carPosition=4, lastLapTime=30.002)]
         session = LapPacket().process(packet, session)
         self.assertEqual(session.lap_list, {
-                    1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1},
-                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2}
+                    1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True},
+                    2: {'sector_1_time_ms': 10002, 'sector_2_time_ms': 20002, 'sector_3_time_ms': 49996, 'lap_number': 2, 'car_race_position': 4, 'pit_status': 2, 'is_valid': True}
                     })
         self.assertEqual(session.lap_number_current, 2)
         session.process_lap_in_f1laps.assert_not_called()
@@ -132,7 +143,7 @@ class CarStatusPacketTest(TestCase):
     def test_process_successful(self):
         session = Session(session_uid="vettel2021")
         session.lap_number_current = 1
-        session.lap_list = { 1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1}}
+        session.lap_list = { 1: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True}}
         packet = get_packet_mock()
         packet.carStatusData = [MagicMock(visualTyreCompound=7)]
         session = CarStatusPacket().process(packet, session)
@@ -156,7 +167,7 @@ class CarStatusPacketTest(TestCase):
     def test_process_no_lap_list_with_current_lap(self):
         session = Session(session_uid="vettel2021")
         session.lap_number_current = 1
-        session.lap_list = { 0: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1}}
+        session.lap_list = { 0: {"sector_1_time_ms" : 0, "sector_2_time_ms": 0, "sector_3_time_ms": 30002, "lap_number": 1, "car_race_position": 1, "pit_status": 1, 'is_valid': True}}
         packet = get_packet_mock()
         packet.carStatusData = [MagicMock(visualTyreCompound=7)]
         session = CarStatusPacket().process(packet, session)

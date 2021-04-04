@@ -14,6 +14,10 @@ class SessionPacket:
             return self.update_session(packet, session)
 
     def create_session(self, packet, session):
+        # if the user is spectating, we don't create a session
+        if packet.isSpectating:
+            log.debug("Spectating mode - no data is synced wiht F1Laps")
+            return None
         packet_session_uid = packet.header.sessionUID
         session = Session(session_uid=packet_session_uid)
         session.session_type = packet.sessionType
@@ -108,6 +112,7 @@ class LapPacket:
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = pit_status
+        session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
 
         # update telemetry too
         frame = packet.header.frameIdentifier
@@ -151,7 +156,7 @@ class TelemetryPacket:
     """ Process telemetry packets """
     def process(self, packet, session):
         """
-        We get tyre info from this packet
+        We get telemetry info from this packet
         Store it continuously
         """
         return self.update_session(packet, session)
