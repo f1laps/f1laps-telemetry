@@ -131,7 +131,7 @@ class TelemetryLap:
                     # We pop any frame that has a greater distance
                     if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
                         log.info("Assuming a flashback happened - deleting all future frames")
-                        for frame_key, frame_value in self.frame_dict.items():
+                        for frame_key, frame_value in self.frame_dict.copy().items():
                             if frame_value[KEY_INDEX_MAP["lap_distance"]] and frame_value[KEY_INDEX_MAP["lap_distance"]] > current_distance:
                                 self.frame_dict.pop(frame_key)
                     # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
