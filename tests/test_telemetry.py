@@ -96,3 +96,47 @@ class TelemetryLapTests(TestCase):
             1005: [53, None, 305, None, None, None, None, None],
         })
 
+    def test_clean_frame_new_lap(self):
+        telemetry = Telemetry()
+        telemetry.start_new_lap(1)
+        tl = telemetry.current_lap
+        telemetry.set(1000, speed=300, lap_distance=4400)
+        telemetry.set(1001, speed=301, lap_distance=4401)
+        telemetry.set(1002, speed=302, lap_distance=4402)
+        self.assertEqual(tl.frame_dict, {
+            1000: [4400, None, 300, None, None, None, None, None],
+            1001: [4401, None, 301, None, None, None, None, None],
+            1002: [4402, None, 302, None, None, None, None, None],
+        })
+        telemetry.set(1003, speed=303, lap_distance=13)
+        self.assertEqual(tl.frame_dict, {
+            1003: [13, None, 303, None, None, None, None, None],
+        })
+        telemetry.set(1004, speed=304, lap_distance=14)
+        telemetry.set(1005, speed=305, lap_distance=15)
+        self.assertEqual(tl.frame_dict, {
+            1003: [13, None, 303, None, None, None, None, None],
+            1004: [14, None, 304, None, None, None, None, None],
+            1005: [15, None, 305, None, None, None, None, None],
+        })
+
+    def test_clean_frame_pre_first_line(self):
+        telemetry = Telemetry()
+        telemetry.start_new_lap(1)
+        tl = telemetry.current_lap
+        telemetry.set(1000, speed=300, lap_distance=-100)
+        telemetry.set(1001, speed=301, lap_distance=-99)
+        telemetry.set(1002, speed=302, lap_distance=-98)
+        self.assertEqual(tl.frame_dict, {})
+        telemetry.set(1003, speed=303, lap_distance=13)
+        self.assertEqual(tl.frame_dict, {
+            1003: [13, None, 303, None, None, None, None, None],
+        })
+        telemetry.set(1004, speed=304, lap_distance=14)
+        telemetry.set(1005, speed=305, lap_distance=15)
+        self.assertEqual(tl.frame_dict, {
+            1003: [13, None, 303, None, None, None, None, None],
+            1004: [14, None, 304, None, None, None, None, None],
+            1005: [15, None, 305, None, None, None, None, None],
+        })
+

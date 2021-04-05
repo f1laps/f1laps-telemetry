@@ -116,6 +116,7 @@ class TelemetryLap:
             current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
             if not current_distance:
                 return
+
             if not isinstance(current_distance, float) and not isinstance(current_distance, int):
                 return
 
@@ -145,7 +146,8 @@ class TelemetryLap:
                     # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
                     elif current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
                         log.info("Assuming a new lap started based on distance delta - killing all old frames")
-                        self.frame_dict = {'frame_number': frame}
+                        self.frame_dict = {frame_number: frame}
+        
         # Set the last distance value for future frames
         self.last_lap_distance = current_distance
         #log.info("Frame %s: last distance %s | CD %s" % (frame_number, self.last_lap_distance, current_distance))
