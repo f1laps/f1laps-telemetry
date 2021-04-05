@@ -4,7 +4,8 @@ import f1_2020_telemetry.packets
 
 from lib.logger import log
 from receiver.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
-                             FinalClassificationPacket, LapPacket, CarStatusPacket
+                             FinalClassificationPacket, LapPacket, CarStatusPacket, \
+                             TelemetryPacket
 from receiver.helpers import get_local_ip
 
 
@@ -101,7 +102,8 @@ class RaceReceiver(threading.Thread):
             # it returns a new session object for new sessions
             if isinstance(packet, f1_2020_telemetry.packets.PacketSessionData_V1):
                 self.session = SessionPacket().process(packet, self.session)
-                self.session.f1laps_api_key = self.f1laps_api_key
+                if self.session:
+                    self.session.f1laps_api_key = self.f1laps_api_key
 
             # dont do anything else if there isnt a session set
             if self.session:
@@ -124,6 +126,10 @@ class RaceReceiver(threading.Thread):
                 # Car Status Data
                 if isinstance(packet, f1_2020_telemetry.packets.PacketCarStatusData_V1):
                     CarStatusPacket().process(packet, self.session)
+
+                # Telemetry Data
+                if isinstance(packet, f1_2020_telemetry.packets.PacketCarTelemetryData_V1):
+                    TelemetryPacket().process(packet, self.session)
 
                 # Final Classification
                 if isinstance(packet, f1_2020_telemetry.packets.PacketFinalClassificationData_V1):

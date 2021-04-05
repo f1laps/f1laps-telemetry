@@ -14,6 +14,10 @@ class SessionPacket:
             return self.update_session(packet, session)
 
     def create_session(self, packet, session):
+        # if the user is spectating, we don't create a session
+        if packet.isSpectating:
+            log.debug("Spectating mode - no data is synced with F1Laps")
+            return None
         packet_session_uid = packet.header.sessionUID
         session = Session(session_uid=packet_session_uid)
         session.session_type = packet.sessionType
@@ -56,6 +60,7 @@ class LapPacket:
         # initiate lap data in the lap list array if necessary
         if not session.lap_list.get(session.lap_number_current):
             session.lap_list[session.lap_number_current] = {}
+            session.telemetry.start_new_lap(session.lap_number_current)
 
         # Always update the session lap list
         session = self.update_session(packet, session, lap_number=session.lap_number_current)
@@ -107,7 +112,12 @@ class LapPacket:
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = pit_status
-        
+        session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
+
+        # update telemetry too
+        frame = packet.header.frameIdentifier
+        session.telemetry.set(frame, lap_time     = total_lap_time,
+                                     lap_distance = lap_data.lapDistance)
         return session
 
     def update_session_last_lap(self, packet, session, last_lap_number):
@@ -139,6 +149,27 @@ class CarStatusPacket:
         car_status = packet.carStatusData[packet.header.playerCarIndex]
         if session.lap_number_current is not None and session.lap_list.get(session.lap_number_current):
             session.lap_list[session.lap_number_current]['tyre_compound_visual'] = car_status.visualTyreCompound
+        return session
+
+
+class TelemetryPacket:
+    """ Process telemetry packets """
+    def process(self, packet, session):
+        """
+        We get telemetry info from this packet
+        Store it continuously
+        """
+        return self.update_session(packet, session)
+
+    def update_session(self, packet, session):
+        telemetry_data = packet.carTelemetryData[packet.header.playerCarIndex]
+        frame = packet.header.frameIdentifier
+        session.telemetry.set(frame, speed    = telemetry_data.speed,
+                                     brake    = telemetry_data.brake,
+                                     throttle = telemetry_data.throttle,
+                                     gear     = telemetry_data.gear,
+                                     steer    = telemetry_data.steer,
+                                     drs      = telemetry_data.drs)
         return session
 
 

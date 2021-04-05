@@ -2,6 +2,7 @@ import json
 import f1_2020_telemetry.types
 
 from receiver.f1laps import F1LapsAPI
+from receiver.telemetry import Telemetry
 from lib.logger import log
 
 
@@ -36,6 +37,11 @@ class Session:
         self.setup = {}
 
         ###################################################
+        # Attributes set with the telemetry package
+        ###################################################
+        self.telemetry = Telemetry()
+
+        ###################################################
         # Attributes set with the final classification
         ###################################################
         self.finish_position = None
@@ -61,16 +67,17 @@ class Session:
 
     def create_lap_in_f1laps(self, lap_number):
         """ Send Lap to F1Laps """
-        log.info("Sending lap %s to F1Laps" % lap_number)
         response = F1LapsAPI(self.f1laps_api_key).lap_create(
-                        track_id      = self.track_id,
-                        team_id       = self.team_id,
-                        conditions    = self.map_weather_ids_to_f1laps_token(),
-                        game_mode     = "time_trial", # hardcoded as the only supported value
-                        sector_1_time = self.lap_list[lap_number]["sector_1_time_ms"],
-                        sector_2_time = self.lap_list[lap_number]["sector_2_time_ms"],
-                        sector_3_time = self.lap_list[lap_number]["sector_3_time_ms"],
-                        setup_data    = self.setup
+                        track_id       = self.track_id,
+                        team_id        = self.team_id,
+                        conditions     = self.map_weather_ids_to_f1laps_token(),
+                        game_mode      = "time_trial", # hardcoded as the only supported value
+                        sector_1_time  = self.lap_list[lap_number]["sector_1_time_ms"],
+                        sector_2_time  = self.lap_list[lap_number]["sector_2_time_ms"],
+                        sector_3_time  = self.lap_list[lap_number]["sector_3_time_ms"],
+                        setup_data     = self.setup,
+                        is_valid       = self.lap_list[lap_number].get("is_valid", True),
+                        telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
                     )
         if response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
@@ -174,11 +181,11 @@ class Session:
             2: "practice_2",
             3: "practice_3",
             4: "practice_1", # short practice
-            5: "qualifying",
-            6: "qualifying",
-            7: "qualifying",
-            8: "qualifying",
-            9: "qualifying",
+            5: "qualifying_1", # q1
+            6: "qualifying_2", # q2
+            7: "qualifying", # q3
+            8: "qualifying", # short q
+            9: "qualifying", # osq
             10: "race",
             11: "race",
             12: "time_trial",
@@ -211,7 +218,8 @@ class Session:
                         "sector_3_time_ms"    : lap_object['sector_3_time_ms'],
                         "car_race_position"   : lap_object['car_race_position'],
                         "pit_status"          : lap_object['pit_status'],
-                        "tyre_compound_visual": lap_object.get('tyre_compound_visual')
+                        "tyre_compound_visual": lap_object.get('tyre_compound_visual'),
+                        "telemetry_data"      : self.telemetry.get_telemetry_api_dict(lap_number)
                     })
         return lap_times
 
