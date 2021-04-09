@@ -100,6 +100,7 @@ class MainWindow(QWidget):
         self.app_version_label.setText("You're using app version %s." % self.app_version)
         self.app_version_label.setObjectName("appVersionLabel")
         self.app_version_label.setWordWrap(True)
+        self.app_version_label.setOpenExternalLinks(True)
 
         # Draw layout
         self.layout = QVBoxLayout()

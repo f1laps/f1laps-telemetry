@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.2.1 - INSERTDATE
+
+INSERTDESCRIPTION
+
+### Fixed
+- The link to upgrade the app when a new version is available now works
+
 ## 0.2.0 - 2021-04-05
 
 This version supports car telemetry data sync.
