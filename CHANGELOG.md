@@ -1,8 +1,11 @@
 # Change Log
 
-## 0.2.1 - INSERTDATE
+## 0.2.1 - 2021-04-14
 
-INSERTDESCRIPTION
+Improving app performance by pushing telemetry data as string, not JSON
+
+### Changed
+- Telemetry data now gets sent as string, not JSON
 
 ### Fixed
 - The link to upgrade the app when a new version is available now works
