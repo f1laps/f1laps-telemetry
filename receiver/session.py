@@ -211,15 +211,18 @@ class Session:
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
             if lap_object['sector_1_time_ms'] and lap_object['sector_2_time_ms'] and lap_object['sector_3_time_ms']:
+                telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
+                if telemetry_data:
+                    telemetry_data = json.dumps(telemetry_data)
                 lap_times.append({
-                        "lap_number"          : lap_number,
-                        "sector_1_time_ms"    : lap_object['sector_1_time_ms'],
-                        "sector_2_time_ms"    : lap_object['sector_2_time_ms'],
-                        "sector_3_time_ms"    : lap_object['sector_3_time_ms'],
-                        "car_race_position"   : lap_object['car_race_position'],
-                        "pit_status"          : lap_object['pit_status'],
-                        "tyre_compound_visual": lap_object.get('tyre_compound_visual'),
-                        "telemetry_data"      : self.telemetry.get_telemetry_api_dict(lap_number)
+                        "lap_number"           : lap_number,
+                        "sector_1_time_ms"     : lap_object['sector_1_time_ms'],
+                        "sector_2_time_ms"     : lap_object['sector_2_time_ms'],
+                        "sector_3_time_ms"     : lap_object['sector_3_time_ms'],
+                        "car_race_position"    : lap_object['car_race_position'],
+                        "pit_status"           : lap_object['pit_status'],
+                        "tyre_compound_visual" : lap_object.get('tyre_compound_visual'),
+                        "telemetry_data_string": telemetry_data
                     })
         return lap_times
 
