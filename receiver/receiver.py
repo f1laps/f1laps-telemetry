@@ -5,7 +5,7 @@ import f1_2020_telemetry.packets
 from lib.logger import log
 from receiver.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
                              FinalClassificationPacket, LapPacket, CarStatusPacket, \
-                             TelemetryPacket
+                             TelemetryPacket, MotionPacket
 from receiver.helpers import get_local_ip
 
 
@@ -114,6 +114,10 @@ class RaceReceiver(threading.Thread):
                 # Participants
                 if isinstance(packet, f1_2020_telemetry.packets.PacketParticipantsData_V1):
                     ParticipantsPacket().process(packet, self.session)
+
+                # Motion
+                if isinstance(packet, f1_2020_telemetry.packets.PacketMotionData_V1):
+                    MotionPacket().process(packet, self.session)
 
                 # Setup
                 if isinstance(packet, f1_2020_telemetry.packets.PacketCarSetupData_V1):

@@ -136,6 +136,24 @@ class LapPacket:
         return session.process_lap_in_f1laps(lap_number)
 
 
+class MotionPacket:
+    """ Process motion packets """
+    def process(self, packet, session):
+        """
+        We get motion info from this packet
+        Store it continuously
+        """
+        return self.update_session(packet, session)
+
+    def update_session(self, packet, session):
+        car_motion = packet.carMotionData[packet.header.playerCarIndex]
+        xpos = car_motion.worldPositionX
+        #ypos = car_motion.worldPositionY # ypos is height
+        zpos = car_motion.worldPositionZ
+        log.info("World Position: %s,%s" % (xpos, zpos))
+        return session
+
+
 class CarStatusPacket:
     """ Process car status packets """
     def process(self, packet, session):
