@@ -53,6 +53,10 @@ class Session:
         ###################################################
         self.f1_laps_session_id = None
 
+        # Temp
+        self.current_distance = None
+        self.last_logged_distance = None
+
     def process_lap_in_f1laps(self, lap_number=None):
         """
         Send Lap to F1Laps; either as a standalone lap or as a session lap,

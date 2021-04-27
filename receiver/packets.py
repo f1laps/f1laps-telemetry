@@ -1,6 +1,9 @@
 from receiver.session import Session
 from lib.logger import log
 
+MINIMAP_ROUNDING = 0
+MINIMAP_SPACING_M = 1
+
 
 class SessionPacket:
     """ Process session packets """
@@ -118,6 +121,7 @@ class LapPacket:
         frame = packet.header.frameIdentifier
         session.telemetry.set(frame, lap_time     = total_lap_time,
                                      lap_distance = lap_data.lapDistance)
+        session.current_distance = round(lap_data.lapDistance, MINIMAP_ROUNDING)
         return session
 
     def update_session_last_lap(self, packet, session, last_lap_number):
@@ -147,10 +151,18 @@ class MotionPacket:
 
     def update_session(self, packet, session):
         car_motion = packet.carMotionData[packet.header.playerCarIndex]
-        xpos = car_motion.worldPositionX
+        xpos = round(car_motion.worldPositionX, MINIMAP_ROUNDING)
         #ypos = car_motion.worldPositionY # ypos is height
-        zpos = car_motion.worldPositionZ
-        log.info("World Position: %s,%s" % (xpos, zpos))
+        zpos = round(car_motion.worldPositionZ, MINIMAP_ROUNDING)
+        if xpos and zpos and session.current_distance:
+            if not session.last_logged_distance:
+                log.info("WPMAP: %s,%s,%s" % (session.current_distance, xpos, zpos))
+                session.last_logged_distance = session.current_distance
+            else:
+                spacing = session.current_distance - session.last_logged_distance
+                if spacing < 0 or spacing > MINIMAP_SPACING_M:
+                    log.info("WPMAP: %s,%s,%s" % (session.current_distance, xpos, zpos))
+                    session.last_logged_distance = session.current_distance
         return session
 
 
