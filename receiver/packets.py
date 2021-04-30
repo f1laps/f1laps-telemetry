@@ -161,7 +161,7 @@ class MotionPacket:
             else:
                 spacing = session.current_distance - session.last_logged_distance
                 if spacing < 0 or spacing > MINIMAP_SPACING_M:
-                    log.info("WPMAP: %s,%s,%s" % (session.current_distance, xpos, zpos))
+                    log.info("WPMAP: %s,%s,%s" % (int(session.current_distance), int(xpos), int(zpos)))
                     session.last_logged_distance = session.current_distance
         return session
 
