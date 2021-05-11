@@ -34,7 +34,7 @@ class APIUserPreferenceWorker(QObject):
                 telemetry_enabled = json_response.get('telemetry_enabled')
                 subscription_plan = json_response.get('subscription_plan')
                 subscription_expires = json_response.get('subscription_expires')
-                log.info("Authenticated successfully. Telemetry is %s" % \
+                log.info("Authenticated against F1Laps API successfully. Telemetry is %s" % \
                     ("enabled" if telemetry_enabled else "not enabled"))
                 user_settings_dict["api_key_valid"] = True
                 user_settings_dict["telemetry_enabled"] = telemetry_enabled

@@ -183,7 +183,7 @@ class Session:
             4: "practice_1", # short practice
             5: "qualifying_1", # q1
             6: "qualifying_2", # q2
-            7: "qualifying", # q3
+            7: "qualifying_3", # q3
             8: "qualifying", # short q
             9: "qualifying", # osq
             10: "race",

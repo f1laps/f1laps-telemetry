@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.0 - 2021-05-XX
+
+First major stable version now that subscription plans have been rolled out.
+
+### Added
+- The API key now gets validated before the session starts
+- Telemetry data will only be saved if the user's subscription plan supports it
+
 ## 0.2.1 - 2021-04-14
 
 Improving app performance by pushing telemetry data as string, not JSON

@@ -52,7 +52,6 @@ class StartButton(QPushButton):
         self.setText("Start Telemetry")
         self.setStyleSheet("background-color: #4338CA;")
 
-
 class StatusLabel(F1QLabel):
     """ Text below StartButton to display current receiver status """
     def __init__(self):
@@ -62,12 +61,19 @@ class StatusLabel(F1QLabel):
         self.setFixedSize(100, 15)
 
     def set_validating_api_key(self):
+        self.setStyleSheet("color: #6B7280;")
         self.setText("Checking API key...")
+
+    def set_invalid_api_key(self):
+        self.setStyleSheet("color: #B91C1C;")
+        self.setText("Invalid API key")
     
     def set_running(self):
+        self.setStyleSheet("color: #6B7280;")
         self.setText("Status: running")
 
     def reset(self):
+        self.setStyleSheet("color: #6B7280;")
         self.setText("Status: not started")
 
 
@@ -148,6 +154,7 @@ class MainWindow(QWidget):
         self.app_version_label.setText("You're using app version %s." % self.app_version)
         self.app_version_label.setObjectName("appVersionLabel")
         self.subscription_label = F1QLabel()
+        self.subscription_label.setText(" ")
         self.subscription_label.setObjectName("subscriptionLabel")
 
         # Draw layout
@@ -256,7 +263,7 @@ class MainWindow(QWidget):
         telemetry_enabled = user_settings_dict.get("telemetry_enabled")
         subscription_plan = user_settings_dict.get("subscription_plan")
         subscription_expires = user_settings_dict.get("subscription_expires")
-        if api_key_valid:
+        if api_key_valid and subscription_plan:
             log.info("Starting Telemetry session")
             self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.set_running()
@@ -264,21 +271,18 @@ class MainWindow(QWidget):
             # Actually start receiver thread
             self.session.start(self.api_key)
         else:
-            log.info("Not starting Telemetry session")
+            log.info("Not starting Telemetry session (api key %s, subscription %s)" % \
+                ("valid" if api_key_valid else "invalid", subscription_plan if subscription_plan else "not set"))
+            self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.reset()
-            self.status_label.reset()
+            self.status_label.set_invalid_api_key()
 
     def display_subscription_information(self, plan, expires_at):
-        if not plan or not expires_at:
-            return
-        if isinstance(expires_at, str):
-            expires_at = datetime.datetime.strptime(expires_at, "%Y-%m-%dT%H:%M:%S%z")
-        sub_text = ""
-        subscription_is_active = bool(expires_at > datetime.datetime.now().replace(tzinfo=datetime.timezone.utc))
-        if subscription_is_active:
+        """ Plan and expires at are only returned if it's active """
+        if plan:
             sub_text = "Subscribed to F1Laps %s plan" % plan
         else:
-            sub_text = "Your F1Laps %s plan subscription has expired. <a href='https://www.f1laps.com/telemetry'>Please renew it now." % plan
+            sub_text = "You have no active F1Laps subscription. <a href='https://www.f1laps.com/telemetry'>Please subscribe now.</a>"
             self.subscription_label.setStyleSheet("color: #B45309")
         self.subscription_label.setText(sub_text)
 
