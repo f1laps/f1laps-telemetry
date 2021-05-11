@@ -20,6 +20,7 @@ class Session:
         self.weather_ids = []
         self.f1laps_api_key = None
         self.telemetry_enabled = True
+        self.is_online_game = False
 
         ###################################################
         # Attributes set with participants packet once
@@ -110,7 +111,8 @@ class Session:
                         points          = self.points,
                         result_status   = self.result_status, 
                         lap_times       = self.get_f1laps_lap_times_list(),
-                        setup_data      = self.setup
+                        setup_data      = self.setup,
+                        is_online_game  = self.is_online_game
                     )
         if response.status_code == 201:
             log.info("Session (%s) successfully created in F1Laps" % self.map_udp_session_id_to_f1laps_token())
@@ -147,7 +149,8 @@ class Session:
                     points            = self.points,
                     result_status     = self.result_status, 
                     lap_times         = self.get_f1laps_lap_times_list(),
-                    setup_data        = self.setup
+                    setup_data        = self.setup,
+                    is_online_game    = self.is_online_game
                 )
         if response.status_code == 200:
             log.info("Session (%s) successfully updated in F1Laps" % self.map_udp_session_id_to_f1laps_token())

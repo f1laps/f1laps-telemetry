@@ -22,6 +22,8 @@ class SessionPacket:
         session = Session(session_uid=packet_session_uid)
         session.session_type = packet.sessionType
         session.track_id = packet.trackId
+        if packet.networkGame == 1:
+            session.is_online_game = True
         if packet.weather not in session.weather_ids:
             session.weather_ids.append(packet.weather)
         log.info("*************************************************")

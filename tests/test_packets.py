@@ -37,6 +37,7 @@ class SessionPacketTest(TestCase):
         self.assertEqual(new_session.track_id, 5)
         self.assertEqual(new_session.session_type, 10)
         self.assertEqual(new_session.weather_ids, [1])
+        self.assertEqual(new_session.is_online_game, False)
 
     def test_session_new_spectating(self):
         """ Assert that when a user is spectating, no session is created """
@@ -44,6 +45,19 @@ class SessionPacketTest(TestCase):
         packet.isSpectating = 1
         new_session = SessionPacket().process(packet, None)
         self.assertEqual(new_session, None)
+
+    def test_session_is_online_game(self):
+        """ Assert that an online game gets marked as such """
+        packet = get_packet_mock()
+        packet.header.sessionUID = "george2021"
+        packet.networkGame = 1
+        new_session = SessionPacket().process(packet, None)
+        self.assertEqual(new_session.is_online_game, True)
+        packet_2 = get_packet_mock()
+        packet_2.header.sessionUID = "george2022"
+        packet_2.networkGame = 0
+        new_session_2 = SessionPacket().process(packet_2, new_session)
+        self.assertEqual(new_session_2.is_online_game, False)
 
     def test_session_weather_changes(self):
         # add first value
