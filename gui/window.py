@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, \
                             QVBoxLayout, QFrame
-from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtSvg import QSvgWidget
 import logging
 import requests
 
+from gui.base_classes import F1QLabel
+from gui.workers import APIUserPreferenceWorker
 from lib.logger import log
 from lib.file_handler import ConfigFile, get_path_temporary
 from receiver.receiver import RaceReceiver
@@ -52,7 +54,7 @@ class StartButton(QPushButton):
         self.setStyleSheet("background-color: #4338CA;")
 
 
-class StatusLabel(QLabel):
+class StatusLabel(F1QLabel):
     """ Text below StartButton to display current receiver status """
     def __init__(self):
         super().__init__()
@@ -90,59 +92,18 @@ class TelemetrySession:
         return True
 
 
-class Worker(QObject):
-    user_settings = pyqtSignal(dict)
-    finished = pyqtSignal()
-
-    def __init__(self, api_key):
-        super().__init__()
-        self.api_key = api_key
-
-    def run(self):
-        """ Return if user is authenticated and supports telemetry 
-        (user_is_valid, user_telemetry_enabled)"""
-        user_settings_dict = {
-            "api_key_valid": False,
-            "telemetry_enabled": False
-        }
-        try:
-            headers = {'Authorization': 'Token %s' % self.api_key,}
-            response = requests.get(F1LAPS_USER_SETTINGS_ENDPOINT, headers=headers)
-            if response.status_code == 401:
-                log.info("API key %s is invalid" % self.api_key)
-                self.user_settings.emit(user_settings_dict)
-            elif response.status_code == 200:
-                telemetry_enabled = json.loads(response.content).get('telemetry_enabled')
-                log.info("Authenticated successfully. Telemetry is %s" % \
-                    ("enabled" if telemetry_enabled else "not enabled"))
-                user_settings_dict["api_key_valid"] = True
-                user_settings_dict["telemetry_enabled"] = telemetry_enabled
-                self.user_settings.emit(user_settings_dict)
-            else:
-                log.warning("Received invalid F1Laps status code %s" % response.status_code)
-                self.user_settings.emit(user_settings_dict)
-        except Exception as ex:
-            log.warning("Couldn't get user settings from F1Laps due to: %s" % ex)
-            self.user_settings.emit(user_settings_dict)
-        self.finished.emit()
-
-
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.api_key_field = None
         self.api_key = ConfigFile().get_api_key()
         self.app_version = config.VERSION
-
         # Draw the window UI
         self.init_ui()
-
         # Show the IP to the user
         self.set_ip()
-
         # Check if there's a new version
         self.check_version()
-
         # Track if we have an active receiver
         self.session = TelemetrySession()
 
@@ -152,26 +113,25 @@ class MainWindow(QWidget):
         logo_label.setFixedSize(100, 28)
 
         # 1) Enter API key section
-        api_key_field_label = QLabel()
+        api_key_field_label = F1QLabel()
         api_key_field_label.setText("1) Enter your API key")
         api_key_field_label.setObjectName("apiKeyFieldLabel")
-        api_key_help_text_label = QLabel()
+        api_key_help_text_label = F1QLabel()
         api_key_help_text_label.setText("You can find your API key on the <a href='https://www.f1laps.com/api/telemetry_apps'>F1Laps Telemetry page</a>")
         api_key_help_text_label.setObjectName("apiKeyHelpTextLabel")
-        api_key_help_text_label.setOpenExternalLinks(True)
         self.api_key_field = QLineEdit()
         self.api_key_field.setObjectName("apiKeyField")
         self.api_key_field.setText(self.api_key)
 
         # 2) Check IP section
-        ip_value_label = QLabel()
+        ip_value_label = F1QLabel()
         ip_value_label.setText("2) Check your F1 game Telemetry IP setting")
         ip_value_label.setObjectName("ipValueLabel")
-        ip_value_help_text_label = QLabel()
+        ip_value_help_text_label = F1QLabel()
         ip_value_help_text_label.setText("You can ignore this step if you're running this program on the same computer as the F1 game. Otherwise open Settings -> Telemetry in the F1 game and set the IP to this value.")
         ip_value_help_text_label.setObjectName("ipValueHelpTextLabel")
         ip_value_help_text_label.setWordWrap(True)
-        self.ip_value = QLabel()
+        self.ip_value = F1QLabel()
         self.ip_value.setObjectName("ipValueField")
         self.ip_value.setContentsMargins(0, 5, 0, 0)
 
@@ -180,15 +140,15 @@ class MainWindow(QWidget):
         self.start_button.clicked.connect(lambda: self.start_button_click())
         self.status_label = StatusLabel()
 
-        help_text_label = QLabel()
+        help_text_label = F1QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
         help_text_label.setOpenExternalLinks(True)
-        self.app_version_label = QLabel()
+        self.app_version_label = F1QLabel()
         self.app_version_label.setText("You're using app version %s." % self.app_version)
         self.app_version_label.setObjectName("appVersionLabel")
-        self.app_version_label.setWordWrap(True)
-        self.app_version_label.setOpenExternalLinks(True)
+        self.subscription_label = F1QLabel()
+        self.subscription_label.setObjectName("subscriptionLabel")
 
         # Draw layout
         self.layout = QVBoxLayout()
@@ -220,6 +180,7 @@ class MainWindow(QWidget):
         self.layout.addWidget(QHSeperationLine())
         self.layout.addWidget(help_text_label)
         self.layout.addWidget(self.app_version_label)
+        self.layout.addWidget(self.subscription_label)
         self.layout.setContentsMargins(30, 20, 30, 30)
         
         self.setLayout(self.layout)
@@ -270,17 +231,12 @@ class MainWindow(QWidget):
         api_key = self.get_api_key()
         # Validate API key via F1Laps API
         self.validate_api_key(api_key)
-        """if not api_key_valid:
-            log.info("Session not started because API key is invalid")
-            return False
-        
-        """
 
     def validate_api_key(self, api_key):
         # Create a QThread object
         self.thread = QThread()
         # Create the worker object
-        self.worker = Worker(api_key)
+        self.worker = APIUserPreferenceWorker(api_key)
         # Move worker to the thread
         self.worker.moveToThread(self.thread)
         # Connect signals and slots
