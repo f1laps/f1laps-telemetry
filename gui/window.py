@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, \
-                            QVBoxLayout, QFrame
+                            QVBoxLayout
 from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtSvg import QSvgWidget
 import requests
 import datetime
 
-from gui.base_classes import F1QLabel
+from gui.base_classes import F1QLabel, QHSeperationLine, QVSpacer
 from gui.workers import APIUserPreferenceWorker
 from lib.logger import log
 from lib.file_handler import ConfigFile, get_path_temporary
@@ -14,24 +14,6 @@ from receiver.helpers import get_local_ip
 import config
 
 F1LAPS_VERSION_ENDPOINT = "https://www.f1laps.com/api/f12020/telemetry/app/version/current/"
-
-
-class QHSeperationLine(QFrame):
-    """ Horizontal seperation line """
-    def __init__(self):
-        super().__init__()
-        self.setMinimumWidth(1)
-        self.setFixedHeight(20)
-        self.setFrameShape(QFrame.HLine)
-        self.setFrameShadow(QFrame.Sunken)
-
-
-class QVSpacer(QLabel):
-    """ Vertical empty space """
-    def __init__(self, height):
-        super().__init__()
-        self.setText(" ")
-        self.setFixedHeight(height)
 
 
 class StartButton(QPushButton):
@@ -141,11 +123,12 @@ class MainWindow(QWidget):
         self.ip_value.setObjectName("ipValueField")
         self.ip_value.setContentsMargins(0, 5, 0, 0)
 
-        # Start/Stop button
+        # Start/Stop button section
         self.start_button = StartButton()
         self.start_button.clicked.connect(lambda: self.start_button_click())
         self.status_label = StatusLabel()
 
+        # Support & notes section
         help_text_label = F1QLabel()
         help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
         help_text_label.setObjectName("helpTextLabel")
@@ -193,7 +176,6 @@ class MainWindow(QWidget):
         self.setLayout(self.layout)
         self.setFixedWidth(420)
         self.setWindowTitle("F1Laps Telemetry") 
-        log.info("Welcome to F1Laps Telemetry! You will see all logging in this text field.")
 
     def set_ip(self):
         self.ip_value.setText(get_local_ip())
