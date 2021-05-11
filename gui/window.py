@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, \
                             QVBoxLayout, QFrame
 from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtSvg import QSvgWidget
-import logging
 import requests
+import datetime
 
 from gui.base_classes import F1QLabel
 from gui.workers import APIUserPreferenceWorker
@@ -14,7 +14,6 @@ from receiver.helpers import get_local_ip
 import config
 
 F1LAPS_VERSION_ENDPOINT = "https://www.f1laps.com/api/f12020/telemetry/app/version/current/"
-F1LAPS_USER_SETTINGS_ENDPOINT = "https://www.f1laps.com/api/f12020/telemetry/app/user/settings/"
 
 
 class QHSeperationLine(QFrame):
@@ -81,6 +80,7 @@ class TelemetrySession:
     def start(self, api_key):
         receiver_thread = RaceReceiver(api_key)
         receiver_thread.start()
+        self.session = receiver_thread
         self.is_active = True
         log.info("Started receiver tread")
         return True
@@ -117,7 +117,7 @@ class MainWindow(QWidget):
         api_key_field_label.setText("1) Enter your API key")
         api_key_field_label.setObjectName("apiKeyFieldLabel")
         api_key_help_text_label = F1QLabel()
-        api_key_help_text_label.setText("You can find your API key on the <a href='https://www.f1laps.com/api/telemetry_apps'>F1Laps Telemetry page</a>")
+        api_key_help_text_label.setText("You can find your API key on the <a href='https://www.f1laps.com/telemetry'>F1Laps Telemetry page</a>")
         api_key_help_text_label.setObjectName("apiKeyHelpTextLabel")
         self.api_key_field = QLineEdit()
         self.api_key_field.setObjectName("apiKeyField")
@@ -204,7 +204,7 @@ class MainWindow(QWidget):
             user_version_int = int(self.app_version.replace(".", ""))
             current_version_int = int(version.replace(".", ""))
             if version > self.app_version:
-                self.app_version_label.setText("There's a new app version available (you're on v%s).<br><a href='https://www.f1laps.com/api/telemetry_apps'>Click here to download the new version!</a>" % self.app_version)
+                self.app_version_label.setText("There's a new app version available (you're on v%s).<br><a href='https://www.f1laps.com/telemetry'>Click here to download the new version!</a>" % self.app_version)
                 self.app_version_label.setStyleSheet("color: #B45309")
             elif version < self.app_version:
                 self.app_version_label.setText("This is pre-release version v%s (stable version is v%s)." % (self.app_version, version))
@@ -218,7 +218,7 @@ class MainWindow(QWidget):
             self.start_telemetry()
         else:
             log.info("Stopping session")
-            self.session = self.stop_telemetry()
+            self.stop_telemetry()
             self.start_button.setText("Start Telemetry")
             self.start_button.setStyleSheet("background-color: #4338CA;")
             self.status_label.setText("Status: stopped")
@@ -254,17 +254,33 @@ class MainWindow(QWidget):
     def set_user_settings(self, user_settings_dict):
         api_key_valid = user_settings_dict.get("api_key_valid")
         telemetry_enabled = user_settings_dict.get("telemetry_enabled")
+        subscription_plan = user_settings_dict.get("subscription_plan")
+        subscription_expires = user_settings_dict.get("subscription_expires")
         if api_key_valid:
             log.info("Starting Telemetry session")
+            self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.set_running()
             self.status_label.set_running()
             # Actually start receiver thread
-            self.session.start(api_key)
+            self.session.start(self.api_key)
         else:
             log.info("Not starting Telemetry session")
             self.start_button.reset()
             self.status_label.reset()
 
+    def display_subscription_information(self, plan, expires_at):
+        if not plan or not expires_at:
+            return
+        if isinstance(expires_at, str):
+            expires_at = datetime.datetime.strptime(expires_at, "%Y-%m-%dT%H:%M:%S%z")
+        sub_text = ""
+        subscription_is_active = bool(expires_at > datetime.datetime.now().replace(tzinfo=datetime.timezone.utc))
+        if subscription_is_active:
+            sub_text = "Subscribed to F1Laps %s plan" % plan
+        else:
+            sub_text = "Your F1Laps %s plan subscription has expired. <a href='https://www.f1laps.com/telemetry'>Please renew it now." % plan
+            self.subscription_label.setStyleSheet("color: #B45309")
+        self.subscription_label.setText(sub_text)
 
     def stop_telemetry(self):
         if not self.session.is_active:
