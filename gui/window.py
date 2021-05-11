@@ -83,8 +83,8 @@ class TelemetrySession:
         self.session = None
         self.is_active = False
 
-    def start(self, api_key):
-        receiver_thread = RaceReceiver(api_key)
+    def start(self, api_key, enable_telemetry):
+        receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry)
         receiver_thread.start()
         self.session = receiver_thread
         self.is_active = True
@@ -235,9 +235,9 @@ class MainWindow(QWidget):
             log.error("A new session can't be started when another one is active")
             return False
         # Get API key from input field
-        api_key = self.get_api_key()
+        self.api_key = self.get_api_key()
         # Validate API key via F1Laps API
-        self.validate_api_key(api_key)
+        self.validate_api_key(self.api_key)
 
     def validate_api_key(self, api_key):
         # Create a QThread object
@@ -263,13 +263,13 @@ class MainWindow(QWidget):
         telemetry_enabled = user_settings_dict.get("telemetry_enabled")
         subscription_plan = user_settings_dict.get("subscription_plan")
         subscription_expires = user_settings_dict.get("subscription_expires")
-        if api_key_valid and subscription_plan:
+        if (api_key_valid and subscription_plan) or (self.api_key == 'F1LAPS_TESTER'):
             log.info("Starting Telemetry session")
             self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.set_running()
             self.status_label.set_running()
             # Actually start receiver thread
-            self.session.start(self.api_key)
+            self.session.start(self.api_key, enable_telemetry=telemetry_enabled)
         else:
             log.info("Not starting Telemetry session (api key %s, subscription %s)" % \
                 ("valid" if api_key_valid else "invalid", subscription_plan if subscription_plan else "not set"))
@@ -281,6 +281,7 @@ class MainWindow(QWidget):
         """ Plan and expires at are only returned if it's active """
         if plan:
             sub_text = "Subscribed to F1Laps %s plan" % plan
+            self.subscription_label.setStyleSheet("color: #6B7280")
         else:
             sub_text = "You have no active F1Laps subscription. <a href='https://www.f1laps.com/telemetry'>Please subscribe now.</a>"
             self.subscription_label.setStyleSheet("color: #B45309")

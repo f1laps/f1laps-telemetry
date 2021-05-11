@@ -5,8 +5,13 @@
 First major stable version now that subscription plans have been rolled out.
 
 ### Added
-- The API key now gets validated before the session starts
+- The API key and F1Laps subscription now gets validated before the session starts
+
+### Changed
+- Telemetry data for single laps (time trial) gets sent as string
 - Telemetry data will only be saved if the user's subscription plan supports it
+- Q3 messions properly get mapped as Q3, not as generic "qualifying"
+
 
 ## 0.2.1 - 2021-04-14
 
@@ -17,6 +22,7 @@ Improving app performance by pushing telemetry data as string, not JSON
 
 ### Fixed
 - The link to upgrade the app when a new version is available now works
+
 
 ## 0.2.0 - 2021-04-05
 
@@ -29,6 +35,7 @@ This version supports car telemetry data sync.
 
 ### Fixed
 - Spectator mode won't break the app
+
 
 ## 0.1.5 - 2021-03-17
 

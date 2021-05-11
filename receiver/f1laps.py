@@ -23,7 +23,7 @@ class F1LapsAPI:
 
     def lap_create(self, track_id, team_id, conditions, game_mode, 
                    sector_1_time, sector_2_time, sector_3_time, setup_data, 
-                   is_valid, telemetry_data):
+                   is_valid, telemetry_data_string):
         """ Create a Lap in F1Laps """
         endpoint = self.base_url + "f12020/laps/"
         method   = "POST"
@@ -37,7 +37,7 @@ class F1LapsAPI:
             'sector_3_time_ms': sector_3_time,
             'setup': setup_data,
             'is_valid': is_valid,
-            'telemetry_data': telemetry_data
+            'telemetry_data_string': telemetry_data_string
         }
         return self.call_api(method, endpoint, params)
 
