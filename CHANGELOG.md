@@ -6,6 +6,7 @@ First major stable version now that subscription plans have been rolled out.
 
 ### Added
 - The API key and F1Laps subscription now gets validated before the session starts
+- Multiplayer sessions now get flagged as such and mapped to "Multiplayer" game mode in F1Laps
 
 ### Changed
 - Telemetry data for single laps (time trial) gets sent as string
