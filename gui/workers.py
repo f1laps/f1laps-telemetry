@@ -24,10 +24,11 @@ class APIUserPreferenceWorker(QObject):
             "subscription_expires": None
         }
         try:
+            log.info("Validating API key...")
             headers = {'Authorization': 'Token %s' % self.api_key,}
             response = requests.get(F1LAPS_USER_SETTINGS_ENDPOINT, headers=headers)
             if response.status_code == 401:
-                log.info("API key %s is invalid" % self.api_key)
+                log.warning("API key %s is invalid" % self.api_key)
                 self.user_settings.emit(user_settings_dict)
             elif response.status_code == 200:
                 json_response = json.loads(response.content)
@@ -48,3 +49,4 @@ class APIUserPreferenceWorker(QObject):
             log.warning("Couldn't get user settings from F1Laps due to: %s" % ex)
             self.user_settings.emit(user_settings_dict)
         self.finished.emit()
+        

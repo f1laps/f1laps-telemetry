@@ -70,13 +70,13 @@ class TelemetrySession:
         receiver_thread.start()
         self.session = receiver_thread
         self.is_active = True
-        log.info("Started receiver tread")
+        log.info("Started telemetry session")
         return True
 
     def kill(self):
         self.session.kill()
         self.is_active = False
-        log.info("Stopped receiver tread")
+        log.info("Stopped telemetry session")
         return True
 
 
@@ -206,7 +206,7 @@ class MainWindow(QWidget):
             log.info("Starting new session")
             self.start_telemetry()
         else:
-            log.info("Stopping session")
+            log.info("Stopping session...")
             self.stop_telemetry()
             self.start_button.setText("Start Telemetry")
             self.start_button.setStyleSheet("background-color: #4338CA;")
@@ -246,7 +246,7 @@ class MainWindow(QWidget):
         subscription_plan = user_settings_dict.get("subscription_plan")
         subscription_expires = user_settings_dict.get("subscription_expires")
         if (api_key_valid and subscription_plan) or (self.api_key == 'F1LAPS_TESTER'):
-            log.info("Starting Telemetry session")
+            log.info("Valid API key and subscription. Starting session...")
             self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.set_running()
             self.status_label.set_running()
@@ -274,5 +274,4 @@ class MainWindow(QWidget):
             log.error("Session can't be stopped as there is no active session")
             return None
         self.session.kill()
-        log.debug("Session has been stopped")
         return None
