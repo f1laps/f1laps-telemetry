@@ -1,8 +1,8 @@
 # Change Log
 
-## 1.0.0 - 2021-05-XX
+## 1.0.0 - 2021-05-13
 
-First major stable version now that subscription plans have been rolled out.
+First major stable version.
 
 ### Added
 - The API key and F1Laps subscription now gets validated before the session starts
@@ -11,7 +11,7 @@ First major stable version now that subscription plans have been rolled out.
 ### Changed
 - Telemetry data for single laps (time trial) gets sent as string
 - Telemetry data will only be saved if the user's subscription plan supports it
-- Q3 messions properly get mapped as Q3, not as generic "qualifying"
+- Q3 sessions properly get mapped as Q3, not as generic "qualifying"
 
 
 ## 0.2.1 - 2021-04-14
