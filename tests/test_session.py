@@ -22,6 +22,8 @@ class SessionBaseTests(TestCase):
         session.session_type = 12
         self.assertEqual(session.map_udp_session_id_to_f1laps_token(), "time_trial")
         self.assertEqual(session.session_type_supported_by_f1laps_as_session(), False)
+        session.session_type = 7
+        self.assertEqual(session.map_udp_session_id_to_f1laps_token(), "qualifying_3")
 
     def test_map_weather_ids_to_f1laps_token(self):
         session = Session(session_uid="vettel2021")
@@ -65,6 +67,14 @@ class SessionBaseTests(TestCase):
         session.track_id = 11
         self.assertEqual(session.get_track_name(), "Monza")
 
+    def test_get_lap_telemetry_data(self):
+        session = Session(session_uid="vettel2021")
+        self.assertEqual(session.get_lap_telemetry_data(1), None)
+        session.telemetry = MagicMock()
+        session.telemetry.get_telemetry_api_dict.return_value = {"test": "dict"}
+        self.assertEqual(session.get_lap_telemetry_data(1), '{"test": "dict"}')
+        session.telemetry_enabled = False
+        self.assertEqual(session.get_lap_telemetry_data(1), None)
 
 
 class SessionAPITests(TestCase):

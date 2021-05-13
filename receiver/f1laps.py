@@ -23,7 +23,7 @@ class F1LapsAPI:
 
     def lap_create(self, track_id, team_id, conditions, game_mode, 
                    sector_1_time, sector_2_time, sector_3_time, setup_data, 
-                   is_valid, telemetry_data):
+                   is_valid, telemetry_data_string):
         """ Create a Lap in F1Laps """
         endpoint = self.base_url + "f12020/laps/"
         method   = "POST"
@@ -37,12 +37,13 @@ class F1LapsAPI:
             'sector_3_time_ms': sector_3_time,
             'setup': setup_data,
             'is_valid': is_valid,
-            'telemetry_data': telemetry_data
+            'telemetry_data_string': telemetry_data_string
         }
         return self.call_api(method, endpoint, params)
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
-                       finish_position, points, result_status, lap_times, setup_data):
+                       finish_position, points, result_status, lap_times, setup_data,
+                       is_online_game):
         """ Create a Session in F1Laps """
         endpoint = self.base_url + "f12020/grandprixs/sessions/"
         method   = "POST"
@@ -56,13 +57,14 @@ class F1LapsAPI:
             'result_status': result_status,
             'udp_session_uid': session_uid,
             'lap_times': lap_times,
-            'setup': setup_data
+            'setup': setup_data,
+            'is_online_game': is_online_game
         }
         return self.call_api(method, endpoint, params)
 
     def session_update(self, f1laps_session_id, track_id, team_id, session_uid, conditions, 
                        session_type, finish_position, points, result_status, lap_times, 
-                       setup_data):
+                       setup_data, is_online_game):
         """ Update a Session in F1Laps """
         endpoint = "%sf12020/grandprixs/sessions/%s/" % (self.base_url, f1laps_session_id)
         method   = "PUT"
@@ -76,7 +78,8 @@ class F1LapsAPI:
             'result_status': result_status,
             'udp_session_uid': session_uid,
             'lap_times': lap_times,
-            'setup': setup_data
+            'setup': setup_data,
+            'is_online_game': is_online_game
         }
         return self.call_api(method, endpoint, params)
 

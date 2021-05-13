@@ -18,7 +18,7 @@ class ActiveSocket:
 
 class RaceReceiver(threading.Thread):
 
-    def __init__(self, f1laps_api_key, host_ip=None, host_port=None, run_as_daemon=True):
+    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True):
         """
         Init the receiver with all attributes needed to 
         push data to F1Laps
@@ -49,8 +49,9 @@ class RaceReceiver(threading.Thread):
         # local session session
         self.session = None
 
-        # f1laps api key
+        # f1laps api key and settings
         self.f1laps_api_key = f1laps_api_key
+        self.telemetry_enabled = enable_telemetry
  
         log.info("Telemetry receiver started & ready for race data")
 
@@ -104,6 +105,7 @@ class RaceReceiver(threading.Thread):
                 self.session = SessionPacket().process(packet, self.session)
                 if self.session:
                     self.session.f1laps_api_key = self.f1laps_api_key
+                    self.session.telemetry_enabled = self.telemetry_enabled
 
             # dont do anything else if there isnt a session set
             if self.session:
