@@ -1,4 +1,4 @@
-from receiver.session import Session
+from receiver.f12020.session import Session
 from lib.logger import log
 
 

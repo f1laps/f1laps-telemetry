@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from receiver.f1laps import F1LapsAPI
+from receiver.f12020.api import F1LapsAPI
 import config
 
 

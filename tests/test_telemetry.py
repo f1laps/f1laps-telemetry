@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from receiver.telemetry import Telemetry, KEY_INDEX_MAP
+from receiver.f12020.telemetry import Telemetry, KEY_INDEX_MAP
 
 
 class TelemetryTests(TestCase):

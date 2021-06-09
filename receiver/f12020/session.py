@@ -1,8 +1,8 @@
 import json
 import f1_2020_telemetry.types
 
-from receiver.f1laps import F1LapsAPI
-from receiver.telemetry import Telemetry
+from receiver.f12020.api import F1LapsAPI
+from receiver.f12020.telemetry import Telemetry
 from lib.logger import log
 
 

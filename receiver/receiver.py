@@ -3,10 +3,11 @@ import socket
 import f1_2020_telemetry.packets
 
 from lib.logger import log
-from receiver.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
+from receiver.f12020.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
                              FinalClassificationPacket, LapPacket, CarStatusPacket, \
                              TelemetryPacket
 from receiver.helpers import get_local_ip
+from receiver.game_version import parse_game_version_from_udp_packet
 
 
 DEFAULT_PORT = 20777
