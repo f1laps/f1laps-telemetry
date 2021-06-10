@@ -10,7 +10,7 @@ class F12021Processor:
         self.f1laps_api_key = f1laps_api_key
         self.telemetry_enabled = enable_telemetry
         log.info("Instantiated F1 2021 game processor")
-        super(F12020Processor, self).__init__()
+        super(F12021Processor, self).__init__()
 
     def process(unpacked_packet):
         packet = f1_2020_telemetry.packets.unpack_udp_packet(unpacked_packet)

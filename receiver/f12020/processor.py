@@ -2,8 +2,8 @@ import f1_2020_telemetry.packets
 from lib.logger import log
 
 from receiver.f12020.packets import SessionPacket, ParticipantsPacket, CarSetupPacket, \
-                             FinalClassificationPacket, LapPacket, CarStatusPacket, \
-                             TelemetryPacket
+                                    FinalClassificationPacket, LapPacket, CarStatusPacket, \
+                                    TelemetryPacket
 
 class F12020Processor:
     session = None
