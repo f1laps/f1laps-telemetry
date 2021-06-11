@@ -1,17 +1,24 @@
 import ctypes
 
+from lib.logger import log
 from receiver.game_version import CrossGamePacketHeader
 from .session import PacketSessionData
+from .lap import PacketLapData
+from .participants import PacketParticipantsData
+from .setup import PacketCarSetupData
+from .telemetry import PacketCarTelemetryData
+from .final_classification import PacketFinalClassificationData
+from .session_history import PacketSessionHistoryData
 
 
 HeaderFieldsToPacketType = {
-    1: PacketSessionData,
-    #2: Lap,
-    #4: Participants,
-    #5: Setup,
-    #6: Telemetry,
-    #8: Final Result,
-    #11: Session History
+     1: PacketSessionData,
+     2: PacketLapData,
+     4: PacketParticipantsData,
+     5: PacketCarSetupData,
+     6: PacketCarTelemetryData,
+     8: PacketFinalClassificationData,
+    11: PacketSessionHistoryData
 }
 
 
@@ -38,5 +45,9 @@ def unpack_udp_packet(packet):
     Returns the mapped body packet
     """
     header = PacketHeader.from_buffer_copy(packet)
-    packet_type = HeaderFieldsToPacketType[header.packetId]
-    return packet_type.from_buffer_copy(packet)
+    packet_type = HeaderFieldsToPacketType.get(header.packetId)
+    if packet_type:
+        return packet_type.from_buffer_copy(packet)
+    else:
+        log.debug("Received unknown packet_type %s" % packet_type)
+        return None

@@ -13,7 +13,7 @@ class F12020Processor:
     def __init__(self, f1laps_api_key, enable_telemetry):
         self.f1laps_api_key = f1laps_api_key
         self.telemetry_enabled = enable_telemetry
-        log.info("Instantiated F1 2020 game processor")
+        log.info("Started F1 2020 game processor")
         super(F12020Processor, self).__init__()
 
     def process(unpacked_packet):
