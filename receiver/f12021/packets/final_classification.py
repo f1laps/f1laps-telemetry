@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class FinalClassificationData(PacketBodyBase):
+class FinalClassificationData(PacketBase):
     _fields_ = [
         ("position", ctypes.c_uint8),
         ("numLaps", ctypes.c_uint8),
@@ -19,7 +19,7 @@ class FinalClassificationData(PacketBodyBase):
     ]
 
 
-class PacketFinalClassificationData(PacketBodyBase):
+class PacketFinalClassificationData(PacketBase):
     _fields_ = [
         ("header", PacketHeader),  # Header
         ("numCars", ctypes.c_uint8),  # Number of cars in the final classification

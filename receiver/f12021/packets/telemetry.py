@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class CarTelemetryData(PacketBodyBase):
+class CarTelemetryData(PacketBase):
     _fields_ = [
         ("speed", ctypes.c_uint16),
         ("throttle", ctypes.c_float),
@@ -22,7 +22,7 @@ class CarTelemetryData(PacketBodyBase):
     ]
 
 
-class PacketCarTelemetryData(PacketBodyBase):
+class PacketCarTelemetryData(PacketBase):
     """
     This packet details telemetry for all the cars in the race.
     It details various values that would be recorded on the car such as speed, throttle application, DRS etc.

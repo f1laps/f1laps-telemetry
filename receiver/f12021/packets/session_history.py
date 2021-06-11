@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class LapHistoryData(PacketBodyBase):
+class LapHistoryData(PacketBase):
     _fields_ = [
         ("lapTimeInMS", ctypes.c_uint16),
         ("sector1TimeInMS", ctypes.c_uint16),
@@ -10,7 +10,7 @@ class LapHistoryData(PacketBodyBase):
     ]
 
 
-class TyreStintsHistoryData(PacketBodyBase):
+class TyreStintsHistoryData(PacketBase):
     _fields_ = [
         ("endLap", ctypes.c_uint8),
         ("tyreActualCompound", ctypes.c_uint8), # Actual tyres used by this driver
@@ -18,7 +18,7 @@ class TyreStintsHistoryData(PacketBodyBase):
     ]
 
 
-class PacketSessionHistoryData(PacketBodyBase):
+class PacketSessionHistoryData(PacketBase):
     """
     This packet contains lap times and tyre usage for the session. 
     This packet works slightly differently to other packets. 

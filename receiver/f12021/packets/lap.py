@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class LapData(PacketBodyBase):
+class LapData(PacketBase):
 
     _fields_ = [
         ("lastLapTime", ctypes.c_float), # in sec
@@ -31,7 +31,7 @@ class LapData(PacketBodyBase):
     ]
 
 
-class PacketLapData(PacketBodyBase):
+class PacketLapData(PacketBase):
     """
     The lap data packet gives details of all the cars in the session.
     Frequency: Rate as specified in menus

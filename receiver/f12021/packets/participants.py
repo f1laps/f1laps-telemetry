@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class ParticipantData(PacketBodyBase):
+class ParticipantData(PacketBase):
     _fields_ = [
         ("aiControlled", ctypes.c_uint8),
         ("driverId", ctypes.c_uint8),
@@ -14,7 +14,7 @@ class ParticipantData(PacketBodyBase):
     ]
 
 
-class PacketParticipantsData(PacketBodyBase):
+class PacketParticipantsData(PacketBase):
     """
     This is a list of participants in the race.
     Frequency: Every 5 seconds

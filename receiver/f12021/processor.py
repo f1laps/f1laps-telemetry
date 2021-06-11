@@ -14,5 +14,7 @@ class F12021Processor:
 
     def process(unpacked_packet):
         packet = unpack_udp_packet(unpacked_packet)
+        log.info("---------------------------------------------------")
         log.info("Received packet with ID %s" % packet.header.packetId)
+        log.info(repr(packet))
         

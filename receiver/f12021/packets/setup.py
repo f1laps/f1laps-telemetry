@@ -1,7 +1,7 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class CarSetupData(PacketBodyBase):
+class CarSetupData(PacketBase):
     _fields_ = [
         ("frontWing", ctypes.c_uint8),
         ("rearWing", ctypes.c_uint8),
@@ -28,7 +28,7 @@ class CarSetupData(PacketBodyBase):
     ]
 
 
-class PacketCarSetupData(PacketBodyBase):
+class PacketCarSetupData(PacketBase):
     """
     This packet details the car setups for each vehicle in the session.
     Note that in multiplayer games, other player cars will appear as blank, you will only be able to see your car setup and AI cars.

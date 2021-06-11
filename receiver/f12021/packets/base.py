@@ -22,11 +22,29 @@ HeaderFieldsToPacketType = {
 }
 
 
-class PacketBodyBase(ctypes.LittleEndianStructure):
-    """
-    Not sure if we need this, but good to have a customizable base class
-    """
-    pass
+class PacketBase(ctypes.LittleEndianStructure):
+    def process(self):
+        log.info(repr(self))
+
+    def __repr__(self):
+        """ Custom repr method """
+        fstr_list = []
+        for field in self._fields_:
+            fname = field[0]
+            value = getattr(self, fname)
+            if isinstance(
+                value, (ctypes.LittleEndianStructure, int, float, bytes)
+            ):
+                vstr = repr(value)
+            elif isinstance(value, ctypes.Array):
+                vstr = "[{}]".format(", ".join(repr(e) for e in value))
+            else:
+                raise RuntimeError(
+                    "Bad value {!r} of type {!r}".format(value, type(value))
+                )
+            fstr = f"{fname}={vstr}"
+            fstr_list.append(fstr)
+        return "{}({})".format(self.__class__.__name__, ", ".join(fstr_list))
 
 
 class PacketHeader(CrossGamePacketHeader):

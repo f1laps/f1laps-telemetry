@@ -1,11 +1,11 @@
-from .base import PacketBodyBase, PacketHeader
+from .base import PacketBase, PacketHeader
 
 
-class MarshalZone(PacketBodyBase):
+class MarshalZone(PacketBase):
     _fields_ = [("zoneStart", ctypes.c_float), ("zoneFlag", ctypes.c_int8)]
 
 
-class WeatherForecastSample(PacketBodyBase):
+class WeatherForecastSample(PacketBase):
     _fields_ = [
         ("sessionType", ctypes.c_uint8),
         ("timeOffset", ctypes.c_uint8),
@@ -18,7 +18,7 @@ class WeatherForecastSample(PacketBodyBase):
     ]
 
 
-class PacketSessionData(PacketBodyBase):
+class PacketSessionData(PacketBase):
     """
     Frequency: 2 per second
     Size: 623 bytes
