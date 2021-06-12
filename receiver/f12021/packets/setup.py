@@ -38,3 +38,31 @@ class PacketCarSetupData(PacketBase):
     """
 
     _fields_ = [("header", PacketHeader), ("carSetups", CarSetupData * 22)]
+
+    def process(self, session):
+        return self.update_setup(session)
+
+    def update_setup(self, session):
+        setup_data = self.carSetups[self.header.playerCarIndex]
+        session.setup['front_wing']                   = setup_data.frontWing
+        session.setup['rear_wing']                    = setup_data.rearWing
+        session.setup['diff_adjustment_on_throttle']  = setup_data.onThrottle
+        session.setup['diff_adjustment_off_throttle'] = setup_data.offThrottle
+        session.setup['front_camber']                 = setup_data.frontCamber
+        session.setup['rear_camber']                  = setup_data.rearCamber
+        session.setup['front_toe']                    = setup_data.frontToe
+        session.setup['rear_toe']                     = setup_data.rearToe
+        session.setup['front_suspension']             = setup_data.frontSuspension
+        session.setup['rear_suspension']              = setup_data.rearSuspension
+        session.setup['front_antiroll_bar']           = setup_data.frontAntiRollBar
+        session.setup['rear_antiroll_bar']            = setup_data.rearAntiRollBar
+        session.setup['front_ride_height']            = setup_data.frontSuspensionHeight
+        session.setup['rear_ride_height']             = setup_data.rearSuspensionHeight
+        session.setup['brake_pressure']               = setup_data.brakePressure
+        session.setup['front_brake_bias']             = setup_data.brakeBias
+        session.setup['front_right_tyre_pressure']    = setup_data.frontRightTyrePressure
+        session.setup['front_left_tyre_pressure']     = setup_data.frontLeftTyrePressure
+        session.setup['rear_right_tyre_pressure']     = setup_data.rearRightTyrePressure
+        session.setup['rear_left_tyre_pressure']      = setup_data.rearLeftTyrePressure
+        return session
+        

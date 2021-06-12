@@ -26,3 +26,13 @@ class PacketParticipantsData(PacketBase):
         ("numActiveCars", ctypes.c_uint8),
         ("participants", ParticipantData * 22),
     ]
+
+    def process(self, session):
+        return self.update_team_id(session)
+
+    def update_team_id(self, session):
+        if session.team_id:
+            # Don't update sessions with existing team_id
+            return False
+        session.team_id = self.participants[self.header.playerCarIndex].teamId
+        return session

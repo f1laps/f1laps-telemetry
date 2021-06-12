@@ -23,7 +23,7 @@ HeaderFieldsToPacketType = {
 
 
 class PacketBase(ctypes.LittleEndianStructure):
-    def process(self):
+    def process(self, session):
         pass
 
     def __repr__(self):
