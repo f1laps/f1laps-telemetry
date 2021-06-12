@@ -1,13 +1,16 @@
 import ctypes
 
+from lib.logger import log
 from receiver.game_version import CrossGamePacketHeader
 
 
 class PacketBase(ctypes.LittleEndianStructure):
     _pack_ = 1
+    creates_session_object = False
 
     def process(self, session):
-        pass
+        log.debug("Skipping incoming %s because it doesn't have a '.process()' method" % self.__class__.__name__)
+        return session
 
     def __repr__(self):
         """ Custom repr method """

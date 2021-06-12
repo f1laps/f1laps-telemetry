@@ -1,6 +1,7 @@
 import json
 
 from lib.logger import log
+from .types import SessionType, Track
 
 
 class F12021Session:
@@ -8,55 +9,49 @@ class F12021Session:
     Handles all session-specific variables and logic
     """
     def __init__(self, session_uid):
-        ###################################################
-        # Attributes set on Session start
-        ###################################################
-        self.session_udp_uid = session_uid
-        self.track_id = None
-        self.session_type = None
-        self.weather_ids = []
+        # Meta
         self.f1laps_api_key = None
         self.telemetry_enabled = True
-        self.is_online_game = False
-
-        ###################################################
-        # Attributes set with participants packet once
-        ###################################################
+        
+        # Session
+        self.session_udp_uid = session_uid
+        self.session_type = None
+        self.track_id = None
         self.team_id = None
+        self.is_online_game = False
+        self.ai_difficulty = None
+        self.weather_ids = []
 
-        ###################################################
-        # Attributes set with each lap
-        ###################################################
+        # Laps
         self.lap_list = {}
         self.lap_number_current = None
 
-        ###################################################
-        # Attributes set with the setup package
-        ###################################################
+        # Setup 
         self.setup = {}
 
-        ###################################################
-        # Attributes set with the telemetry package
-        ###################################################
+        # Telemetry
         self.telemetry = None#Telemetry()
 
-        ###################################################
-        # Attributes set with the final classification
-        ###################################################
+        # Final classification
         self.finish_position = None
         self.result_status = None
         self.points = None
 
-        ###################################################
-        # Attributes set via F1Laps API
-        ###################################################
+        # Data we get from F1Laps
         self.f1_laps_session_id = None
 
+    def start(self):
+        log.info("*************************************************")
+        log.info("New session started: %s %s (ID %s)" % (self.get_track_name(), 
+                                                         self.get_session_type(),
+                                                         self.session_udp_uid))
+        log.info("*************************************************")
+
     def get_track_name(self):
-        raise Exception("Not implemented yet")
+        return Track.get(self.track_id)
 
     def get_session_type(self):
-        raise Exception("Not implemented yet")
+        return SessionType.get(self.session_type)
 
     def get_lap_telemetry_data(self, lap_number):
         if self.telemetry_enabled:

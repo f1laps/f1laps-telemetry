@@ -1,5 +1,6 @@
 import ctypes
 
+from lib.logger import log
 from receiver.f12021.session import F12021Session
 from .base import PacketBase, PacketHeader
 
@@ -22,6 +23,7 @@ class WeatherForecastSample(PacketBase):
 
 
 class PacketSessionData(PacketBase):
+    creates_session_object = True
     _fields_ = [
         ("header", PacketHeader),
         ("weather", ctypes.c_uint8),
@@ -76,26 +78,30 @@ class PacketSessionData(PacketBase):
             return self.update_session(session)
 
     def is_active_session(self, session):
-        return bool(session and session.session_udp_uid != self.header.sessionUID)
+        session_exists = bool(session)
+        if not session_exists:
+            log.info("Starting new session because it doesnt exist")
+            return False
+        udp_id_changed = bool(session.session_udp_uid != self.header.sessionUID)
+        if udp_id_changed:
+            log.info("Starting new session because UDP changed")
+            return False
+        return True
 
-    def create_session(self, session):
-        packet_session_uid = self.header.sessionUID
-        session = F12021Session(session_uid=packet_session_uid)
+    def create_session(self):
+        session = F12021Session(session_uid=self.header.sessionUID)
+        session.session_udp_uid = self.header.sessionUID
         session.session_type = self.sessionType
         session.track_id = self.trackId
+        session.ai_difficulty = self.aiDifficulty
         if self.networkGame == 1:
             session.is_online_game = True
         if self.weather not in session.weather_ids:
             session.weather_ids.append(self.weather)
-        log.info("*************************************************")
-        log.info("New session started: %s %s (ID %s)" % (session.get_track_name(), 
-                                                         session.get_session_type(),
-                                                         packet_session_uid))
-        log.info("*************************************************")
+        session.start()
         return session
 
     def update_session(self, session):
-        packet_session_uid = self.header.sessionUID
         if self.weather not in session.weather_ids:
             session.weather_ids.append(self.weather)
         return session

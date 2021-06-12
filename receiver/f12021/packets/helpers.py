@@ -28,7 +28,7 @@ def unpack_udp_packet(packet):
     """
     header = PacketHeader.from_buffer_copy(packet)
     packet_type = HeaderFieldsToPacketType.get(header.packetId)
-    log.info("Found packet type %s ID %s" % (packet_type, header.packetId))
+    log.debug("Found packet type %s ID %s" % (packet_type, header.packetId))
     if packet_type:
         return packet_type.from_buffer_copy(packet)
     else:

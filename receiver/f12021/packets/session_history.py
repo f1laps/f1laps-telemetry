@@ -1,5 +1,6 @@
 import ctypes
 
+from lib.logger import log
 from .base import PacketBase, PacketHeader
 
 
@@ -44,3 +45,29 @@ class PacketSessionHistoryData(PacketBase):
         ("lapHistoryData", LapHistoryData * 22),
         ("tyreStintsHistoryData", TyreStintsHistoryData * 22),
     ]
+
+    def process(self, session):
+        if not self.is_current_player():
+            return session
+        session = self.update_session(session)
+        return session
+
+    def update_laps(self, session):
+        num_laps = self.numLaps
+        if not num_laps:
+            return session
+        # loop through existing laps and add them to local dict
+        # only if > 1 because 1 is always the current, incomplete lap
+        if num_laps > 1:
+            lap_dict = session.lap_list
+            for lap_number in range(1, num_laps):
+                if lap_number not in lap_dict:
+                    lap_dict[lap_number] = {}
+                    lap_dict[lap_number]["sector_1_time_ms"]  = self.LapHistoryData[lap_number].sector1TimeInMS
+                    lap_dict[lap_number]["sector_2_time_ms"]  = self.LapHistoryData[lap_number].sector2TimeInMS
+                    lap_dict[lap_number]["sector_3_time_ms"]  = self.LapHistoryData[lap_number].sector3TimeInMS
+                    lap_dict[lap_number]["lap_number"]        = lap_number
+                    log.info("Updated lap dict to %s" % lap_dict)
+
+    def is_current_player(self):
+        return self.carIdx == self.header.playerCarIndex

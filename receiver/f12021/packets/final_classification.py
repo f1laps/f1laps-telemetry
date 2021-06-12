@@ -27,3 +27,15 @@ class PacketFinalClassificationData(PacketBase):
         ("numCars", ctypes.c_uint8),  # Number of cars in the final classification
         ("classificationData", FinalClassificationData * 22),
     ]
+
+    def process(self, session):
+        session = self.set_results(session)
+        self.process_in_f1laps(session)
+        return session
+
+    def set_results(self, session):
+        classification_data     = self.classificationData[self.header.playerCarIndex]
+        session.finish_position = classification_data.position
+        session.result_status   = classification_data.resultStatus
+        session.points          = classification_data.points
+        return session
