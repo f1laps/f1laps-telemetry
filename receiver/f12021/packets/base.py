@@ -24,7 +24,7 @@ HeaderFieldsToPacketType = {
 
 class PacketBase(ctypes.LittleEndianStructure):
     def process(self):
-        log.info(repr(self))
+        pass
 
     def __repr__(self):
         """ Custom repr method """
