@@ -2,6 +2,7 @@ import ctypes
 
 
 class CrossGamePacketHeader(ctypes.LittleEndianStructure):
+    _pack_ = 1
     _fields_ = [
             ("packetFormat", ctypes.c_uint16),
             ("gameMajorVersion", ctypes.c_uint8),
@@ -17,8 +18,8 @@ class CrossGamePacketHeader(ctypes.LittleEndianStructure):
 
 
 UDP_PACKET_FORMAT_TO_GAME_VERSION_MAP = {
-    2020: "f1_2020",
-    2021: "f1_2021"
+    2020: "f12020",
+    2021: "f12021"
 }
 
 

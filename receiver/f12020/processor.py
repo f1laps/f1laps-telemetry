@@ -16,7 +16,7 @@ class F12020Processor:
         log.info("Started F1 2020 game processor")
         super(F12020Processor, self).__init__()
 
-    def process(unpacked_packet):
+    def process(self, unpacked_packet):
         packet = f1_2020_telemetry.packets.unpack_udp_packet(unpacked_packet)
 
         # process session packets first

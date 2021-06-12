@@ -1,3 +1,5 @@
+import ctypes
+
 from .base import PacketBase, PacketHeader
 
 
@@ -40,5 +42,5 @@ class PacketSessionHistoryData(PacketBase):
         ("bestSector2LapNum", ctypes.c_uint8),  # Lap the best Sector 2 time was achieved on
         ("bestSector3LapNum", ctypes.c_uint8),  # Lap the best Sector 3 time was achieved on
         ("lapHistoryData", LapHistoryData * 22),
-        ("tyreStintsHistoryData", TyreStintHistoryData * 22),
+        ("tyreStintsHistoryData", TyreStintsHistoryData * 22),
     ]

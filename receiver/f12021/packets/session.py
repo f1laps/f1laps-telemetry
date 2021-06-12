@@ -1,3 +1,5 @@
+import ctypes
+
 from receiver.f12021.session import F12021Session
 from .base import PacketBase, PacketHeader
 
@@ -20,11 +22,6 @@ class WeatherForecastSample(PacketBase):
 
 
 class PacketSessionData(PacketBase):
-    """
-    Frequency: 2 per second
-    Size: 623 bytes
-    Version: 1
-    """
     _fields_ = [
         ("header", PacketHeader),
         ("weather", ctypes.c_uint8),
@@ -33,11 +30,9 @@ class PacketSessionData(PacketBase):
         ("totalLaps", ctypes.c_uint8),
         ("trackLength", ctypes.c_uint16),
         ("sessionType", ctypes.c_uint8), 
-        """
-        0 = unknown, 1 = P1, 2 = P2, 3 = P3, 4 = Short P
-        5 = Q1, 6 = Q2, 7 = Q3, 8 = Short Q, 9 = OSQ
-        10 = R, 11 = R2, 12 = R3, 13 = Time Trial
-        """ 
+        # 0 = unknown, 1 = P1, 2 = P2, 3 = P3, 4 = Short P
+        # 5 = Q1, 6 = Q2, 7 = Q3, 8 = Short Q, 9 = OSQ
+        # 10 = R, 11 = R2, 12 = R3, 13 = Time Trial
         ("trackId", ctypes.c_int8),
         ("formula", ctypes.c_uint8),
         ("sessionTimeLeft", ctypes.c_uint16),

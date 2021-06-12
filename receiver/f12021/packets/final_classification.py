@@ -1,3 +1,5 @@
+import ctypes
+
 from .base import PacketBase, PacketHeader
 
 

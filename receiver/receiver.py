@@ -3,6 +3,7 @@ import socket
 
 from lib.logger import log
 from receiver.f12020.processor import F12020Processor
+from receiver.f12021.processor import F12021Processor
 from receiver.helpers import get_local_ip
 from receiver.game_version import parse_game_version_from_udp_packet
 
@@ -36,10 +37,10 @@ class RaceReceiver(threading.Thread):
         self.host_ip   = host_ip or get_local_ip()
         self.host_port = host_port or int(DEFAULT_PORT)
 
-        log.debug("*************************************************")
-        log.debug("Set your F1 game telemetry IP to:   %s" % self.host_ip)
-        log.debug("Set your F1 game telemetry port to: %s" % self.host_port)
-        log.debug("*************************************************")
+        log.info("*************************************************")
+        log.info("Set your F1 game telemetry IP to:   %s" % self.host_ip)
+        log.info("Set your F1 game telemetry port to: %s" % self.host_port)
+        log.info("*************************************************")
 
         # Get previously opened socket, or create new one
         self.udp_socket = self.get_socket()
@@ -89,7 +90,7 @@ class RaceReceiver(threading.Thread):
         """
         # Starting an endless loop to continuously listen for UDP packets
         # until user aborts or process is terminated
-        log.debug("Receiver started running")
+        log.info("Receiver started running")
         
         while not self.kill_event.is_set():
             incoming_udp_packet = self.udp_socket.recv(2048)

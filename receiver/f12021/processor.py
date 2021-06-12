@@ -1,5 +1,5 @@
 from lib.logger import log
-from .packets.base import unpack_udp_packet
+from .packets.helpers import unpack_udp_packet
 
 class F12021Processor:
     session = None
@@ -12,9 +12,8 @@ class F12021Processor:
         log.info("Started F1 2021 game processor")
         super(F12021Processor, self).__init__()
 
-    def process(unpacked_packet):
+    def process(self, unpacked_packet):
         packet = unpack_udp_packet(unpacked_packet)
-        log.info("---------------------------------------------------")
-        log.info("Received packet with ID %s" % packet.header.packetId)
-        log.info(repr(packet))
+        if packet:
+            pass
         
