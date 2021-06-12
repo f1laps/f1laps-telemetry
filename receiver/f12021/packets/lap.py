@@ -45,3 +45,28 @@ class PacketLapData(PacketBase):
         ("header", PacketHeader),  # Header
         ("lapData", LapData * 22),  # Lap data for all cars on track
     ]
+
+    def process(self, session):
+        session = self.update_current_lap(session)
+        return session
+
+    def update_current_lap(self, session):
+        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_number = lap_data.currentLapNum
+        if not session.lap_list.get(lap_number):
+            session.lap_list[lap_number] = {}
+        session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
+        session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
+        session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
+        return session
+
+    def get_pit_value(self, session, lap_data, lap_number):
+        # pit status changes over the course of a lap
+        # we want to keep the highest number of 
+        # 0 = no pit; 1 = pit entry/exit; 2 = pitting
+        # so that we store the "slowest" pit value
+        if session.lap_list[lap_number].get("pit_status"):
+            return max(session.lap_list[lap_number]["pit_status"], lap_data.pitStatus)
+        else:
+            return lap_data.pitStatus
+

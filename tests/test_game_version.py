@@ -10,7 +10,7 @@ class F1LapsAPITest(TestCase):
     def test_parse_game_version_from_udp_packet(self, mock_header):
         mock_header.from_buffer_copy.return_value = MagicMock(packetFormat=2020)
         game_version = parse_game_version_from_udp_packet("doesntmatter")
-        self.assertEqual(game_version, "f1_2020")
+        self.assertEqual(game_version, "f12020")
 
 
 if __name__ == '__main__':

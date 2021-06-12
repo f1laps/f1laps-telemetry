@@ -30,7 +30,7 @@ class PacketFinalClassificationData(PacketBase):
 
     def process(self, session):
         session = self.set_results(session)
-        self.process_in_f1laps(session)
+        self.set_results(session)
         return session
 
     def set_results(self, session):

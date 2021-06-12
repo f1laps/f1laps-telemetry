@@ -6,7 +6,7 @@ from .base import PacketBase, PacketHeader
 
 class LapHistoryData(PacketBase):
     _fields_ = [
-        ("lapTimeInMS", ctypes.c_uint16),
+        ("lapTimeInMS", ctypes.c_uint32),
         ("sector1TimeInMS", ctypes.c_uint16),
         ("sector2TimeInMS", ctypes.c_uint16),
         ("sector3TimeInMS", ctypes.c_uint16),
@@ -28,10 +28,6 @@ class PacketSessionHistoryData(PacketBase):
     To reduce CPU and bandwidth, each packet relates to a specific vehicle and is sent every 1/20 s, 
     and the vehicle being sent is cycled through. 
     Therefore in a 20 car race you should receive an update for each vehicle at least once per second.
- 
-    Frequency: 20 per second but cycling through cars
-    Size: 1055 bytes
-    Version: 1
     """
     _fields_ = [
         ("header", PacketHeader),  # Header
@@ -42,14 +38,14 @@ class PacketSessionHistoryData(PacketBase):
         ("bestSector1LapNum", ctypes.c_uint8),  # Lap the best Sector 1 time was achieved on
         ("bestSector2LapNum", ctypes.c_uint8),  # Lap the best Sector 2 time was achieved on
         ("bestSector3LapNum", ctypes.c_uint8),  # Lap the best Sector 3 time was achieved on
-        ("lapHistoryData", LapHistoryData * 22),
-        ("tyreStintsHistoryData", TyreStintsHistoryData * 22),
+        ("lapHistoryData", LapHistoryData * 100),
+        ("tyreStintsHistoryData", TyreStintsHistoryData * 8),
     ]
 
     def process(self, session):
         if not self.is_current_player():
             return session
-        session = self.update_session(session)
+        session = self.update_laps(session)
         return session
 
     def update_laps(self, session):
@@ -61,13 +57,26 @@ class PacketSessionHistoryData(PacketBase):
         if num_laps > 1:
             lap_dict = session.lap_list
             for lap_number in range(1, num_laps):
-                if lap_number not in lap_dict:
-                    lap_dict[lap_number] = {}
-                    lap_dict[lap_number]["sector_1_time_ms"]  = self.LapHistoryData[lap_number].sector1TimeInMS
-                    lap_dict[lap_number]["sector_2_time_ms"]  = self.LapHistoryData[lap_number].sector2TimeInMS
-                    lap_dict[lap_number]["sector_3_time_ms"]  = self.LapHistoryData[lap_number].sector3TimeInMS
-                    lap_dict[lap_number]["lap_number"]        = lap_number
-                    log.info("Updated lap dict to %s" % lap_dict)
+                # Complete lap if it doesnt exist or if sector 3 time isnt set
+                # S3 time is a proxy for "did we complete it before"
+                # May have to make this more explicit in the future
+                if lap_number not in lap_dict or lap_dict[lap_number].get("sector_3_ms") is None:
+                    udp_lap_data = self.lapHistoryData[lap_number-1]
+                    session.complete_lap(
+                        lap_number = lap_number,
+                        sector_1_ms = udp_lap_data.sector1TimeInMS,
+                        sector_2_ms = udp_lap_data.sector2TimeInMS,
+                        sector_3_ms = udp_lap_data.sector3TimeInMS,
+                        tyre_visual = self.get_tyre_visual(lap_number)
+                        )
+                    log.info("Updated lap dict to %s" % session.lap_list)
+        return session
 
     def is_current_player(self):
         return self.carIdx == self.header.playerCarIndex
+
+    def get_tyre_visual(self, lap_number):
+        for tyre_stint in self.tyreStintsHistoryData:
+            if lap_number <= tyre_stint.endLap:
+                return tyre_stint.tyreVisualCompound
+

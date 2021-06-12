@@ -24,7 +24,6 @@ class F12021Session:
 
         # Laps
         self.lap_list = {}
-        self.lap_number_current = None
 
         # Setup 
         self.setup = {}
@@ -52,6 +51,20 @@ class F12021Session:
 
     def get_session_type(self):
         return SessionType.get(self.session_type)
+
+    def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
+        if not self.lap_list.get(lap_number):
+            self.lap_list[lap_number] = {}
+        self.lap_list[lap_number]['lap_number']  = lap_number
+        self.lap_list[lap_number]['sector_1_ms'] = sector_1_ms
+        self.lap_list[lap_number]['sector_2_ms'] = sector_2_ms
+        self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
+        self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
+        self.push_lap_to_f1laps(lap_number)
+
+    def push_lap_to_f1laps(self, lap_number):
+        # verify that its complete - like has S1 & S2 & S3 > 1000 or so
+        pass
 
     def get_lap_telemetry_data(self, lap_number):
         if self.telemetry_enabled:
