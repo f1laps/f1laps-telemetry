@@ -69,7 +69,7 @@ class PacketSessionHistoryData(PacketBase):
                         sector_3_ms = udp_lap_data.sector3TimeInMS,
                         tyre_visual = self.get_tyre_visual(lap_number)
                         )
-                    log.info("Updated lap dict to %s" % session.lap_list)
+                    log.debug("Updated lap dict to %s" % session.lap_list)
         return session
 
     def is_current_player(self):

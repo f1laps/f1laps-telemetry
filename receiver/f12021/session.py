@@ -69,9 +69,10 @@ class F12021Session(SessionBase):
         log.info("Completed lap #%s" % lap_number)
         if self.lap_should_be_sent_to_f1laps(lap_number):
             if self.lap_should_be_sent_as_session():
+                # TODO CHANGE TO SESSION
                 self.send_lap_to_f1laps(lap_number)
             else:
-                api.session_create()
+                self.send_lap_to_f1laps(lap_number)
 
     def lap_should_be_sent_to_f1laps(self, lap_number):
         lap = self.lap_list.get(lap_number)
