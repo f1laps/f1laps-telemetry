@@ -12,7 +12,7 @@ class F1LapsAPITest(TestCase):
     def test_get_headers(self, mock_system, mock_release):
         mock_system.return_value = "F1Laps Test Runner"
         mock_release.return_value = "2021.02.28"
-        headers = F1LapsAPI("vettel4tw")._get_headers()
+        headers = F1LapsAPI("vettel4tw", "f12020")._get_headers()
         self.assertEqual(headers, {
             'Content-Type'      : 'application/json',
             'Authorization'     : 'Token vettel4tw',

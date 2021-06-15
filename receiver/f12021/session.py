@@ -1,10 +1,12 @@
 import json
 
 from lib.logger import log
+from receiver.session_base import SessionBase
 from .types import SessionType, Track
+from .api import F1LapsAPI2021
 
 
-class F12021Session:
+class F12021Session(SessionBase):
     """
     Handles all session-specific variables and logic
     """
@@ -12,6 +14,7 @@ class F12021Session:
         # Meta
         self.f1laps_api_key = None
         self.telemetry_enabled = True
+        self.game_version = "f12021"
         
         # Session
         self.session_udp_uid = session_uid
@@ -60,17 +63,42 @@ class F12021Session:
         self.lap_list[lap_number]['sector_2_ms'] = sector_2_ms
         self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
         self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
-        self.push_lap_to_f1laps(lap_number)
+        self.post_process(lap_number)
 
-    def push_lap_to_f1laps(self, lap_number):
-        # verify that its complete - like has S1 & S2 & S3 > 1000 or so
-        pass
+    def post_process(self, lap_number):
+        log.info("Completed lap #%s" % lap_number)
+        if self.lap_should_be_sent_to_f1laps(lap_number):
+            if self.lap_should_be_sent_as_session():
+                self.send_lap_to_f1laps(lap_number)
+            else:
+                api.session_create()
 
-    def get_lap_telemetry_data(self, lap_number):
-        if self.telemetry_enabled:
-            telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
-            if telemetry_data:
-                return json.dumps(telemetry_data)
-        return None
+    def lap_should_be_sent_to_f1laps(self, lap_number):
+        lap = self.lap_list.get(lap_number)
+        if not lap:
+            return False
+        return bool(lap.get('sector_1_ms') and lap.get('sector_2_ms') and lap.get('sector_3_ms'))
+
+    def lap_should_be_sent_as_session(self):
+        return bool(self.session_type and self.get_session_type() != 'time_trial')
+
+    def send_lap_to_f1laps(self, lap_number):
+        api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
+        response = api.lap_create(
+            track_id              = self.track_id,
+            team_id               = self.team_id,
+            conditions            = self.map_weather_ids_to_f1laps_token(),
+            game_mode             = "time_trial",
+            sector_1_time         = self.lap_list[lap_number]["sector_1_ms"],
+            sector_2_time         = self.lap_list[lap_number]["sector_2_ms"],
+            sector_3_time         = self.lap_list[lap_number]["sector_3_ms"],
+            setup_data            = self.setup,
+            is_valid              = self.lap_list[lap_number].get("is_valid", True),
+            telemetry_data_string = None#self.get_lap_telemetry_data(lap_number)
+        )
+        if response.status_code == 201:
+            log.info("Lap #%s successfully created in F1Laps" % lap_number)
+        else:
+            log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
 
 

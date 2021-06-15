@@ -1,12 +1,13 @@
 import json
 import f1_2020_telemetry.types
 
+from receiver.session_base import SessionBase
 from receiver.f12020.api import F1LapsAPI
 from receiver.f12020.telemetry import Telemetry
 from lib.logger import log
 
 
-class Session:
+class Session(SessionBase):
     """
     Handles all session-specific variables and logic
     """
@@ -69,7 +70,7 @@ class Session:
 
     def create_lap_in_f1laps(self, lap_number):
         """ Send Lap to F1Laps """
-        response = F1LapsAPI(self.f1laps_api_key).lap_create(
+        response = F1LapsAPI(self.f1laps_api_key, "f12020").lap_create(
                         track_id              = self.track_id,
                         team_id               = self.team_id,
                         conditions            = self.map_weather_ids_to_f1laps_token(),
@@ -101,7 +102,7 @@ class Session:
         Also attempts to retrieve & update Session if already created previously
         """
         log.info("Creating full session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-        response = F1LapsAPI(self.f1laps_api_key).session_create(
+        response = F1LapsAPI(self.f1laps_api_key, "f12020").session_create(
                         track_id        = self.track_id,
                         team_id         = self.team_id,
                         session_uid     = self.session_udp_uid,
@@ -138,7 +139,7 @@ class Session:
     def update_session_in_f1laps(self):
         """ Update existing Session in F1Laps """
         log.info("Updating full session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-        response = F1LapsAPI(self.f1laps_api_key).session_update(
+        response = F1LapsAPI(self.f1laps_api_key, "f12020").session_update(
                     f1laps_session_id = self.f1_laps_session_id,
                     track_id          = self.track_id,
                     team_id           = self.team_id,
@@ -177,7 +178,7 @@ class Session:
     def list_sessions_in_f1laps(self):
         """ List Sessions in F1Laps, filtered by UDP session id"""
         log.debug("Searching sessions for ID %s in F1Laps" % self.session_udp_uid)
-        return F1LapsAPI(self.f1laps_api_key).session_list(self.session_udp_uid)
+        return F1LapsAPI(self.f1laps_api_key, "f12020").session_list(self.session_udp_uid)
 
     def map_udp_session_id_to_f1laps_token(self):
         session_mapping = {
@@ -199,18 +200,6 @@ class Session:
     def session_type_supported_by_f1laps_as_session(self):
         return True if self.session_type and self.session_type != 12 else False
 
-    def map_weather_ids_to_f1laps_token(self):
-        """
-        Map UDP weather IDs to F1Laps weather token
-        0-2: dry; 3-5: wet; both: mixed
-        """
-        has_dry_weather = any(x in self.weather_ids for x in [0, 1, 2])
-        has_wet_weather = any(x in self.weather_ids for x in [3, 4, 5])
-        if has_dry_weather and has_wet_weather:
-            return 'mixed'
-        else:
-            return 'wet' if has_wet_weather else 'dry'
-
     def get_f1laps_lap_times_list(self):
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
@@ -229,12 +218,5 @@ class Session:
 
     def get_track_name(self):
         return f1_2020_telemetry.types.TrackIDs.get(self.track_id)
-
-    def get_lap_telemetry_data(self, lap_number):
-        if self.telemetry_enabled:
-            telemetry_data = self.telemetry.get_telemetry_api_dict(lap_number)
-            if telemetry_data:
-                return json.dumps(telemetry_data)
-        return None
 
 

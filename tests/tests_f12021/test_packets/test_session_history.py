@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from receiver.f12021.packets.session_history import PacketSessionHistoryData, LapHistoryData, TyreStintsHistoryData
 from receiver.f12021.session import F12021Session
@@ -17,7 +17,8 @@ class PacketSessionHistoryDataTest(TestCase):
         self.assertEqual(packet.get_tyre_visual(1), 16)
         self.assertEqual(packet.get_tyre_visual(2), 17)
 
-    def test_update_laps(self):
+    @patch('receiver.f12021.session.F12021Session.post_process')
+    def test_update_laps(self, mock_post_process):
         session = F12021Session(123)
         self.assertEqual(session.lap_list, {})
         packet = MockPacketSessionHistoryData()

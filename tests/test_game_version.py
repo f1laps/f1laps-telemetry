@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from receiver.game_version import parse_game_version_from_udp_packet
 
 
-class F1LapsAPITest(TestCase):
+class GameVersionTest(TestCase):
 
     @patch('receiver.game_version.CrossGamePacketHeader')
     def test_parse_game_version_from_udp_packet(self, mock_header):
