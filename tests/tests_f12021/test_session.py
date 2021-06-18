@@ -49,6 +49,17 @@ class F12021SessionTest(TestCase):
         self.assertEqual(session.send_lap_to_f1laps(1), None)
         mock_api.assert_called_with(track_id=10, team_id=2, conditions='dry', game_mode='time_trial', sector_1_time=11111, sector_2_time=22222, sector_3_time=33333, setup_data={}, is_valid=True, telemetry_data_string=None)
 
+    @patch('receiver.f12021.session.F1LapsAPI2021.session_create_or_update')
+    def test_send_session_to_f1laps(self, mock_api):
+        mock_api.return_value = True, "vettel2021"
+        session = F12021Session(123)
+        session.track_id = 10
+        session.team_id = 2
+        session.lap_list = []
+        session.send_session_to_f1laps()
+        self.assertEqual(session.f1_laps_session_id, "vettel2021")
+        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type=None, finish_position=None, points=None, result_status=None, lap_times=None, setup_data={}, is_online_game=False)
+
 
 if __name__ == '__main__':
     unittest.main()

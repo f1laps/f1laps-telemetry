@@ -1,5 +1,6 @@
 import platform
 import requests
+import json
 
 import config
 from lib.logger import log
@@ -106,7 +107,7 @@ class F1LapsAPIBase:
         if not f1_laps_session_id:
             # Create session
             kwargs_exclude_in_create = ['f1laps_session_id']
-            session_create_params = return {k:v for k,v in kwargs.items() if k not in kwargs_exclude_in_create}
+            session_create_params = {k:v for k,v in kwargs.items() if k not in kwargs_exclude_in_create}
             response = self.session_create(**session_create_params)
             if response.status_code == 201:
                 log.info("Session successfully created in F1Laps")
@@ -117,34 +118,34 @@ class F1LapsAPIBase:
                 # But we haven't stored the ID locally (e.g. when user restarts script during a session)
                 # We'll try to get the F1Laps ID via GET list call, then try again
                 if response.status_code == 400:
-                    retrieved_f1_laps_session_id = self.retrieve_f1laps_session_id(kwargs.get('session_uid'))
+                    retrieved_f1_laps_session_id = self.retrieve_f1_laps_session_id(kwargs.get('session_uid'))
                     if retrieved_f1_laps_session_id:
                         f1_laps_session_id = retrieved_f1_laps_session_id
                         # Add session ID to kwargs and update session
                         session_create_params['f1laps_session_id'] = retrieved_f1_laps_session_id
-                        success = self.update_session_in_f1laps(session_create_params)
+                        success = self.update_session_in_f1laps(**session_create_params)
                     else:
                         log.error("Session can't be created, and no existing session found in F1Laps.")
                 else:
                     log.error("Error creating session in F1Laps: %s" % json.loads(response.content))
         else:
             # Update session
-            success = update_session_in_f1laps(**kwargs)
-        return success, f1laps_session_id
+            success = self.update_session_in_f1laps(**kwargs)
+        return success, f1_laps_session_id
 
     def update_session_in_f1laps(self, **kwargs):
         """ Update existing Session in F1Laps """
         response = self.session_update(**kwargs)
         return response.status_code == 200
 
-    def retrieve_f1laps_session_id(self, session_uid):
+    def retrieve_f1_laps_session_id(self, session_uid):
         """ Try to retrieve previous session id from F1Laps by listing all sessions """
         list_response = self.session_list(session_uid)
         list_response_content = json.loads(list_response.content)
         if list_response_content['results'] and len(list_response_content['results']) == 1:
-            f1laps_session_id = list_response_content['results'][0]['id']
-            log.info("Found existing session id %s in F1Laps" % f1laps_session_id)
-            return f1laps_session_id
+            f1_laps_session_id = list_response_content['results'][0]['id']
+            log.info("Found existing session id %s in F1Laps" % f1_laps_session_id)
+            return f1_laps_session_id
         else:
             log.info("No session found in F1Laps")
             return None

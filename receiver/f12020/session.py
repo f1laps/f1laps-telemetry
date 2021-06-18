@@ -91,55 +91,8 @@ class Session(SessionBase):
             return False
 
     def create_or_update_session_in_f1laps(self):
-        if self.f1_laps_session_id:
-            return self.update_session_in_f1laps()
-        else:
-            return self.create_session_in_f1laps()
-
-    def create_session_in_f1laps(self):
-        """
-        Create new Session in F1Laps 
-        Also attempts to retrieve & update Session if already created previously
-        """
-        log.info("Creating full session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-        response = F1LapsAPI(self.f1laps_api_key, "f12020").session_create(
-                        track_id        = self.track_id,
-                        team_id         = self.team_id,
-                        session_uid     = self.session_udp_uid,
-                        conditions      = self.map_weather_ids_to_f1laps_token(),
-                        session_type    = self.map_udp_session_id_to_f1laps_token(),
-                        finish_position = self.finish_position,
-                        points          = self.points,
-                        result_status   = self.result_status, 
-                        lap_times       = self.get_f1laps_lap_times_list(),
-                        setup_data      = self.setup,
-                        is_online_game  = self.is_online_game
-                    )
-        if response.status_code == 201:
-            log.info("Session (%s) successfully created in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-            self.f1_laps_session_id = json.loads(response.content)['id']
-            return True
-        else:
-            # The call may have failed because this session was already posted to F1Laps
-            # But we haven't stored the ID locally (e.g. when user restarts script during a session)
-            # We'll try to get the F1Laps ID via GET list call, then try again
-            if response.status_code == 400 and not self.f1_laps_session_id:
-                retrieved_f1_laps_session_id = self.retrieve_f1laps_session_id()
-                if retrieved_f1_laps_session_id:
-                    self.f1_laps_session_id = retrieved_f1_laps_session_id
-                    return self.update_session_in_f1laps()
-                else:
-                    log.error("Session can't be created, and no existing session found in F1Laps.")
-                    return False
-            else:
-                log.error("Error creating session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-                log.error("F1Laps API response: %s" % json.loads(response.content))
-                return False
-
-    def update_session_in_f1laps(self):
-        """ Update existing Session in F1Laps """
-        log.info("Updating full session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-        response = F1LapsAPI(self.f1laps_api_key, "f12020").session_update(
+        log.info("Updating session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
+        success,self.f1_laps_session_id = F1LapsAPI(self.f1laps_api_key, "f12020").session_create_or_update(
                     f1laps_session_id = self.f1_laps_session_id,
                     track_id          = self.track_id,
                     team_id           = self.team_id,
@@ -153,32 +106,12 @@ class Session(SessionBase):
                     setup_data        = self.setup,
                     is_online_game    = self.is_online_game
                 )
-        if response.status_code == 200:
+        if success:
             log.info("Session (%s) successfully updated in F1Laps" % self.map_udp_session_id_to_f1laps_token())
             return True
         else:
-            log.error("Error updating session (%s) in F1Laps" % self.map_udp_session_id_to_f1laps_token())
-            log.error("F1Laps API response: %s" % json.loads(response.content))
+            log.info("Session not updated in F1Laps")
             return False
-
-    def retrieve_f1laps_session_id(self):
-        """ Try to retrieve previous session id from F1Laps """
-        log.debug("Trying to retrieve F1Laps session id for UDP session id %s" % self.session_udp_uid)
-        # List all sessions from F1Laps
-        list_response = self.list_sessions_in_f1laps()
-        list_response_content = json.loads(list_response.content)
-        if list_response_content['results'] and len(list_response_content['results']) == 1:
-            f1laps_session_id = list_response_content['results'][0]['id']
-            log.debug("Found existing session id %s in F1Laps" % f1laps_session_id)
-            return f1laps_session_id
-        else:
-            log.debug("No session found in F1Laps")
-            return False
-
-    def list_sessions_in_f1laps(self):
-        """ List Sessions in F1Laps, filtered by UDP session id"""
-        log.debug("Searching sessions for ID %s in F1Laps" % self.session_udp_uid)
-        return F1LapsAPI(self.f1laps_api_key, "f12020").session_list(self.session_udp_uid)
 
     def map_udp_session_id_to_f1laps_token(self):
         session_mapping = {

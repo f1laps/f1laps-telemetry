@@ -69,8 +69,7 @@ class F12021Session(SessionBase):
         log.info("Completed lap #%s" % lap_number)
         if self.lap_should_be_sent_to_f1laps(lap_number):
             if self.lap_should_be_sent_as_session():
-                # TODO CHANGE TO SESSION
-                self.send_lap_to_f1laps(lap_number)
+                self.send_session_to_f1laps()
             else:
                 self.send_lap_to_f1laps(lap_number)
 
@@ -102,9 +101,9 @@ class F12021Session(SessionBase):
         else:
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
 
-    def send_session_to_f1laps(self, lap_number):
+    def send_session_to_f1laps(self):
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
-        response = api.session_create_or_update(
+        success, self.f1_laps_session_id = api.session_create_or_update(
             f1laps_session_id = self.f1_laps_session_id,
             track_id          = self.track_id,
             team_id           = self.team_id,
@@ -118,9 +117,9 @@ class F12021Session(SessionBase):
             setup_data        = self.setup,
             is_online_game    = self.is_online_game
         )
-        if response.status_code == 201:
+        if success:
             log.info("Session successfully updated in F1Laps")
         else:
-            log.error("Error updating session in F1Laps: %s" % json.loads(response.content))
+            log.info("Session not updated in F1Laps")
 
 
