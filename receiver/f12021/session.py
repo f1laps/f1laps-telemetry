@@ -102,4 +102,25 @@ class F12021Session(SessionBase):
         else:
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
 
+    def send_session_to_f1laps(self, lap_number):
+        api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
+        response = api.session_create_or_update(
+            f1laps_session_id = self.f1_laps_session_id,
+            track_id          = self.track_id,
+            team_id           = self.team_id,
+            session_uid       = self.session_udp_uid,
+            conditions        = self.map_weather_ids_to_f1laps_token(),
+            session_type      = self.get_session_type(),
+            finish_position   = self.finish_position,
+            points            = self.points,
+            result_status     = self.result_status, 
+            lap_times         = None,#self.get_f1laps_lap_times_list(),
+            setup_data        = self.setup,
+            is_online_game    = self.is_online_game
+        )
+        if response.status_code == 201:
+            log.info("Session successfully updated in F1Laps")
+        else:
+            log.error("Error updating session in F1Laps: %s" % json.loads(response.content))
+
 
