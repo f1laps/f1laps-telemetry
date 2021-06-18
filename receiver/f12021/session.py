@@ -113,7 +113,7 @@ class F12021Session(SessionBase):
             finish_position   = self.finish_position,
             points            = self.points,
             result_status     = self.result_status, 
-            lap_times         = None,#self.get_f1laps_lap_times_list(),
+            lap_times         = self.get_f1laps_lap_times_list(),
             setup_data        = self.setup,
             is_online_game    = self.is_online_game
         )
@@ -121,5 +121,22 @@ class F12021Session(SessionBase):
             log.info("Session successfully updated in F1Laps")
         else:
             log.info("Session not updated in F1Laps")
+
+    def get_f1laps_lap_times_list(self):
+        lap_times = []
+        for lap_number, lap_object in self.lap_list.items():
+            if lap_object['sector_1_ms'] and lap_object['sector_2_ms'] and lap_object['sector_3_ms']:
+                lap_times.append({
+                        "lap_number"           : lap_number,
+                        "sector_1_time_ms"     : lap_object['sector_1_ms'],
+                        "sector_2_time_ms"     : lap_object['sector_2_ms'],
+                        "sector_3_time_ms"     : lap_object['sector_3_ms'],
+                        "car_race_position"    : lap_object['car_race_position'],
+                        "pit_status"           : lap_object['pit_status'],
+                        "tyre_compound_visual" : lap_object.get('tyre_compound_visual'),
+                        "telemetry_data_string": None#self.get_lap_telemetry_data(lap_number)
+                    })
+        return lap_times
+
 
 

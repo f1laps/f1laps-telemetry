@@ -55,10 +55,10 @@ class F12021SessionTest(TestCase):
         session = F12021Session(123)
         session.track_id = 10
         session.team_id = 2
-        session.lap_list = []
+        session.lap_list = {}
         session.send_session_to_f1laps()
         self.assertEqual(session.f1_laps_session_id, "vettel2021")
-        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type=None, finish_position=None, points=None, result_status=None, lap_times=None, setup_data={}, is_online_game=False)
+        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type=None, finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False)
 
 
 if __name__ == '__main__':
