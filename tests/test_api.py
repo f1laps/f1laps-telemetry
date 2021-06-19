@@ -30,7 +30,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = None, track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, True)
         self.assertEqual(f1laps_session_id, "vettel2021")
@@ -47,7 +48,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = "vettel2021", track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, True)
         self.assertEqual(f1laps_session_id, "vettel2021")
@@ -66,7 +68,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = None, track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, True)
         self.assertEqual(f1laps_session_id, "vettel2021")
@@ -84,7 +87,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = None, track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, False)
         self.assertEqual(f1laps_session_id, None)
@@ -101,7 +105,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = None, track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, False)
         self.assertEqual(f1laps_session_id, None)
@@ -118,7 +123,8 @@ class F1LapsAPITest(TestCase):
         success, f1laps_session_id = api.session_create_or_update(
             f1laps_session_id = "vettel2021", track_id = 1, team_id = 2, session_uid = 345, 
             conditions = 'dry', session_type = 'race', finish_position = None, points = None,
-            result_status = None, lap_times = [], setup_data = {}, is_online_game = False
+            result_status = None, lap_times = [], setup_data = {}, is_online_game = False,
+            ai_difficulty=None
         )
         self.assertEqual(success, False)
         self.assertEqual(f1laps_session_id, "vettel2021")

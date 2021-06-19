@@ -99,6 +99,12 @@ class PacketSessionData(PacketBase):
         if self.weather not in session.weather_ids:
             session.weather_ids.append(self.weather)
         session.start()
+        log.info("Session vals: season %s weekend %s session %s UID %s" % (
+            self.seasonLinkIdentifier,
+            self.weekendLinkIdentifier,
+            self.sessionLinkIdentifier,
+            self.header.sessionUID
+            ))
         return session
 
     def update_session(self, session):

@@ -47,7 +47,7 @@ class F1LapsAPIBase:
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
-                       is_online_game):
+                       is_online_game, **extra_params):
         """ Create a Session in F1Laps """
         endpoint = "grandprixs/sessions/"
         method   = "POST"
@@ -62,13 +62,14 @@ class F1LapsAPIBase:
             'udp_session_uid': session_uid,
             'lap_times': lap_times,
             'setup': setup_data,
-            'is_online_game': is_online_game
+            'is_online_game': is_online_game,
+            **extra_params
         }
         return self.call_api(method, endpoint, params)
 
     def session_update(self, f1laps_session_id, track_id, team_id, session_uid, conditions, 
                        session_type, finish_position, points, result_status, lap_times, 
-                       setup_data, is_online_game):
+                       setup_data, is_online_game, **extra_params):
         """ Update a Session in F1Laps """
         endpoint = "grandprixs/sessions/%s/" % f1laps_session_id
         method   = "PUT"
@@ -83,7 +84,8 @@ class F1LapsAPIBase:
             'udp_session_uid': session_uid,
             'lap_times': lap_times,
             'setup': setup_data,
-            'is_online_game': is_online_game
+            'is_online_game': is_online_game,
+            **extra_params
         }
         return self.call_api(method, endpoint, params)
 

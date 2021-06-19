@@ -115,7 +115,8 @@ class F12021Session(SessionBase):
             result_status     = self.result_status, 
             lap_times         = self.get_f1laps_lap_times_list(),
             setup_data        = self.setup,
-            is_online_game    = self.is_online_game
+            is_online_game    = self.is_online_game,
+            ai_difficulty     = self.ai_difficulty
         )
         if success:
             log.info("Session successfully updated in F1Laps")
