@@ -41,3 +41,17 @@ class PacketCarTelemetryData(PacketBase):
         ("mfdPanelIndexSecondaryPlayer", ctypes.c_uint8),
         ("suggestedGear", ctypes.c_int8),
     ]
+
+    def process(self, session):
+        self.update_telemetry(session)
+        return session
+
+    def update_telemetry(self, session):
+        telemetry_data = self.carTelemetryData[self.header.playerCarIndex]
+        frame = self.header.frameIdentifier
+        session.telemetry.set(frame, speed    = telemetry_data.speed,
+                                     brake    = telemetry_data.brake,
+                                     throttle = telemetry_data.throttle,
+                                     gear     = telemetry_data.gear,
+                                     steer    = telemetry_data.steer,
+                                     drs      = telemetry_data.drs)

@@ -4,6 +4,7 @@ from lib.logger import log
 from receiver.session_base import SessionBase
 from .types import SessionType, Track
 from .api import F1LapsAPI2021
+from .telemtry import F12021Telemetry
 
 
 class F12021Session(SessionBase):
@@ -32,7 +33,7 @@ class F12021Session(SessionBase):
         self.setup = {}
 
         # Telemetry
-        self.telemetry = None#Telemetry()
+        self.telemetry = F12021Telemetry()
 
         # Final classification
         self.finish_position = None
@@ -55,7 +56,24 @@ class F12021Session(SessionBase):
     def get_session_type(self):
         return SessionType.get(self.session_type)
 
+    def new_lap_started(self, lap_number):
+        """ 
+        As set by the Lap packet, this method is called 
+        when the currentLap number was increased 
+        """
+        # Update telemetry
+        # ADD UNIT TEST FOR THIS
+        self.telemetry.start_new_lap(lap_number)
+
     def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
+        """ 
+        While this method is similar to new_lap_started, it's different
+        It's not called as soon as possible, but when all previous lap data is available
+        There might be a ~1 second gap after the line is crossed
+
+        As set by the SessionHistory packet, this method is called 
+        when the previous lap data was published in the history packet
+        """
         if not self.lap_list.get(lap_number):
             self.lap_list[lap_number] = {}
         self.lap_list[lap_number]['lap_number']  = lap_number
@@ -67,6 +85,7 @@ class F12021Session(SessionBase):
 
     def post_process(self, lap_number):
         log.info("Completed lap #%s" % lap_number)
+        # Send to F1Laps
         if self.lap_should_be_sent_to_f1laps(lap_number):
             if self.lap_should_be_sent_as_session():
                 self.send_session_to_f1laps()
@@ -94,7 +113,7 @@ class F12021Session(SessionBase):
             sector_3_time         = self.lap_list[lap_number]["sector_3_ms"],
             setup_data            = self.setup,
             is_valid              = self.lap_list[lap_number].get("is_valid", True),
-            telemetry_data_string = None#self.get_lap_telemetry_data(lap_number)
+            telemetry_data_string = self.get_lap_telemetry_data(lap_number)
         )
         if response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
@@ -135,7 +154,7 @@ class F12021Session(SessionBase):
                         "car_race_position"    : lap_object['car_race_position'],
                         "pit_status"           : lap_object['pit_status'],
                         "tyre_compound_visual" : lap_object.get('tyre_compound_visual'),
-                        "telemetry_data_string": None#self.get_lap_telemetry_data(lap_number)
+                        "telemetry_data_string": self.get_lap_telemetry_data(lap_number)
                     })
         return lap_times
 
