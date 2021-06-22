@@ -4,7 +4,7 @@ from lib.logger import log
 from receiver.session_base import SessionBase
 from .types import SessionType, Track
 from .api import F1LapsAPI2021
-from .telemtry import F12021Telemetry
+from .telemetry import F12021Telemetry
 
 
 class F12021Session(SessionBase):

@@ -59,6 +59,7 @@ class PacketLapData(PacketBase):
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
         session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
+        return session
 
     def update_telemetry(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]
@@ -66,6 +67,7 @@ class PacketLapData(PacketBase):
         total_lap_time = lap_data.currentLapTime * 1000 # current lap time is in secs not ms
         session.telemetry.set(frame, lap_time     = total_lap_time,
                                      lap_distance = lap_data.lapDistance)
+        return session
 
     def get_pit_value(self, session, lap_data, lap_number):
         # pit status changes over the course of a lap
