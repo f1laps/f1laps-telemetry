@@ -8,7 +8,7 @@ from receiver.f12021.session import F12021Session
 MOCK_LAP_NUMBER = 2
 
 
-class PacketSessionHistoryDataTest(TestCase):
+class PacketLapDataTest(TestCase):
 
     def test_update_current_lap(self):
         session = F12021Session(123)
@@ -38,7 +38,7 @@ class MockLapData(LapData):
     carPosition = 10
     pitStatus = 2
     currentLapInvalid = 0
-    currentLapTime = 1.543
+    currentLapTimeInMS = 1543
     lapDistance = 4321
 
 

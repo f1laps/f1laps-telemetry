@@ -43,7 +43,7 @@ class PacketCarTelemetryData(PacketBase):
     ]
 
     def process(self, session):
-        self.update_telemetry(session)
+        session = self.update_telemetry(session)
         return session
 
     def update_telemetry(self, session):
@@ -55,3 +55,5 @@ class PacketCarTelemetryData(PacketBase):
                                      gear     = telemetry_data.gear,
                                      steer    = telemetry_data.steer,
                                      drs      = telemetry_data.drs)
+        return session
+
