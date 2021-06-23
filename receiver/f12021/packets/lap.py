@@ -6,8 +6,8 @@ from .base import PacketBase, PacketHeader
 class LapData(PacketBase):
 
     _fields_ = [
-        ("lastLapTime", ctypes.c_float), # in sec
-        ("currentLapTime", ctypes.c_float), # in sec 
+        ("lastLapTimeInMS", ctypes.c_uint32),
+        ("currentLapTimeInMS", ctypes.c_uint32),
         ("sector1TimeInMS", ctypes.c_uint16), 
         ("sector2TimeInMS", ctypes.c_uint16),
         ("lapDistance", ctypes.c_float),
@@ -20,6 +20,9 @@ class LapData(PacketBase):
         ("sector", ctypes.c_uint8), # 0 = sector1, 1 = sector2, 2 = sector3
         ("currentLapInvalid", ctypes.c_uint8), # Current lap invalid - 0 = valid, 1 = invalid
         ("penalties", ctypes.c_uint8),
+        ("warnings", ctypes.c_uint8),
+        ("numUnservedDriveThroughPens", ctypes.c_uint8),
+        ("numUnservedStopGoPens", ctypes.c_uint8),
         ("gridPosition", ctypes.c_uint8),
         ("driverStatus", ctypes.c_uint8), # Status of driver - 0 = in garage, 1 = flying lap
                                           # 2 = in lap, 3 = out lap, 4 = on track
@@ -64,8 +67,7 @@ class PacketLapData(PacketBase):
     def update_telemetry(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]
         frame = self.header.frameIdentifier
-        total_lap_time = lap_data.currentLapTime * 1000 # current lap time is in secs not ms
-        session.telemetry.set(frame, lap_time     = total_lap_time,
+        session.telemetry.set(frame, lap_time     = lap_data.currentLapTimeInMS,
                                      lap_distance = lap_data.lapDistance)
         return session
 

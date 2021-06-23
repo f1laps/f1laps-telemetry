@@ -65,6 +65,8 @@ class PacketSessionData(PacketBase):
         ("pitReleaseAssist", ctypes.c_uint8),
         ("ERSAssist", ctypes.c_uint8),
         ("DRSAssist", ctypes.c_uint8),
+        ("dynamicRacingLine", ctypes.c_uint8),
+        ("dynamicRacingLineType", ctypes.c_uint8),
     ]
 
     def process(self, session):

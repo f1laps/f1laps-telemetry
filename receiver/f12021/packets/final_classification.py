@@ -11,7 +11,7 @@ class FinalClassificationData(PacketBase):
         ("points", ctypes.c_uint8),
         ("numPitStops", ctypes.c_uint8),
         ("resultStatus", ctypes.c_uint8),
-        ("bestLapTime", ctypes.c_float),
+        ("bestLapTimeInMS", ctypes.c_uint32),
         ("totalRaceTime", ctypes.c_double),
         ("penaltiesTime", ctypes.c_uint8),
         ("numPenalties", ctypes.c_uint8),
