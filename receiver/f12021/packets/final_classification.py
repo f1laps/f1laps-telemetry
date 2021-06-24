@@ -30,7 +30,6 @@ class PacketFinalClassificationData(PacketBase):
 
     def process(self, session):
         session = self.set_results(session)
-        self.set_results(session)
         return session
 
     def set_results(self, session):
@@ -38,4 +37,5 @@ class PacketFinalClassificationData(PacketBase):
         session.finish_position = classification_data.position
         session.result_status   = classification_data.resultStatus
         session.points          = classification_data.points
+        session.complete_session()
         return session

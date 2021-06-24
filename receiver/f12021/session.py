@@ -92,6 +92,9 @@ class F12021Session(SessionBase):
             else:
                 self.send_lap_to_f1laps(lap_number)
 
+    def complete_session(self):
+        self.send_session_to_f1laps()
+
     def lap_should_be_sent_to_f1laps(self, lap_number):
         lap = self.lap_list.get(lap_number)
         if not lap:
@@ -135,7 +138,7 @@ class F12021Session(SessionBase):
             lap_times         = self.get_f1laps_lap_times_list(),
             setup_data        = self.setup,
             is_online_game    = self.is_online_game,
-            ai_difficulty     = self.ai_difficulty
+            ai_difficulty     = self.ai_difficulty or None
         )
         if success:
             log.info("Session successfully updated in F1Laps")
@@ -145,14 +148,14 @@ class F12021Session(SessionBase):
     def get_f1laps_lap_times_list(self):
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
-            if lap_object['sector_1_ms'] and lap_object['sector_2_ms'] and lap_object['sector_3_ms']:
+            if lap_object.get('sector_1_ms') and lap_object.get('sector_2_ms') and lap_object.get('sector_3_ms'):
                 lap_times.append({
                         "lap_number"           : lap_number,
                         "sector_1_time_ms"     : lap_object['sector_1_ms'],
                         "sector_2_time_ms"     : lap_object['sector_2_ms'],
                         "sector_3_time_ms"     : lap_object['sector_3_ms'],
-                        "car_race_position"    : lap_object['car_race_position'],
-                        "pit_status"           : lap_object['pit_status'],
+                        "car_race_position"    : lap_object.get('car_race_position'),
+                        "pit_status"           : lap_object.get('pit_status'),
                         "tyre_compound_visual" : lap_object.get('tyre_compound_visual'),
                         "telemetry_data_string": self.get_lap_telemetry_data(lap_number)
                     })

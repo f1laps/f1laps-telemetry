@@ -50,7 +50,8 @@ class PacketLapData(PacketBase):
     ]
 
     def process(self, session):
-        self.update_current_lap(session)
+        session = self.update_current_lap(session)
+        session = self.update_telemetry(session)
         return session
 
     def update_current_lap(self, session):

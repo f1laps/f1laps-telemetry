@@ -10,6 +10,13 @@ MOCK_LAP_NUMBER = 2
 
 class PacketLapDataTest(TestCase):
 
+    def test_process(self):
+        session = F12021Session(123)
+        packet = MockPacketLapData()
+        session = packet.process(session)
+        self.assertEqual(session.lap_list, {MOCK_LAP_NUMBER: {'car_race_position': 10, 'is_valid': True, 'pit_status': 2}})
+        self.assertEqual(session.telemetry.lap_dict[MOCK_LAP_NUMBER].frame_dict, {2345: [4321, 1543.0, None, None, None, None, None, None]})
+
     def test_update_current_lap(self):
         session = F12021Session(123)
         packet = MockPacketLapData()
