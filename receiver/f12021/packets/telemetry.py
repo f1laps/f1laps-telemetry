@@ -36,7 +36,6 @@ class PacketCarTelemetryData(PacketBase):
     _fields_ = [
         ("header", PacketHeader),
         ("carTelemetryData", CarTelemetryData * 22),
-        ("buttonStatus", ctypes.c_uint32),
         ("mfdPanelIndex", ctypes.c_uint8),
         ("mfdPanelIndexSecondaryPlayer", ctypes.c_uint8),
         ("suggestedGear", ctypes.c_int8),
