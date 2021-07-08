@@ -1,14 +1,18 @@
 import threading
 import socket
+import sentry_sdk
+import platform
 
 from lib.logger import log
 from receiver.f12020.processor import F12020Processor
 from receiver.f12021.processor import F12021Processor
 from receiver.helpers import get_local_ip
 from receiver.game_version import parse_game_version_from_udp_packet
+import config
 
 
 DEFAULT_PORT = 20777
+SENTRY_DSN = "https://d00edba104864bee975f5f4a71025639@o615967.ingest.sentry.io/5854730"
 
 
 class ActiveSocket:
@@ -51,8 +55,27 @@ class RaceReceiver(threading.Thread):
 
         # game data processor
         self.processor = None
+
+        # Start sentry
+        self.start_sentry()
  
         log.info("Telemetry receiver started & ready for race data")
+
+
+    def start_sentry(self):
+        sentry_sdk.init(
+            SENTRY_DSN,
+            traces_sample_rate=0,
+            release=config.VERSION
+        )
+        sentry_sdk.set_context("machine", {
+            "system": platform.system(),
+            "release": platform.release()
+        })
+        sentry_sdk.set_context("api", {
+            "key": self.f1laps_api_key,
+            "telemetry_enabled": self.telemetry_enabled
+        })
 
 
     def get_socket(self):
@@ -93,17 +116,20 @@ class RaceReceiver(threading.Thread):
         log.info("Receiver started running")
         
         while not self.kill_event.is_set():
-            incoming_udp_packet = self.udp_socket.recv(2048)
-            if not self.processor:
-                # Get game version -- raises if unknown or not found
-                game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
-                if game_version == "f12020":
-                    log.info("Detected F1 2020 game version")
-                    self.processor = F12020Processor(self.f1laps_api_key, self.telemetry_enabled)
-                elif game_version == "f12021":
-                    log.info("Detected F1 2021 game version")
-                    self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
-            if self.processor:
-                self.processor.process(incoming_udp_packet)
+            try:
+                incoming_udp_packet = self.udp_socket.recv(2048)
+                if not self.processor:
+                    # Get game version -- raises if unknown or not found
+                    game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
+                    if game_version == "f12020":
+                        log.info("Detected F1 2020 game version")
+                        self.processor = F12020Processor(self.f1laps_api_key, self.telemetry_enabled)
+                    elif game_version == "f12021":
+                        log.info("Detected F1 2021 game version")
+                        self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
+                if self.processor:
+                    self.processor.process(incoming_udp_packet)
+            except Exception as ex:
+                sentry_sdk.capture_exception(ex)
             
 
