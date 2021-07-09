@@ -65,11 +65,12 @@ class PacketSessionHistoryData(PacketBase):
                 # May have to make this more explicit in the future
                 if lap_number not in lap_dict or lap_dict[lap_number].get("sector_3_ms") is None:
                     udp_lap_data = self.lapHistoryData[lap_number-1]
+                    sector_1_ms, sector_2_ms, sector_3_ms = self.clean_sectors(udp_lap_data)
                     session.complete_lap(
                         lap_number = lap_number,
-                        sector_1_ms = udp_lap_data.sector1TimeInMS,
-                        sector_2_ms = udp_lap_data.sector2TimeInMS,
-                        sector_3_ms = udp_lap_data.sector3TimeInMS,
+                        sector_1_ms = sector_1_ms,
+                        sector_2_ms = sector_2_ms,
+                        sector_3_ms = sector_3_ms,
                         tyre_visual = self.get_tyre_visual(lap_number)
                         )
                     log.debug("Lap History: T %s S1 %s S2 %s S3 %s" % (
@@ -80,6 +81,27 @@ class PacketSessionHistoryData(PacketBase):
                         ))
                     log.debug("Updated lap dict to %s" % session.lap_list)
         return session
+
+    def clean_sectors(self, udp_lap_data):
+        laptime = udp_lap_data.lapTimeInMS
+        sector_1_ms = udp_lap_data.sector1TimeInMS
+        sector_2_ms = udp_lap_data.sector2TimeInMS
+        sector_3_ms = udp_lap_data.sector3TimeInMS
+        lap_sector_delta = laptime - sector_1_ms - sector_2_ms - sector_3_ms
+        if lap_sector_delta < 0:
+            sector_1_ms = sector_1_ms - 1
+            if lap_sector_delta < -1:
+                sector_2_ms = sector_2_ms - 1
+                if lap_sector_delta < -2:
+                    sector_3_ms = sector_3_ms - 1
+        if lap_sector_delta > 0:
+            sector_1_ms = sector_1_ms + 1
+            if lap_sector_delta > 1:
+                sector_2_ms = sector_2_ms + 1
+                if lap_sector_delta > 2:
+                    sector_3_ms = sector_3_ms + 1
+        return sector_1_ms, sector_2_ms, sector_3_ms
+            
 
     def is_current_player(self):
         return self.carIdx == self.header.playerCarIndex
