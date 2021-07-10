@@ -2,3 +2,4 @@ f1-2020-telemetry==0.2.1
 requests==2.25.1
 pyinstaller==4.2
 PyQt5==5.15.2
+sentry-sdk==1.1.0

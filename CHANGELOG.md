@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.0 - 2021-07-10
+
+Support for F1 2021 and major refactoring.
+
+### Added
+- Now supporting the F1 2021 game
+
+
 ## 1.0.0 - 2021-05-13
 
 First major stable version.
