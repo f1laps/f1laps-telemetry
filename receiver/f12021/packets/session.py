@@ -49,7 +49,7 @@ class PacketSessionData(PacketBase):
         ("safetyCarStatus", ctypes.c_uint8),
         ("networkGame", ctypes.c_uint8),
         ("numWeatherForecastSamples", ctypes.c_uint8),
-        ("weatherForecastSamples", WeatherForecastSample * 20),
+        ("weatherForecastSamples", WeatherForecastSample * 56),
         ("forecastAccuracy", ctypes.c_uint8),
         ("aiDifficulty", ctypes.c_uint8), # AI Difficulty rating – 0-110
         ("seasonLinkIdentifier", ctypes.c_uint32),

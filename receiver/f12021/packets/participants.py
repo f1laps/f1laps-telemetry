@@ -7,6 +7,7 @@ class ParticipantData(PacketBase):
     _fields_ = [
         ("aiControlled", ctypes.c_uint8),
         ("driverId", ctypes.c_uint8),
+        ("networkId", ctypes.c_uint8),
         ("teamId", ctypes.c_uint8),
         ("myTeam", ctypes.c_uint8), # My team flag – 1 = My Team, 0 = otherwise
         ("raceNumber", ctypes.c_uint8),
@@ -35,6 +36,8 @@ class PacketParticipantsData(PacketBase):
     def update_team_id(self, session):
         if session.team_id:
             # Don't update sessions with existing team_id
-            return False
+            return session
         session.team_id = self.participants[self.header.playerCarIndex].teamId
+        from lib.logger import log
+        log.info("TEAMMMM %s" % session.team_id)
         return session
