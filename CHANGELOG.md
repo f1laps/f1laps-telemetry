@@ -1,5 +1,15 @@
 # Change Log
 
+
+## 2.0.1 - 2021-07-13
+
+Early F1 2021 bug fixes.
+
+### Fixed
+- Team names are now properly retrieved and synced
+- AI difficulty is now properly retrieved and synced
+
+
 ## 2.0.0 - 2021-07-10
 
 Support for F1 2021 and major refactoring.
