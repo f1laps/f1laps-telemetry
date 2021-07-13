@@ -141,7 +141,7 @@ class TelemetryBase:
 
     def start_new_lap(self, number):
         """ New lap started in game """
-        log.info("Start new lap %s" % number)
+        log.info("Telemetry: start new lap %s" % number)
         if self.current_lap_number and number == self.current_lap_number:
             log.info("TelemetryLap number %s already started" % number)
             return None
@@ -153,4 +153,4 @@ class TelemetryBase:
             for key in list(self.lap_dict):
                 if key != number and key != (number-1):
                     self.lap_dict.pop(key, None)
-                    log.debug("Deleted telemetry of lap %s" % key)
+                    log.info("Telemetry: deleted telemetry of lap %s" % key)

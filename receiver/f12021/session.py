@@ -61,8 +61,8 @@ class F12021Session(SessionBase):
         As set by the Lap packet, this method is called 
         when the currentLap number was increased 
         """
+        log.info("Session: start new lap %s" % lap_number)
         # Update telemetry
-        # ADD UNIT TEST FOR THIS
         self.telemetry.start_new_lap(lap_number)
 
     def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
@@ -74,6 +74,7 @@ class F12021Session(SessionBase):
         As set by the SessionHistory packet, this method is called 
         when the previous lap data was published in the history packet
         """
+        log.info("Session: complete lap %s" % lap_number)
         if not self.lap_list.get(lap_number):
             self.lap_list[lap_number] = {}
         self.lap_list[lap_number]['lap_number']  = lap_number
@@ -84,7 +85,7 @@ class F12021Session(SessionBase):
         self.post_process(lap_number)
 
     def post_process(self, lap_number):
-        log.info("Completed lap #%s" % lap_number)
+        log.info("Session: post process lap %s" % lap_number)
         # Send to F1Laps
         if self.lap_should_be_sent_to_f1laps(lap_number):
             if self.lap_should_be_sent_as_session():
@@ -93,6 +94,7 @@ class F12021Session(SessionBase):
                 self.send_lap_to_f1laps(lap_number)
 
     def complete_session(self):
+        log.info("Session: complete session")
         self.send_session_to_f1laps()
 
     def lap_should_be_sent_to_f1laps(self, lap_number):
