@@ -38,6 +38,4 @@ class PacketParticipantsData(PacketBase):
             # Don't update sessions with existing team_id
             return session
         session.team_id = self.participants[self.header.playerCarIndex].teamId
-        from lib.logger import log
-        log.info("TEAMMMM %s" % session.team_id)
         return session
