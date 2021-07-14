@@ -53,10 +53,12 @@ class TelemetryLapBase:
         current_distance = None
         if not frame:
             return
+
         # Check if we popped this frame before - if so, don't populate it again
         if frame_number in self.frames_popped_list:
             self.frame_dict.pop(frame_number)
             return 
+
         if frame[KEY_INDEX_MAP["lap_distance"]]:
             current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
             if not current_distance:
@@ -67,8 +69,7 @@ class TelemetryLapBase:
 
             # Delete frames that are pre session FIRST LINE CROSS start
             if current_distance < 0:
-                self.frame_dict.pop(frame_number)
-                self.frames_popped_list.append(frame_number)
+                self.remove_frame(frame_number)
                 return
 
             # If we have current and last lap distance, check that we're incrementing the distance
@@ -90,12 +91,31 @@ class TelemetryLapBase:
                     # And lap distance pre line cross is NOT negative (also weird!)
                     # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
                     elif current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
-                        log.info("Assuming a new lap started based on distance delta - killing all old frames")
-                        self.frame_dict = {frame_number: frame}
+                        # New in F1 2021:
+                        # Sometimes, the Lap Package gets sent after finish line cross (inlap) without incrementing the lapnumber
+                        # In that case, the following code would remove the entire last lap. We dont want that. 
+                        # So we add the condition that we only clean the pre-line frames if that pre-line frame_dict didn't contain
+                        # frames that are early in the lap (meaning it wasnt a full lap)
+                        frame_dict_sorted_by_distance = sorted(self.frame_dict.copy().items(), key=lambda kv: kv[KEY_INDEX_MAP["lap_distance"]])
+                        first_frame_distance_frame, first_frame_distance_values = frame_dict_sorted_by_distance[0]
+                        first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]]
+                        if first_frame_distance_value < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                            log.info("Assuming an outlap started based on distance delta - killing all new frames (current distance %s, last distance %s, first frame distance %s)" % \
+                                (current_distance, self.last_lap_distance, first_frame_distance_value))
+                            self.remove_frame(frame_number)
+                            # Important to return here to not set the last_lap_distance to the current_distance
+                            return
+                        else:
+                            log.info("Assuming a new lap started based on distance delta - killing all old frames (current distance %s, last distance %s, first frame distance %s)" % \
+                                (current_distance, self.last_lap_distance, first_frame_distance_value))
+                            self.frame_dict = {frame_number: frame}
         
         # Set the last distance value for future frames
         self.last_lap_distance = current_distance
-        #log.info("Frame %s: last distance %s | CD %s" % (frame_number, self.last_lap_distance, current_distance))
+
+    def remove_frame(self, frame_number):
+        self.frame_dict.pop(frame_number)
+        self.frames_popped_list.append(frame_number)
 
 
 class TelemetryBase:
