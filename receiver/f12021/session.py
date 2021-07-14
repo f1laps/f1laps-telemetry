@@ -74,6 +74,11 @@ class F12021Session(SessionBase):
         As set by the SessionHistory packet, this method is called 
         when the previous lap data was published in the history packet
         """
+        # Temp hack: there is a bug in the telemetry that the SessionHistory gets sent with 
+        # laps from the last session. This prevents the telemetry from being started by
+        # our lap packet. So we start it here too. 
+        # Remove this once the bug is fixed
+        self.telemetry.start_new_lap(lap_number)
         log.info("Session: complete lap %s" % lap_number)
         if not self.lap_list.get(lap_number):
             self.lap_list[lap_number] = {}
