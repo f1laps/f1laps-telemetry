@@ -162,7 +162,7 @@ class TelemetryBase:
     def start_new_lap(self, number):
         """ New lap started in game """
         log.info("Telemetry: start new lap %s" % number)
-        if self.current_lap_number and number == self.current_lap_number:
+        if number in self.lap_dict.keys():
             log.info("TelemetryLap number %s already started" % number)
             return None
         # Update current lap number and add to dict

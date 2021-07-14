@@ -4,6 +4,30 @@ from receiver.f12021.telemetry import F12021Telemetry
 from receiver.telemetry_base import KEY_INDEX_MAP
 
 
+class F12021TelemetryTests(TestCase):
+
+    def test_start_telemetry_old_lap(self):
+        """ 
+        Assert that when we attempt to start Telemetry for a lap that was already collected,
+        we don't do it.
+        This happens when the Session History Packet starts Telemetry, but is significantly delayed by 1+ laps
+        And hence attempts to start an old lap
+        """
+        telemetry = F12021Telemetry()
+        # start new lap
+        telemetry.start_new_lap(1)
+        self.assertEqual(telemetry.current_lap_number, 1)
+        self.assertEqual(telemetry.lap_dict[1].number, 1)
+        # start new lap
+        telemetry.start_new_lap(2)
+        self.assertEqual(telemetry.current_lap_number, 2)
+        self.assertEqual(telemetry.lap_dict[2].number, 2)
+        # attempt old lap
+        telemetry.start_new_lap(1)
+        self.assertEqual(telemetry.current_lap_number, 2)
+        self.assertEqual(telemetry.lap_dict[2].number, 2)
+
+
 class F12021TelemetryLapTests(TestCase):
 
     def test_clean_frame_outlap_pre_line_negative_distances(self):
