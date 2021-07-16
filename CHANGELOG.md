@@ -3,6 +3,20 @@
 
 ## 2.0.1 - 2021-07-13
 
+Patching UDP bugs related to session and telemetry data.
+
+### Added
+- The app now auto-starts telemetry when an API key is set
+
+### Fixed
+- Telemetry data is now correctly populated for all laps
+
+### Open
+- The Session History data is buggy and resulting in incorrect lap time info for repeated sessions. We're waiting on Codemasters to patch UDP telemetry.
+
+
+## 2.0.1 - 2021-07-13
+
 Early F1 2021 bug fixes.
 
 ### Fixed
