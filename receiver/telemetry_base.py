@@ -117,6 +117,12 @@ class TelemetryLapBase:
         self.frame_dict.pop(frame_number)
         self.frames_popped_list.append(frame_number)
 
+    def process_flashback_event(self, frame_id_flashed_back_to):
+        for frame_id, frame_value in self.frame_dict.copy().items():
+            if frame_id >= frame_id_flashed_back_to:
+                self.frame_dict.pop(frame_id)
+        log.info("Removed frames that were flashbacked away")
+
 
 class TelemetryBase:
     """
@@ -174,3 +180,6 @@ class TelemetryBase:
                 if key != number and key != (number-1):
                     self.lap_dict.pop(key, None)
                     log.info("Telemetry: deleted telemetry of lap %s" % key)
+
+    def process_flashback_event(self, frame_id_flashed_back_to):
+        self.current_lap.process_flashback_event(frame_id_flashed_back_to)

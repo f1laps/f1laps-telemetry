@@ -36,11 +36,9 @@ class PacketEventData(PacketBase):
     ]
 
     def process(self, session):
-        if self.eventStringCode == "FLBK":
-            log.inf0("*******************")
-            log.info("Received FLBK event")
-            log.info("eventDets: %s" % self.eventDetails)
-            log.info("frameID: %s" % self.eventDetails.flashbackFrameIdentifier)
-            log.info("sessionTime: %s" % self.eventDetails.flashbackSessionTime)
-            log.inf0("*******************")
+        if self.eventStringCode == b"FLBK":
+            frame_id = self.eventDetails.flashback.flashbackFrameIdentifier
+            session_time = self.eventDetails.flashback.flashbackSessionTime
+            log.info("Event: Flashback happened to frame %s and session time %s. Deleting frames." % (frame_id, session_time))
+            session.telemetry.process_flashback_event(frame_id)
         return session

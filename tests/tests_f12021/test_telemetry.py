@@ -27,6 +27,24 @@ class F12021TelemetryTests(TestCase):
         self.assertEqual(telemetry.current_lap_number, 2)
         self.assertEqual(telemetry.lap_dict[2].number, 2)
 
+    def test_process_flashback_event(self):
+        telemetry = F12021Telemetry()
+        telemetry.start_new_lap(1)
+        telemetry.set(1000, speed=300, lap_distance=50)
+        telemetry.set(1001, speed=301, lap_distance=51)
+        telemetry.set(1002, speed=302, lap_distance=52)
+        telemetry.set(1003, speed=303, lap_distance=53)
+        self.assertEqual(telemetry.current_lap.frame_dict, {
+            1000: [50, None, 300, None, None, None, None, None],
+            1001: [51, None, 301, None, None, None, None, None],
+            1002: [52, None, 302, None, None, None, None, None],
+            1003: [53, None, 303, None, None, None, None, None],
+        })
+        telemetry.process_flashback_event(1001)
+        self.assertEqual(telemetry.current_lap.frame_dict, {
+            1000: [50, None, 300, None, None, None, None, None],
+        })
+
 
 class F12021TelemetryLapTests(TestCase):
 
