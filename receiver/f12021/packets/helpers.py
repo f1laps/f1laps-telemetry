@@ -2,6 +2,7 @@ from lib.logger import log
 from .base import PacketHeader
 from .session import PacketSessionData
 from .lap import PacketLapData
+from .event import PacketEventData
 from .participants import PacketParticipantsData
 from .setup import PacketCarSetupData
 from .telemetry import PacketCarTelemetryData
@@ -12,6 +13,7 @@ from .session_history import PacketSessionHistoryData
 HeaderFieldsToPacketType = {
      1: PacketSessionData,
      2: PacketLapData,
+     3: PacketEventData,
      4: PacketParticipantsData,
      5: PacketCarSetupData,
      6: PacketCarTelemetryData,
