@@ -1,6 +1,5 @@
 import ctypes
 
-from lib.logger import log
 from .base import PacketBase, PacketHeader
 
 
@@ -64,14 +63,6 @@ class PacketLapData(PacketBase):
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
         session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
-        session = self.update_result_status(session, lap_data.resultStatus)
-        return session
-
-    def update_result_status(self, session, result_status):
-        current_result_status = session.result_status
-        if result_status != current_result_status:
-            log.info("Lap packet: update result status from old %s to new %s" % (current_result_status, result_status))
-        session.result_status = result_status
         return session
 
     def update_telemetry(self, session):

@@ -73,7 +73,7 @@ class PacketSessionHistoryData(PacketBase):
                         sector_3_ms = sector_3_ms,
                         tyre_visual = self.get_tyre_visual(lap_number)
                         )
-                    log.info("Session History: set lap %s history: T %s S1 %s S2 %s S3 %s" % (
+                    log.debug("Session History: set lap %s history: T %s S1 %s S2 %s S3 %s" % (
                         lap_number,
                         udp_lap_data.lapTimeInMS,
                         udp_lap_data.sector1TimeInMS,
