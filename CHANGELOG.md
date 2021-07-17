@@ -1,15 +1,17 @@
 # Change Log
 
 
-## 2.0.1 - 2021-07-13
+## 2.0.2 - 2021-07-18
 
 Patching UDP bugs related to session and telemetry data.
 
 ### Added
 - The app now auto-starts telemetry when an API key is set
+- When you switch from one game to the other, the app now switches in-flight without having to restart
 
 ### Fixed
 - Telemetry data is now correctly populated for all laps
+- Flashbacks are now based on the event data, which leads to more reliable flashback handling
 
 ### Open
 - The Session History data is buggy and resulting in incorrect lap time info for repeated sessions. We're waiting on Codemasters to patch UDP telemetry.
