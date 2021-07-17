@@ -123,12 +123,12 @@ class RaceReceiver(threading.Thread):
                 game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
                 if game_version == "f12020":
                     # Only start processor if it's not set yet or has switched
-                    if not self.processor or not isintance(self.processor, F12020Processor):
+                    if not self.processor or not isinstance(self.processor, F12020Processor):
                         log.info("Detected F1 2020 game version, starting F1 2020 processor.")
                         self.processor = F12020Processor(self.f1laps_api_key, self.telemetry_enabled)
                 elif game_version == "f12021":
                     # Only start processor if it's not set yet or has switched
-                    if not self.processor or not isintance(self.processor, F12021Processor):
+                    if not self.processor or not isinstance(self.processor, F12021Processor):
                         log.info("Detected F1 2021 game version, starting F1 2021 processor.")
                         self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
                 if self.processor:
