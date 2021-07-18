@@ -1,5 +1,6 @@
 import ctypes
 
+from lib.logger import log
 from .base import PacketBase, PacketHeader
 
 
@@ -50,20 +51,58 @@ class PacketLapData(PacketBase):
     ]
 
     def process(self, session):
+        # First, check if it's a new lap
+        lap_number = self.get_lap_number()
+
+        if self.is_new_lap(session, lap_number):
+            # Update previous lap with sector 3 time
+            self.update_previous_lap(session)
+            # Start new lap, which in turn starts telemetry
+            # Then update lap-1 in F1Laps
+            session.start_new_lap(lap_number)
+            session.complete_lap_v2(lap_number-1)
+
+        # Second, update current lap and telemetry
         session = self.update_current_lap(session)
         session = self.update_telemetry(session)
         return session
 
     def update_current_lap(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]
-        lap_number = lap_data.currentLapNum
-        if not session.lap_list.get(lap_number):
-            session.lap_list[lap_number] = {}
-            session.new_lap_started(lap_number)
+        lap_number = self.get_lap_number()
+        #log.info("CLN %s     /      CLD %s" % (lap_number, lap_data.lapDistance))
+        # Update lap list data
+        session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
         session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
+        session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
+        session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
+        session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
         return session
+
+    def update_previous_lap(self, session):
+        lap_data = self.lapData[self.header.playerCarIndex]
+        prev_lap_num = self.get_lap_number() - 1
+        if not session.lap_list.get(prev_lap_num) or \
+           not (session.lap_list[prev_lap_num]["sector_1_ms"] and session.lap_list[prev_lap_num]["sector_2_ms"]):
+            log.info("Lap packet: not updating previous lap %s because it doesn't exist" % prev_lap_num)
+            return
+        # Calculate sector 3 time (so that it adds up to actual last lap time)
+        sector_3_ms = lap_data.lastLapTimeInMS - session.lap_list[prev_lap_num]["sector_1_ms"] - session.lap_list[prev_lap_num]["sector_2_ms"]
+        session.lap_list[prev_lap_num]["sector_3_ms"] = sector_3_ms
+
+
+    def get_lap_number(self):
+        lap_data = self.lapData[self.header.playerCarIndex]
+        return lap_data.currentLapNum
+
+    def get_sector_3_ms(self, lap_data):
+        sector_3_ms = lap_data.currentLapTimeInMS - lap_data.sector1TimeInMS - lap_data.sector2TimeInMS
+        return round(sector_3_ms) if sector_3_ms else None 
+
+    def is_new_lap(self, session, lap_number):
+        return not session.lap_list.get(lap_number)
 
     def update_telemetry(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]

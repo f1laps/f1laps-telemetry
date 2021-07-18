@@ -50,49 +50,50 @@ class F12021Session(SessionBase):
                                                          self.session_udp_uid))
         log.info("*************************************************")
 
+    def set_session_type(self, session_type):
+        self.session_type = session_type
+        self.telemetry.session_type = session_type
+
     def get_track_name(self):
         return Track.get(self.track_id)
 
     def get_session_type(self):
         return SessionType.get(self.session_type)
 
-    def new_lap_started(self, lap_number):
+    def start_new_lap(self, lap_number):
         """ 
         As set by the Lap packet, this method is called 
         when the currentLap number was increased 
         """
+        log.info("Session (via Lap packet): start new lap %s" % lap_number)
+        # Add new lap to lap list
+        self.lap_list[lap_number] = {}
         # Update telemetry
-        # ADD UNIT TEST FOR THIS
         self.telemetry.start_new_lap(lap_number)
 
-    def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
+    def complete_lap_v2(self, lap_number):
         """ 
-        While this method is similar to new_lap_started, it's different
-        It's not called as soon as possible, but when all previous lap data is available
-        There might be a ~1 second gap after the line is crossed
-
-        As set by the SessionHistory packet, this method is called 
-        when the previous lap data was published in the history packet
+        This is meant to be a temporary function as it's now based on the Lap packet again
+        The Session History packet turned out to be too buggy, which is why the original complete_lap
+        isn't used currently anymore.
         """
-        if not self.lap_list.get(lap_number):
-            self.lap_list[lap_number] = {}
-        self.lap_list[lap_number]['lap_number']  = lap_number
-        self.lap_list[lap_number]['sector_1_ms'] = sector_1_ms
-        self.lap_list[lap_number]['sector_2_ms'] = sector_2_ms
-        self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
-        self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
+        log.info("Session (via Lap packet): complete lap %s" % lap_number)
         self.post_process(lap_number)
 
     def post_process(self, lap_number):
-        log.info("Completed lap #%s" % lap_number)
         # Send to F1Laps
-        if self.lap_should_be_sent_to_f1laps(lap_number):
+        send_to_f1_laps = self.lap_should_be_sent_to_f1laps(lap_number)
+        if not send_to_f1_laps:
+            log.info("Not updating in F1Laps because of missing data: %s" % self.lap_list.get(lap_number))
+        else:
+            log.info("Session: post process lap %s" % lap_number)
             if self.lap_should_be_sent_as_session():
                 self.send_session_to_f1laps()
             else:
                 self.send_lap_to_f1laps(lap_number)
 
     def complete_session(self):
+        log.info("Session: complete session")
         self.send_session_to_f1laps()
 
     def lap_should_be_sent_to_f1laps(self, lap_number):
@@ -104,7 +105,18 @@ class F12021Session(SessionBase):
     def lap_should_be_sent_as_session(self):
         return bool(self.session_type and self.get_session_type() != 'time_trial')
 
+    def is_valid_for_f1laps(self):
+        if not self.session_type:
+            log.warning("Attempted to send session to F1Laps without session type: %s" % self)
+            return False
+        if not self.team_id:
+            log.warning("Attempted to send session to F1Laps without team ID: %s" % self)
+            return False
+        return True
+
     def send_lap_to_f1laps(self, lap_number):
+        if not self.is_valid_for_f1laps():
+            return 
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
         response = api.lap_create(
             track_id              = self.track_id,
@@ -124,6 +136,8 @@ class F12021Session(SessionBase):
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
 
     def send_session_to_f1laps(self):
+        if not self.is_valid_for_f1laps():
+            return 
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
         success, self.f1_laps_session_id = api.session_create_or_update(
             f1laps_session_id = self.f1_laps_session_id,
@@ -160,6 +174,30 @@ class F12021Session(SessionBase):
                         "telemetry_data_string": self.get_lap_telemetry_data(lap_number)
                     })
         return lap_times
+
+    def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
+        """ 
+        While this method is similar to new_lap_started, it's different
+        It's not called as soon as possible, but when all previous lap data is available
+        There might be a ~1 second gap after the line is crossed
+
+        As set by the SessionHistory packet, this method is called 
+        when the previous lap data was published in the history packet
+        """
+        # Temp hack: there is a bug in the telemetry that the SessionHistory gets sent with 
+        # laps from the last session. This prevents the telemetry from being started by
+        # our lap packet. So we start it here too. 
+        # Remove this once the bug is fixed
+        self.telemetry.start_new_lap(lap_number)
+        log.info("Session (via History packet): complete lap %s" % lap_number)
+        if not self.lap_list.get(lap_number):
+            self.lap_list[lap_number] = {}
+        self.lap_list[lap_number]['lap_number']  = lap_number
+        self.lap_list[lap_number]['sector_1_ms'] = sector_1_ms
+        self.lap_list[lap_number]['sector_2_ms'] = sector_2_ms
+        self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
+        self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
+        self.post_process(lap_number)
 
 
 

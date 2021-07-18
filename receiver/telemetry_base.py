@@ -30,9 +30,17 @@ class TelemetryLapBase:
     Stores current lap telemetry data in memory
     """
 
-    def __init__(self, number):
+    # Time trial lets you restart a lap
+    # Other game modes have outlaps (TT doesnt)
+    # This distinction is important because for outlaps, we dont want the outlap frames
+    # But for restart, we want the new lap frames
+    SESSION_TYPES_WITHOUT_OUTLAP = [13]
+
+    def __init__(self, number, session_type=None):
         # Current lap number
         self.number = number
+
+        self.session_type = session_type
 
         # Each frame is a key in this dict
         # Each holds a list of the telemetry values
@@ -53,49 +61,89 @@ class TelemetryLapBase:
         current_distance = None
         if not frame:
             return
+
         # Check if we popped this frame before - if so, don't populate it again
         if frame_number in self.frames_popped_list:
             self.frame_dict.pop(frame_number)
             return 
-        if frame[KEY_INDEX_MAP["lap_distance"]]:
-            current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
-            if not current_distance:
-                return
 
-            if not isinstance(current_distance, float) and not isinstance(current_distance, int):
-                return
+        # Get lap distance of current frame
+        current_distance = frame[KEY_INDEX_MAP["lap_distance"]]
 
-            # Delete frames that are pre session FIRST LINE CROSS start
-            if current_distance < 0:
-                self.frame_dict.pop(frame_number)
-                self.frames_popped_list.append(frame_number)
-                return
+        # The telemetry packet doesn't set lap distance, so we may not have distance yet - return if so
+        if not current_distance:
+            return
 
-            # If we have current and last lap distance, check that we're incrementing the distance
-            elif self.last_lap_distance:    
-                # Check if last distance was higher - this means something UNEXPECTED happened
-                if self.last_lap_distance > current_distance:
+        # This should never happen, but let's make sure that distance is a number
+        if not isinstance(current_distance, float) and not isinstance(current_distance, int):
+            return
 
-                    # First, if current distance is SLIGHTLY less than last distance, we assume its a FLASHBACK
-                    # We pop any frame that has a greater distance
-                    if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
-                        log.info("Assuming a flashback happened - deleting all future frames")
-                        for frame_key, frame_value in self.frame_dict.copy().items():
-                            if frame_value[KEY_INDEX_MAP["lap_distance"]]\
-                             and frame_value[KEY_INDEX_MAP["lap_distance"]] >= current_distance\
-                             and frame_key != frame_number:
-                                self.frame_dict.pop(frame_key)
+        # Reset telemetry when we are pre session FIRST LINE CROSS start
+        if current_distance < 0:
+            self.frame_dict = {}
+            # In F1 2021, in an outlap in TT, the first frame sends a positive value (e.g. distance of 126)
+            # Then switches to negative values as expected in an outlap
+            # So we need to manually reset the last lap distance to None here
+            self.last_lap_distance = None
+            return
 
-                    # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
-                    # And lap distance pre line cross is NOT negative (also weird!)
-                    # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
-                    elif current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
-                        log.info("Assuming a new lap started based on distance delta - killing all old frames")
+        # If we have current and last lap distance, check that we're incrementing the distance
+        if self.last_lap_distance:    
+
+            # Check if last distance was higher - this means something UNEXPECTED happened
+            if self.last_lap_distance > current_distance:
+
+                # First, if current distance is SLIGHTLY less than last distance, we assume its a FLASHBACK
+                # We pop any frame that has a greater distance
+                #if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
+                #    log.info("Assuming a flashback happened - passing, but would have deleted frames in F1 2020 (current distance %s, last distance %s, delta %s)" % \
+                #            (current_distance, self.last_lap_distance, (self.last_lap_distance - current_distance)))
+                #    pass
+
+                # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
+                # And lap distance pre line cross is NOT negative (also weird!)
+                # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
+                if current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                    # New in F1 2021:
+                    # Sometimes, the Lap Package gets sent after finish line cross (inlap) without incrementing the lapnumber
+                    # In that case, the following code would remove the entire last lap. We dont want that. 
+                    # So we add the condition that we only clean the pre-line frames if that pre-line frame_dict didn't contain
+                    # frames that are early in the lap (meaning it wasnt a full lap)
+                    frame_dict_sorted_by_distance = sorted(self.frame_dict.copy().items(), key=lambda kv: kv[KEY_INDEX_MAP["lap_distance"]])
+                    first_frame_distance_frame, first_frame_distance_values = frame_dict_sorted_by_distance[0]
+                    first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]]
+                    if self.session_type not in self.SESSION_TYPES_WITHOUT_OUTLAP and first_frame_distance_value < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                        log.info("Assuming an outlap started based on distance delta - killing all new frames (current distance %s, last distance %s, first frame distance %s)" % \
+                            (current_distance, self.last_lap_distance, first_frame_distance_value))
+                        self.remove_frame(frame_number)
+                        # Important to return here to not set the last_lap_distance to the current_distance
+                        return
+                    else:
+                        log.info("Assuming a new lap started based on distance delta - killing all old frames (current distance %s, last distance %s, first frame distance %s)" % \
+                            (current_distance, self.last_lap_distance, first_frame_distance_value))
                         self.frame_dict = {frame_number: frame}
         
         # Set the last distance value for future frames
         self.last_lap_distance = current_distance
-        #log.info("Frame %s: last distance %s | CD %s" % (frame_number, self.last_lap_distance, current_distance))
+
+    def remove_frame(self, frame_number):
+        self.frame_dict.pop(frame_number)
+        self.frames_popped_list.append(frame_number)
+
+    def process_flashback_event(self, frame_id_flashed_back_to):
+        current_frame_max = max(self.frame_dict) if self.frame_dict else None
+        deleted_frame_count = 0
+        for frame_id, frame_value in self.frame_dict.copy().items():
+            if frame_id >= frame_id_flashed_back_to:
+                deleted_frame_count += 1
+                self.frame_dict.pop(frame_id)
+        # Reset last lap distance
+        self.last_lap_distance = None
+        log.info("Removed frames that were flashbacked away (flbk to %s; max was %s; deleted %s)" % (
+            frame_id_flashed_back_to,
+            current_frame_max,
+            deleted_frame_count
+            ))
 
 
 class TelemetryBase:
@@ -104,9 +152,10 @@ class TelemetryBase:
     """
     TelemetryLapModel = TelemetryLapBase
 
-    def __init__(self):
+    def __init__(self, session_type=None):
         self.current_lap_number = None
         self.lap_dict = {}
+        self.session_type = session_type
 
     @property
     def current_lap(self):
@@ -141,16 +190,19 @@ class TelemetryBase:
 
     def start_new_lap(self, number):
         """ New lap started in game """
-        log.info("Start new lap %s" % number)
-        if self.current_lap_number and number == self.current_lap_number:
+        log.info("Telemetry: start new lap %s" % number)
+        if number in self.lap_dict.keys():
             log.info("TelemetryLap number %s already started" % number)
             return None
         # Update current lap number and add to dict
         self.current_lap_number = number
-        self.lap_dict[number] = self.TelemetryLapModel(number)
+        self.lap_dict[number] = self.TelemetryLapModel(number, session_type=self.session_type)
         # Remove all laps that are not current or last
         if len(self.lap_dict) > 2:
             for key in list(self.lap_dict):
                 if key != number and key != (number-1):
                     self.lap_dict.pop(key, None)
-                    log.debug("Deleted telemetry of lap %s" % key)
+                    log.info("Telemetry: deleted telemetry of lap %s" % key)
+
+    def process_flashback_event(self, frame_id_flashed_back_to):
+        self.current_lap.process_flashback_event(frame_id_flashed_back_to)

@@ -1,6 +1,23 @@
 # Change Log
 
 
+## 2.0.2 - 2021-07-18
+
+Patching UDP bugs related to session and telemetry data.
+
+### Changed
+- Deprecated Session History packet usage because it's unreliable
+- Log Flashback event data because it seems inconsistent
+
+### Added
+- The app now auto-starts telemetry when an API key is set
+- When you switch from one game to the other, the app now switches in-flight without having to restart
+
+### Fixed
+- Telemetry data is now correctly populated for all laps (added session type to telemetry)
+- Flashbacks are now based on the event data, which leads to more reliable flashback handling
+
+
 ## 2.0.1 - 2021-07-13
 
 Early F1 2021 bug fixes.

@@ -94,6 +94,9 @@ class MainWindow(QWidget):
         self.check_version()
         # Track if we have an active receiver
         self.session = TelemetrySession()
+        # Auto-start app if api key is set
+        if self.api_key:
+            self.start_button_click()
 
     def init_ui(self):
         # 1) Logo & heading

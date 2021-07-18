@@ -5,6 +5,17 @@ class SessionBase:
     weather_ids = []
     telemetry_enabled = True
 
+    def __str__(self):
+        return "%s Session %s (%s, team %s, type %s, %s, %s laps)" % (
+            self.game_version.upper(),
+            self.session_udp_uid,
+            self.get_track_name(),
+            self.team_id,
+            self.get_session_type(),
+            "online" if self.is_online_game else "offline",
+            len(self.lap_list) if self.lap_list else 0
+            )
+
     def map_weather_ids_to_f1laps_token(self):
         """
         Map UDP weather IDs to F1Laps weather token

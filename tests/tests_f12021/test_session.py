@@ -5,6 +5,15 @@ from receiver.f12021.session import F12021Session
 
 
 class F12021SessionTest(TestCase):
+    def test_string(self):
+        session = F12021Session(123)
+        session.team_id = 1
+        session.lap_list = {2: []}
+        self.assertEqual(str(session), "F12021 Session 123 (None, team 1, type None, offline, 1 laps)")
+        session.track_id = 2
+        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type None, offline, 1 laps)")
+        session.session_type = 6
+        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type qualifying_2, offline, 1 laps)")
 
     @patch('receiver.f12021.session.F12021Session.post_process')
     def test_complete_lap(self, mock_post_process):
@@ -45,6 +54,7 @@ class F12021SessionTest(TestCase):
         session = F12021Session(123)
         session.track_id = 10
         session.team_id = 2
+        session.session_type = 13
         session.lap_list = {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'sector_3_ms': 33333, 'tyre_compound_visual': 16}}
         self.assertEqual(session.send_lap_to_f1laps(1), None)
         mock_api.assert_called_with(track_id=10, team_id=2, conditions='dry', game_mode='time_trial', sector_1_time=11111, sector_2_time=22222, sector_3_time=33333, setup_data={}, is_valid=True, telemetry_data_string=None)
@@ -55,10 +65,11 @@ class F12021SessionTest(TestCase):
         session = F12021Session(123)
         session.track_id = 10
         session.team_id = 2
+        session.session_type = 10
         session.lap_list = {}
         session.send_session_to_f1laps()
         self.assertEqual(session.f1_laps_session_id, "vettel2021")
-        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type=None, finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False, ai_difficulty=None)
+        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type='race', finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False, ai_difficulty=None)
 
 
 if __name__ == '__main__':
