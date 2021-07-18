@@ -53,6 +53,7 @@ class PacketLapData(PacketBase):
     def process(self, session):
         # First, check if it's a new lap
         lap_number = self.get_lap_number()
+
         if self.is_new_lap(session, lap_number):
             # Update previous lap with sector 3 time
             self.update_previous_lap(session)
@@ -69,6 +70,7 @@ class PacketLapData(PacketBase):
     def update_current_lap(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]
         lap_number = self.get_lap_number()
+        log.info("CLN %s     /      CLD %s" % (lap_number, lap_data.lapDistance))
         # Update lap list data
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition

@@ -50,6 +50,10 @@ class F12021Session(SessionBase):
                                                          self.session_udp_uid))
         log.info("*************************************************")
 
+    def set_session_type(self, session_type):
+        self.session_type = session_type
+        self.telemetry.session_type = session_type
+
     def get_track_name(self):
         return Track.get(self.track_id)
 
@@ -77,12 +81,12 @@ class F12021Session(SessionBase):
         self.post_process(lap_number)
 
     def post_process(self, lap_number):
-        log.info("Session: post process lap %s" % lap_number)
         # Send to F1Laps
         send_to_f1_laps = self.lap_should_be_sent_to_f1laps(lap_number)
         if not send_to_f1_laps:
             log.info("Not updating in F1Laps because of missing data: %s" % self.lap_list.get(lap_number))
         else:
+            log.info("Session: post process lap %s" % lap_number)
             if self.lap_should_be_sent_as_session():
                 self.send_session_to_f1laps()
             else:
