@@ -5,6 +5,15 @@ from receiver.f12021.session import F12021Session
 
 
 class F12021SessionTest(TestCase):
+    def test_string(self):
+        session = F12021Session(123)
+        session.team_id = 1
+        session.lap_list = {2: []}
+        self.assertEqual(str(session), "F12021 Session 123 (None, team 1, type None, offline, 1 laps)")
+        session.track_id = 2
+        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type None, offline, 1 laps)")
+        session.session_type = 6
+        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type qualifying_2, offline, 1 laps)")
 
     @patch('receiver.f12021.session.F12021Session.post_process')
     def test_complete_lap(self, mock_post_process):

@@ -94,6 +94,8 @@ class PacketSessionData(PacketBase):
         session = F12021Session(session_uid=self.header.sessionUID)
         session.session_udp_uid = self.header.sessionUID
         session.session_type = self.sessionType
+        if not self.sessionType:
+            log.warning("Got Session packet without sessionType")
         session.track_id = self.trackId
         session.ai_difficulty = self.aiDifficulty
         if self.networkGame == 1:
@@ -112,6 +114,7 @@ class PacketSessionData(PacketBase):
     def update_session(self, session):
         if self.weather not in session.weather_ids:
             session.weather_ids.append(self.weather)
+        session.session_type = self.sessionType
         return session
 
 

@@ -66,21 +66,21 @@ class PacketSessionHistoryData(PacketBase):
                 if lap_number not in lap_dict or lap_dict[lap_number].get("sector_3_ms") is None:
                     udp_lap_data = self.lapHistoryData[lap_number-1]
                     sector_1_ms, sector_2_ms, sector_3_ms = self.clean_sectors(udp_lap_data)
-                    session.complete_lap(
-                        lap_number = lap_number,
-                        sector_1_ms = sector_1_ms,
-                        sector_2_ms = sector_2_ms,
-                        sector_3_ms = sector_3_ms,
-                        tyre_visual = self.get_tyre_visual(lap_number)
-                        )
-                    log.debug("Session History: set lap %s history: T %s S1 %s S2 %s S3 %s" % (
+                    # Disabling SessionHistory packet for now as it has major bugs
+                    #session.complete_lap(
+                    #    lap_number = lap_number,
+                    #    sector_1_ms = sector_1_ms,
+                    #    sector_2_ms = sector_2_ms,
+                    #    sector_3_ms = sector_3_ms,
+                    #    tyre_visual = self.get_tyre_visual(lap_number)
+                    #    )
+                    log.info("Session History: set lap %s history: Total %s S1 %s S2 %s S3 %s" % (
                         lap_number,
                         udp_lap_data.lapTimeInMS,
                         udp_lap_data.sector1TimeInMS,
                         udp_lap_data.sector2TimeInMS,
                         udp_lap_data.sector3TimeInMS
                         ))
-                    log.debug("Updated lap dict to %s" % session.lap_list)
         return session
 
     def clean_sectors(self, udp_lap_data):

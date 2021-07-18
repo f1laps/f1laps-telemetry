@@ -118,10 +118,17 @@ class TelemetryLapBase:
         self.frames_popped_list.append(frame_number)
 
     def process_flashback_event(self, frame_id_flashed_back_to):
+        current_frame_max = max(self.frame_dict) if self.frame_dict else None
+        deleted_frame_count = 0
         for frame_id, frame_value in self.frame_dict.copy().items():
             if frame_id >= frame_id_flashed_back_to:
-                self.frame_dict.pop(frame_id)
-        log.info("Removed frames that were flashbacked away")
+                deleted_frame_count += 1
+                self.remove_frame(frame_id)
+        log.info("Removed frames that were flashbacked away (flbk to %s; max was %s; deleted %s)" % (
+            frame_id_flashed_back_to,
+            current_frame_max,
+            deleted_frame_count
+            ))
 
 
 class TelemetryBase:
