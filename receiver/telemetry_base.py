@@ -78,9 +78,9 @@ class TelemetryLapBase:
         if not isinstance(current_distance, float) and not isinstance(current_distance, int):
             return
 
-        # Delete frames that are pre session FIRST LINE CROSS start
+        # Reset telemetry when we are pre session FIRST LINE CROSS start
         if current_distance < 0:
-            self.remove_frame(frame_number)
+            self.frame_dict = {}
             # In F1 2021, in an outlap in TT, the first frame sends a positive value (e.g. distance of 126)
             # Then switches to negative values as expected in an outlap
             # So we need to manually reset the last lap distance to None here
