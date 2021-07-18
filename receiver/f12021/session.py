@@ -105,7 +105,18 @@ class F12021Session(SessionBase):
     def lap_should_be_sent_as_session(self):
         return bool(self.session_type and self.get_session_type() != 'time_trial')
 
+    def is_valid_for_f1laps(self):
+        if not self.session_type:
+            log.warning("Attempted to send session to F1Laps without session type: %s" % self)
+            return False
+        if not self.team_id:
+            log.warning("Attempted to send session to F1Laps without team ID: %s" % self)
+            return False
+        return True
+
     def send_lap_to_f1laps(self, lap_number):
+        if not self.is_valid_for_f1laps():
+            return 
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
         response = api.lap_create(
             track_id              = self.track_id,
@@ -125,8 +136,8 @@ class F12021Session(SessionBase):
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
 
     def send_session_to_f1laps(self):
-        if not self.session_type:
-            log.warning("Attempted to send session to F1Laps without session type: %s" % self)
+        if not self.is_valid_for_f1laps():
+            return 
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
         success, self.f1_laps_session_id = api.session_create_or_update(
             f1laps_session_id = self.f1_laps_session_id,

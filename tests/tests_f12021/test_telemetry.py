@@ -34,6 +34,7 @@ class F12021TelemetryTests(TestCase):
         telemetry.set(1001, speed=301, lap_distance=51)
         telemetry.set(1002, speed=302, lap_distance=52)
         telemetry.set(1003, speed=303, lap_distance=53)
+        self.assertEqual(telemetry.current_lap.last_lap_distance, 53)
         self.assertEqual(telemetry.current_lap.frame_dict, {
             1000: [50, None, 300, None, None, None, None, None],
             1001: [51, None, 301, None, None, None, None, None],
@@ -44,6 +45,9 @@ class F12021TelemetryTests(TestCase):
         self.assertEqual(telemetry.current_lap.frame_dict, {
             1000: [50, None, 300, None, None, None, None, None],
         })
+        self.assertEqual(telemetry.current_lap.last_lap_distance, None)
+        telemetry.set(1001, speed=301, lap_distance=52)
+        self.assertEqual(telemetry.current_lap.last_lap_distance, 52)
 
 
 class F12021TelemetryLapTests(TestCase):

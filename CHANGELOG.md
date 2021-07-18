@@ -14,7 +14,7 @@ Patching UDP bugs related to session and telemetry data.
 - When you switch from one game to the other, the app now switches in-flight without having to restart
 
 ### Fixed
-- Telemetry data is now correctly populated for all laps
+- Telemetry data is now correctly populated for all laps (added session type to telemetry)
 - Flashbacks are now based on the event data, which leads to more reliable flashback handling
 
 
