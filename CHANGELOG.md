@@ -1,6 +1,16 @@
 # Change Log
 
 
+## 2.0.3 - 2021-07-XX
+
+Fixed minor telemetry data and logging issues
+
+### Fixed
+- Telemetry data is correctly removing practice outlaps
+- Unsupported F1 game versions are handled gracefully
+- Session History log line is muted
+
+
 ## 2.0.2 - 2021-07-18
 
 Patching UDP bugs related to session and telemetry data.

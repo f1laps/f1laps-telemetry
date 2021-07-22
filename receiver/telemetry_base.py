@@ -92,15 +92,7 @@ class TelemetryLapBase:
 
             # Check if last distance was higher - this means something UNEXPECTED happened
             if self.last_lap_distance > current_distance:
-
-                # First, if current distance is SLIGHTLY less than last distance, we assume its a FLASHBACK
-                # We pop any frame that has a greater distance
-                #if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
-                #    log.info("Assuming a flashback happened - passing, but would have deleted frames in F1 2020 (current distance %s, last distance %s, delta %s)" % \
-                #            (current_distance, self.last_lap_distance, (self.last_lap_distance - current_distance)))
-                #    pass
-
-                # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
+                # We came out of the garage, which doesnt increment the lap counter (weird!)
                 # And lap distance pre line cross is NOT negative (also weird!)
                 # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
                 if current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
