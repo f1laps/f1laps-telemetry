@@ -29,5 +29,5 @@ def parse_game_version_from_udp_packet(packet):
     Output: Game Version as string
     """
     header = CrossGamePacketHeader.from_buffer_copy(packet)
-    return UDP_PACKET_FORMAT_TO_GAME_VERSION_MAP[header.packetFormat]
+    return UDP_PACKET_FORMAT_TO_GAME_VERSION_MAP.get(header.packetFormat)
     

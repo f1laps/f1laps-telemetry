@@ -111,7 +111,7 @@ class TelemetryLapBase:
                     # frames that are early in the lap (meaning it wasnt a full lap)
                     frame_dict_sorted_by_distance = sorted(self.frame_dict.copy().items(), key=lambda kv: kv[KEY_INDEX_MAP["lap_distance"]])
                     first_frame_distance_frame, first_frame_distance_values = frame_dict_sorted_by_distance[0]
-                    first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]]
+                    first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]] or 0
                     if self.session_type not in self.SESSION_TYPES_WITHOUT_OUTLAP and first_frame_distance_value < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
                         log.info("Assuming an outlap started based on distance delta - killing all new frames (current distance %s, last distance %s, first frame distance %s)" % \
                             (current_distance, self.last_lap_distance, first_frame_distance_value))
