@@ -92,15 +92,7 @@ class TelemetryLapBase:
 
             # Check if last distance was higher - this means something UNEXPECTED happened
             if self.last_lap_distance > current_distance:
-
-                # First, if current distance is SLIGHTLY less than last distance, we assume its a FLASHBACK
-                # We pop any frame that has a greater distance
-                #if (self.last_lap_distance - current_distance) < self.MAX_FLASHBACK_DISTANCE_METERS:
-                #    log.info("Assuming a flashback happened - passing, but would have deleted frames in F1 2020 (current distance %s, last distance %s, delta %s)" % \
-                #            (current_distance, self.last_lap_distance, (self.last_lap_distance - current_distance)))
-                #    pass
-
-                # There's another case: we came out of the garage, which doesnt increment the lap counter (weird!)
+                # We came out of the garage, which doesnt increment the lap counter (weird!)
                 # And lap distance pre line cross is NOT negative (also weird!)
                 # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
                 if current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
@@ -111,7 +103,7 @@ class TelemetryLapBase:
                     # frames that are early in the lap (meaning it wasnt a full lap)
                     frame_dict_sorted_by_distance = sorted(self.frame_dict.copy().items(), key=lambda kv: kv[KEY_INDEX_MAP["lap_distance"]])
                     first_frame_distance_frame, first_frame_distance_values = frame_dict_sorted_by_distance[0]
-                    first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]]
+                    first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]] or 0
                     if self.session_type not in self.SESSION_TYPES_WITHOUT_OUTLAP and first_frame_distance_value < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
                         log.info("Assuming an outlap started based on distance delta - killing all new frames (current distance %s, last distance %s, first frame distance %s)" % \
                             (current_distance, self.last_lap_distance, first_frame_distance_value))

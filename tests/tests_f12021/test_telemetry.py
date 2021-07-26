@@ -102,6 +102,18 @@ class F12021TelemetryLapTests(TestCase):
             1005: [15, None, 305, None, None, None, None, None],
         })
 
+    def test_clean_frame_outlap_pre_line_positive_distances_no_first_distance(self):
+        """ 
+        Same as above, but without a first lap distance because the first frame didn't get a lap packet in time
+        """
+        telemetry = F12021Telemetry()
+        telemetry.start_new_lap(1)
+        tl = telemetry.current_lap
+        tl.last_lap_distance = 4500 # greater than distance we set next
+        telemetry.set(1000, speed=300)
+        telemetry.set(1001, speed=300, lap_distance=100)
+        self.assertEqual(tl.frame_dict, {1000: [None, None, 300, None, None, None, None, None]})
+
     def test_clean_frame_inlap_post_line_positive_distances(self):
         """ 
         In an inlap after race end, when the lap distance is positive, clean any new frames

@@ -131,6 +131,8 @@ class RaceReceiver(threading.Thread):
                     if not self.processor or not isinstance(self.processor, F12021Processor):
                         log.info("Detected F1 2021 game version, starting F1 2021 processor.")
                         self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
+                else:
+                    log.info("Unknown packet or game version.")
                 if self.processor:
                     self.processor.process(incoming_udp_packet)
             except Exception as ex:
