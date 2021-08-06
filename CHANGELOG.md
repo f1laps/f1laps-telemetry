@@ -1,6 +1,17 @@
 # Change Log
 
 
+## 2.0.4 - INSERTDATEHERE
+
+Supporting UDP Broadcast mode & fixing last lap import issue.
+
+### Fixed
+- The last lap of a 25%+ race now gets imported correctly
+
+## Added
+- Support for UDP Broadcast mode
+
+
 ## 2.0.3 - 2021-07-26
 
 Fixed minor telemetry data and logging issues
