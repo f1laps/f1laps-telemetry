@@ -46,7 +46,9 @@ class PacketCarTelemetryData(PacketBase):
         return session
 
     def update_telemetry(self, session):
-        telemetry_data = self.carTelemetryData[self.header.playerCarIndex]
+        telemetry_data = self.carTelemetryData.get(self.header.playerCarIndex)
+        if not telemetry_data:
+            return None
         frame = self.header.frameIdentifier
         session.telemetry.set(frame, speed    = telemetry_data.speed,
                                      brake    = telemetry_data.brake,

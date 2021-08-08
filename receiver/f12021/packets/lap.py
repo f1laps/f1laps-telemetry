@@ -53,16 +53,21 @@ class PacketLapData(PacketBase):
     ]
 
     def process(self, session):
-        # First, check if it's a new lap
+        # Get lap number and distance
         lap_number = self.get_lap_number()
+        if not lap_number:
+            # If we can't retrieve lap number, we can't do anything here
+            log.info("Can't retrieve lap number from lap packet - not processing")
+            return None
         lap_distance = self.get_lap_distance()
 
+        # Handle outlaps - essentially ignore everything, just update lap before outlap
         is_outlap = self.is_outlap(session, lap_number)
-
         if is_outlap:
             session = self.update_current_lap(session)
             return session
 
+        # Handle new laps
         if self.is_new_lap(session, lap_number):
             # Update previous lap with sector 3 time
             self.update_previous_lap(session, lap_number, is_outlap)
@@ -71,7 +76,7 @@ class PacketLapData(PacketBase):
             # Start new lap, which in turn starts telemetry
             session.start_new_lap(lap_number)
 
-        # Second, update current lap and telemetry
+        # Update current lap and telemetry
         session = self.update_current_lap(session)
         session = self.update_telemetry(session)
         return session
@@ -101,7 +106,9 @@ class PacketLapData(PacketBase):
         session.lap_list[prev_lap_num]["sector_3_ms"] = sector_3_ms
 
     def get_lap_number(self):
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData.get(self.header.playerCarIndex)
+        if not lap_data:
+            return None
         return lap_data.currentLapNum
 
     def get_sector_3_ms(self, lap_data):

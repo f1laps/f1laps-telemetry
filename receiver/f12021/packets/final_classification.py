@@ -33,7 +33,9 @@ class PacketFinalClassificationData(PacketBase):
         return session
 
     def set_results(self, session):
-        classification_data     = self.classificationData[self.header.playerCarIndex]
+        classification_data     = self.classificationData.get(self.header.playerCarIndex)
+        if not classification_data:
+            return session
         session.finish_position = classification_data.position
         session.result_status   = classification_data.resultStatus
         session.points          = classification_data.points
