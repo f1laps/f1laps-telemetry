@@ -37,5 +37,6 @@ class PacketParticipantsData(PacketBase):
         if session.team_id:
             # Don't update sessions with existing team_id
             return session
-        session.team_id = self.participants[self.header.playerCarIndex].teamId
+        udp_team_id = self.participants[self.header.playerCarIndex].teamId
+        session.team_id = udp_team_id
         return session

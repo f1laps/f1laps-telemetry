@@ -7,6 +7,7 @@ Supporting UDP Broadcast mode & fixing last lap import issue.
 
 ### Fixed
 - The last lap of a 25%+ race now gets imported correctly
+- Using the F1 2021 Mercedes in a Session not gets synced correctly
 
 ## Added
 - Support for UDP Broadcast mode

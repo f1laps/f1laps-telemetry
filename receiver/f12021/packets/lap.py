@@ -3,6 +3,8 @@ import ctypes
 from lib.logger import log
 from .base import PacketBase, PacketHeader
 
+MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
+
 
 class LapData(PacketBase):
 
@@ -53,17 +55,19 @@ class PacketLapData(PacketBase):
     def process(self, session):
         # First, check if it's a new lap
         lap_number = self.get_lap_number()
+        lap_distance = self.get_lap_distance()
 
-        is_outlap = self.is_outlap(lap_number)
+        is_outlap = self.is_outlap(session, lap_number)
 
-        if self.is_new_lap(session, lap_number) or is_outlap:
+        if is_outlap:
+            session = self.update_current_lap(session)
+            return session
+
+        if self.is_new_lap(session, lap_number):
             # Update previous lap with sector 3 time
             self.update_previous_lap(session, lap_number, is_outlap)
             # Push lap-1 to F1Laps
             session.complete_lap_v2(lap_number-1)
-            if is is_outlap:
-                # Don't do anything else 
-                return session
             # Start new lap, which in turn starts telemetry
             session.start_new_lap(lap_number)
 
@@ -75,7 +79,6 @@ class PacketLapData(PacketBase):
     def update_current_lap(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]
         lap_number = self.get_lap_number()
-        #log.info("CLN %s     /      CLD %s" % (lap_number, lap_data.lapDistance))
         # Update lap list data
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
@@ -108,14 +111,23 @@ class PacketLapData(PacketBase):
     def is_new_lap(self, session, lap_number):
         return not session.lap_list.get(lap_number)
 
-    def is_outlap(self, lap_number):
+    def is_outlap(self, session, lap_number):
         # For race outlaps (lap after last lap), the lap number doesn't increment
         # We use the following test to ignore the outlap
         lap_list = session.lap_list.get(lap_number)
+        current_distance = self.get_lap_distance()
+        # If we're in the middle of a lap, it's not an outlap
+        if not current_distance or not current_distance < MAX_DISTANCE_COUNT_AS_NEW_LAP:
+            return False
+        # If we're in the first x meters of a lap, but also have all sector data -- it's an outlap
         if lap_list and lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms"):
             log.info("Assuming this lap is an outlap - ignoring data")
             return True
+        return False
 
+    def get_lap_distance(self):
+        lap_data = self.lapData[self.header.playerCarIndex]
+        return lap_data.lapDistance
 
     def update_telemetry(self, session):
         lap_data = self.lapData[self.header.playerCarIndex]

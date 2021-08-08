@@ -93,11 +93,11 @@ class RaceReceiver(threading.Thread):
         # The SO_REUSEADDR setting allows us to reuse sockets
         # Which may be necessary when a user restarts sessions
         # See https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ for more details
-        if False and self.use_udp_broadcast:
+        if True or self.use_udp_broadcast:
             # Enable broadcasting mode
             log.info("Using UDP broadcast mode")
             new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)    
-            new_socket.bind(("<broadcast>", self.host_port))
+            new_socket.bind(("", self.host_port))
         else:
             log.info("Using UDP unicast mode")
             new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
