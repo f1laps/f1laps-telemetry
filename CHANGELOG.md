@@ -1,13 +1,14 @@
 # Change Log
 
 
-## 2.0.4 - INSERTDATEHERE
+## 2.1.0 - INSERTDATEHERE
 
-Supporting UDP Broadcast mode & fixing last lap import issue.
+Now supporting UDP Broadcast mode
 
 ### Fixed
-- The last lap of a 25%+ race now gets imported correctly
+- The last lap of a race now gets imported correctly
 - Using the F1 2021 Mercedes in a Session not gets synced correctly
+- Reduced noisy logs for invalid player index key and for API errors
 
 ## Added
 - Support for UDP Broadcast mode
