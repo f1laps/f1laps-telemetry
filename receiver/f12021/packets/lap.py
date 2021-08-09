@@ -106,8 +106,9 @@ class PacketLapData(PacketBase):
         session.lap_list[prev_lap_num]["sector_3_ms"] = sector_3_ms
 
     def get_lap_number(self):
-        lap_data = self.lapData.get(self.header.playerCarIndex)
-        if not lap_data:
+        try:
+            lap_data = self.lapData[self.header.playerCarIndex]
+        except:
             return None
         return lap_data.currentLapNum
 

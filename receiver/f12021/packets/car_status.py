@@ -59,8 +59,9 @@ class PacketCarStatusData(PacketBase):
         return self.update_tyre_visual(session)
 
     def update_tyre_visual(self, session):
-        car_status = self.carStatusData.get(self.header.playerCarIndex)
-        if not car_status:
+        try:
+            car_status = self.carStatusData[self.header.playerCarIndex]
+        except:
             return session
         if session.lap_list:
             current_lap = max(session.lap_list)
