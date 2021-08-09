@@ -70,7 +70,7 @@ class PacketLapData(PacketBase):
         # Handle new laps
         if self.is_new_lap(session, lap_number):
             # Update previous lap with sector 3 time
-            self.update_previous_lap(session, lap_number, is_outlap)
+            self.update_previous_lap(session, lap_number)
             # Push lap-1 to F1Laps
             session.complete_lap_v2(lap_number-1)
             # Start new lap, which in turn starts telemetry
@@ -94,9 +94,9 @@ class PacketLapData(PacketBase):
         session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
         return session
 
-    def update_previous_lap(self, session, lap_number, is_outlap=False):
+    def update_previous_lap(self, session, lap_number):
         lap_data = self.lapData[self.header.playerCarIndex]
-        prev_lap_num = lap_number - 1 if not is_outlap else lap_number
+        prev_lap_num = lap_number - 1
         if not session.lap_list.get(prev_lap_num) or \
            not (session.lap_list[prev_lap_num]["sector_1_ms"] and session.lap_list[prev_lap_num]["sector_2_ms"]):
             log.info("Lap packet: not updating previous lap %s because it doesn't exist" % prev_lap_num)
