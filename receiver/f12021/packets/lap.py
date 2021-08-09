@@ -71,10 +71,10 @@ class PacketLapData(PacketBase):
         if self.is_new_lap(session, lap_number):
             # Update previous lap with sector 3 time
             self.update_previous_lap(session, lap_number)
-            # Push lap-1 to F1Laps
-            session.complete_lap_v2(lap_number-1)
             # Start new lap, which in turn starts telemetry
             session.start_new_lap(lap_number)
+            # Push lap-1 to F1Laps
+            session.complete_lap_v2(lap_number-1)
 
         # Update current lap and telemetry
         session = self.update_current_lap(session)
