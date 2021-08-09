@@ -21,7 +21,7 @@ class ActiveSocket:
 
 class RaceReceiver(threading.Thread):
 
-    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True):
+    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True, use_udp_broadcast=False):
         """
         Init the receiver with all attributes needed to 
         push data to F1Laps
@@ -40,6 +40,7 @@ class RaceReceiver(threading.Thread):
         # Network settings
         self.host_ip   = host_ip or get_local_ip()
         self.host_port = host_port or int(DEFAULT_PORT)
+        self.use_udp_broadcast = use_udp_broadcast
 
         log.info("*************************************************")
         log.info("Set your F1 game telemetry IP to:   %s" % self.host_ip)
@@ -80,6 +81,7 @@ class RaceReceiver(threading.Thread):
 
     def get_socket(self):
         """ Get ActiveSocket or initiate it """
+        return self.open_socket()
         if not ActiveSocket.socket:
             new_socket = self.open_socket()
             ActiveSocket.socket = new_socket
@@ -90,17 +92,17 @@ class RaceReceiver(threading.Thread):
 
     def open_socket(self):
         new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        # The SO_REUSEADDR setting allows us to reuse sockets
-        # Which may be necessary when a user restarts sessions
+        # The SO_REUSEPORT setting allows us to reuse sockets
+        # Which is necessary when a user restarts sessions
         # See https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ for more details
-        if True or self.use_udp_broadcast:
+        new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        if self.use_udp_broadcast:
             # Enable broadcasting mode
             log.info("Using UDP broadcast mode")
-            new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)    
+            new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             new_socket.bind(("", self.host_port))
         else:
             log.info("Using UDP unicast mode")
-            new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             new_socket.bind((self.host_ip, self.host_port))
         log.debug("Socket opened and bound")
         return new_socket

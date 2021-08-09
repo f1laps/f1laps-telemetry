@@ -65,8 +65,8 @@ class TelemetrySession:
         self.session = None
         self.is_active = False
 
-    def start(self, api_key, enable_telemetry):
-        receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry)
+    def start(self, api_key, enable_telemetry, use_udp_broadcast):
+        receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry, use_udp_broadcast=use_udp_broadcast)
         receiver_thread.start()
         self.session = receiver_thread
         self.is_active = True
@@ -83,10 +83,14 @@ class TelemetrySession:
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+
+        # Get user config (before drawing UI!)
+        self.user_config = ConfigFile().load()
         self.api_key_field = None
-        self.api_key = ConfigFile().get_api_key()
-        # Need app version before drawing UI
+        self.api_key = self.user_config.get("API_KEY") or None
+        self.broadcast_mode_enabled = self.user_config.get("UDP_BROADCAST_ENABLED") or False
         self.app_version = config.VERSION
+
         # Draw the window UI
         self.init_ui()
         # Show the IP to the user
@@ -129,10 +133,11 @@ class MainWindow(QWidget):
         self.ip_value = F1QLabel(object_name="ipValueField")
         self.ip_value.setContentsMargins(0, 0, 0, 5)
         udp_broadcast_help_text_label = F1QLabel(
-            text = "Alternatively you can enable UDP broadcast mode:",
+            text = "Alternatively you can set and use UDP broadcast mode:",
             object_name = "udpBroadcastHelpTextLabel"
             )
-        self.udp_broadcast_checkbox = QCheckBox("Enable UDP broadcast mode")
+        self.udp_broadcast_checkbox = QCheckBox("Use UDP broadcast mode")
+        self.udp_broadcast_checkbox.setChecked(self.broadcast_mode_enabled)
 
         # Start/Stop button section
         self.start_button = StartButton()
@@ -141,7 +146,7 @@ class MainWindow(QWidget):
 
         # Support & notes section
         help_text_label = F1QLabel(
-            text = "Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>",
+            text = "Need help? <a href='https://community.f1laps.com/c/telemetry-app-faqs'>Check out the FAQs!</a>",
             object_name = "helpTextLabel"
             )
         self.app_version_label = F1QLabel(
@@ -198,12 +203,6 @@ class MainWindow(QWidget):
     def set_ip(self):
         self.ip_value.setText(get_local_ip())
 
-    def get_api_key(self):
-        """ Get API key from user input field and store it in local file """
-        api_key = self.api_key_field.text()
-        ConfigFile().set_api_key(api_key)
-        return api_key
-
     def check_version(self):
         try:
             response = requests.get(F1LAPS_VERSION_ENDPOINT)
@@ -234,8 +233,11 @@ class MainWindow(QWidget):
         if self.session.is_active:
             log.error("A new session can't be started when another one is active")
             return False
-        # Get API key from input field
-        self.api_key = self.get_api_key()
+        # Update user config
+        self.api_key = self.api_key_field.text()        
+        self.broadcast_mode_enabled = self.udp_broadcast_checkbox.isChecked()
+        self.user_config.set("API_KEY", self.api_key)
+        self.user_config.set("UDP_BROADCAST_ENABLED", self.broadcast_mode_enabled)
         # Validate API key via F1Laps API
         self.validate_api_key(self.api_key)
 
@@ -269,7 +271,7 @@ class MainWindow(QWidget):
             self.start_button.set_running()
             self.status_label.set_running()
             # Actually start receiver thread
-            self.session.start(self.api_key, enable_telemetry=telemetry_enabled)
+            self.session.start(self.api_key, enable_telemetry=telemetry_enabled, use_udp_broadcast=self.broadcast_mode_enabled)
         else:
             log.info("Not starting Telemetry session (api key %s, subscription %s)" % \
                 ("valid" if api_key_valid else "invalid", subscription_plan if subscription_plan else "not set"))
