@@ -96,6 +96,7 @@ class PacketLapData(PacketBase):
             log.info("[THIS LAP DEBUG LOG] PLT %s" % lap_data.lastLapTimeInMS)
             log.info("[THIS LAP DEBUG LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
             log.info("[THIS LAP DEBUG LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
+            log.info("[THIS LAP DEBUG LOG] Distance %s" % lap_data.lapDistance)
         session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
         session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
         session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
@@ -145,6 +146,7 @@ class PacketLapData(PacketBase):
             log.info("[OUTLAP LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
             log.info("[OUTLAP LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
             log.info("[OUTLAP LOG] Lap s3 %s" % self.get_sector_3_ms(lap_data))
+            log.info("[THIS OUTLAP LOG] Distance %s" % lap_data.lapDistance)
             return True
         return False
 
