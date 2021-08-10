@@ -105,6 +105,12 @@ class PacketLapDataTest(TestCase):
         self.assertEqual(session.start_new_lap.call_count, 0)
         self.assertEqual(packet.update_telemetry.call_count, 0)
 
+    def test_packet_should_update_lap(self):
+        session = F12021Session(123)
+        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
+        packet = MockPacketOutLapData()
+        self.assertEqual(packet.packet_should_update_lap(session, MOCK_LAP_NUMBER), False)
+
 
 
 if __name__ == '__main__':
@@ -133,14 +139,15 @@ class MockOutLapData(LapData):
     carPosition = 10
     pitStatus = 2
     currentLapInvalid = 0
-    currentLapTimeInMS = 2543
+    currentLapTimeInMS = 0
     lapDistance = 10
-    sector1TimeInMS = 1000
-    sector2TimeInMS = 543
+    sector1TimeInMS = 0
+    sector2TimeInMS = 0
     lastLapTimeInMS = 1200
 
 
 class MockPacketOutLapData(PacketLapData):
     header = MagicMock(playerCarIndex=0, frameIdentifier=2345)
     lapData = [MockOutLapData, ]
+
 

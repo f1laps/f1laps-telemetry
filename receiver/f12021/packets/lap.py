@@ -86,21 +86,33 @@ class PacketLapData(PacketBase):
         lap_data = self.lapData[self.header.playerCarIndex]
         lap_number = self.get_lap_number()
         # Update lap list data
+        if not self.packet_should_update_lap(session, lap_number):
+            log.info("Not updating lap #%s with 0 value because it's already set" % lap_number)
+            return session
         session.lap_list[lap_number]["lap_number"]        = lap_data.currentLapNum
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
         session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
-        if lap_data.sector1TimeInMS in ["0", 0, None, ""] and session.lap_list[lap_number]["sector_1_ms"]:
+        session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
+        session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
+        session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
+        return session
+
+    def packet_should_update_lap(self, session, lap_number):
+        """ Only allow packets to write data if we don't already have all 3 sectors """
+        null_values = ["0", 0, None, ""]
+        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_list = session.lap_list[lap_number]
+        all_sectors_set = lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")
+        if all_sectors_set and lap_data.sector1TimeInMS in null_values:
             log.info("[THIS LAP DEBUG LOG] Removing sector 1 time for lap %s" % lap_number)
             log.info("[THIS LAP DEBUG LOG] CLT %s" % lap_data.currentLapTimeInMS)
             log.info("[THIS LAP DEBUG LOG] PLT %s" % lap_data.lastLapTimeInMS)
             log.info("[THIS LAP DEBUG LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
             log.info("[THIS LAP DEBUG LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
             log.info("[THIS LAP DEBUG LOG] Distance %s" % lap_data.lapDistance)
-        session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
-        session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
-        session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
-        return session
+            return False
+        return True
 
     def update_previous_lap(self, session, lap_number, is_outlap=False):
         lap_data = self.lapData[self.header.playerCarIndex]
