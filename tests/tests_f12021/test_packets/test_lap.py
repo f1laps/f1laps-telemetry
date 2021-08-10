@@ -100,7 +100,7 @@ class PacketLapDataTest(TestCase):
         packet.update_telemetry = MagicMock()
         packet.process(session)
         self.assertEqual(session.lap_list, 
-                         {MOCK_LAP_NUMBER: {'car_race_position': 10, 'is_valid': True, 'lap_number': 2, 'pit_status': 2, 'sector_1_ms': 1000, 'sector_2_ms': 543, 'sector_3_ms': 1000}})
+                         {MOCK_LAP_NUMBER: {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 300}})
         self.assertEqual(session.complete_lap_v2.call_count, 1)
         self.assertEqual(session.start_new_lap.call_count, 0)
         self.assertEqual(packet.update_telemetry.call_count, 0)

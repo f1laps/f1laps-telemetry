@@ -90,6 +90,12 @@ class PacketLapData(PacketBase):
         session.lap_list[lap_number]["car_race_position"] = lap_data.carPosition
         session.lap_list[lap_number]["pit_status"]        = self.get_pit_value(session, lap_data, lap_number)
         session.lap_list[lap_number]["is_valid"]          = False if lap_data.currentLapInvalid == 1 else True
+        if lap_data.sector1TimeInMS in ["0", 0, None, ""] and session.lap_list[lap_number]["sector_1_ms"]:
+            log.info("[THIS LAP DEBUG LOG] Removing sector 1 time for lap %s" % lap_number)
+            log.info("[THIS LAP DEBUG LOG] CLT %s" % lap_data.currentLapTimeInMS)
+            log.info("[THIS LAP DEBUG LOG] PLT %s" % lap_data.lastLapTimeInMS)
+            log.info("[THIS LAP DEBUG LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
+            log.info("[THIS LAP DEBUG LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
         session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
         session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
         session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
