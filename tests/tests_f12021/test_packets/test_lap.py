@@ -101,7 +101,7 @@ class PacketLapDataTest(TestCase):
         packet.process(session)
         self.assertEqual(session.lap_list, 
                          {MOCK_LAP_NUMBER: {'car_race_position': 10, 'is_valid': True, 'lap_number': 2, 'pit_status': 2, 'sector_1_ms': 1000, 'sector_2_ms': 543, 'sector_3_ms': 1000}})
-        self.assertEqual(session.complete_lap_v2.call_count, 0)
+        self.assertEqual(session.complete_lap_v2.call_count, 1)
         self.assertEqual(session.start_new_lap.call_count, 0)
         self.assertEqual(packet.update_telemetry.call_count, 0)
 

@@ -65,6 +65,7 @@ class PacketLapData(PacketBase):
         is_outlap = self.is_outlap(session, lap_number)
         if is_outlap:
             session = self.update_current_lap(session)
+            session.complete_lap_v2(lap_number)
             return session
 
         # Handle new laps
@@ -129,7 +130,15 @@ class PacketLapData(PacketBase):
             return False
         # If we're in the first x meters of a lap, but also have all sector data -- it's an outlap
         if lap_list and lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms"):
-            log.info("Assuming this lap is an outlap - ignoring data")
+            log.info("Assuming this new lap (#%s) is an outlap - ignoring data" % lap_number)
+            # Temp logging
+            lap_data = self.lapData[self.header.playerCarIndex]
+            log.info("[OUTLAP LOG] Lap number %s" % lap_number)
+            log.info("[OUTLAP LOG] CLT %s" % lap_data.currentLapTimeInMS)
+            log.info("[OUTLAP LOG] PLT %s" % lap_data.lastLapTimeInMS)
+            log.info("[OUTLAP LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
+            log.info("[OUTLAP LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
+            log.info("[OUTLAP LOG] Lap s3 %s" % self.get_sector_3_ms(lap_data))
             return True
         return False
 
