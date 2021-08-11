@@ -106,11 +106,6 @@ class PacketLapData(PacketBase):
         all_sectors_set = lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")
         if all_sectors_set and lap_data.sector1TimeInMS in null_values:
             log.info("[THIS LAP DEBUG LOG] Removing sector 1 time for lap %s" % lap_number)
-            log.info("[THIS LAP DEBUG LOG] CLT %s" % lap_data.currentLapTimeInMS)
-            log.info("[THIS LAP DEBUG LOG] PLT %s" % lap_data.lastLapTimeInMS)
-            log.info("[THIS LAP DEBUG LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
-            log.info("[THIS LAP DEBUG LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
-            log.info("[THIS LAP DEBUG LOG] Distance %s" % lap_data.lapDistance)
             return False
         return True
 
@@ -150,15 +145,6 @@ class PacketLapData(PacketBase):
         # If we're in the first x meters of a lap, but also have all sector data -- it's an outlap
         if lap_list and lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms"):
             log.info("Assuming this new lap (#%s) is an outlap - ignoring data" % lap_number)
-            # Temp logging
-            lap_data = self.lapData[self.header.playerCarIndex]
-            log.info("[OUTLAP LOG] Lap number %s" % lap_number)
-            log.info("[OUTLAP LOG] CLT %s" % lap_data.currentLapTimeInMS)
-            log.info("[OUTLAP LOG] PLT %s" % lap_data.lastLapTimeInMS)
-            log.info("[OUTLAP LOG] Lap s1 %s" % lap_data.sector1TimeInMS)
-            log.info("[OUTLAP LOG] Lap s2 %s" % lap_data.sector2TimeInMS)
-            log.info("[OUTLAP LOG] Lap s3 %s" % self.get_sector_3_ms(lap_data))
-            log.info("[THIS OUTLAP LOG] Distance %s" % lap_data.lapDistance)
             return True
         return False
 

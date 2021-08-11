@@ -63,7 +63,7 @@ class ConfigFile:
     def load(self):
         file_lines = self._read_config()
         if not file_lines:
-            return None
+            return self
         for line in file_lines:
             try:
                 line_name, line_value = line.split("=")
