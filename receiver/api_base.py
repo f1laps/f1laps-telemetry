@@ -127,7 +127,7 @@ class F1LapsAPIBase:
                         session_create_params['f1laps_session_id'] = retrieved_f1_laps_session_id
                         success = self.update_session_in_f1laps(**session_create_params)
                     else:
-                        log.error("Session can't be created, and no existing session found in F1Laps.")
+                        log.info("Session can't be created, and no existing session found in F1Laps.")
                 else:
                     log.error("Error creating session in F1Laps: %s" % json.loads(response.content))
         else:

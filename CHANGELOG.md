@@ -1,6 +1,19 @@
 # Change Log
 
 
+## 2.1.0 - 2021-08-11
+
+Now supporting UDP Broadcast mode
+
+### Fixed
+- The last lap of a race now gets imported correctly
+- Using the F1 2021 Mercedes in a Session not gets synced correctly
+- Reduced noisy logs for invalid player index key and for API errors
+
+## Added
+- Support for UDP Broadcast mode
+
+
 ## 2.0.3 - 2021-07-26
 
 Fixed minor telemetry data and logging issues

@@ -71,6 +71,14 @@ class F12021SessionTest(TestCase):
         self.assertEqual(session.f1_laps_session_id, "vettel2021")
         mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type='race', finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False, ai_difficulty=None)
 
+    def test_is_valid_for_f1laps_team_zero(self):
+        session = F12021Session(123)
+        session.team_id = 0
+        session.session_type = 1
+        self.assertEqual(session.is_valid_for_f1laps(), True)
+        session.team_id = None
+        self.assertEqual(session.is_valid_for_f1laps(), False)
+
 
 if __name__ == '__main__':
     unittest.main()
