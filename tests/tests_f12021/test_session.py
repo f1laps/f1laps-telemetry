@@ -34,11 +34,16 @@ class F12021SessionTest(TestCase):
 
     def test_lap_should_be_sent_to_f1laps(self):
         session = F12021Session(123)
+        # Test lap not found
         self.assertEqual(session.lap_should_be_sent_to_f1laps(1), False)
         session.lap_list = {1: {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'tyre_compound_visual': 16}}}
+        # Test lap doesnt have all sectors
         self.assertEqual(session.lap_should_be_sent_to_f1laps(1), False)
         session.lap_list = {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'sector_3_ms': 33333, 'tyre_compound_visual': 16}}
+        # Test success case
         self.assertEqual(session.lap_should_be_sent_to_f1laps(1), True)
+        # Test lap was already sent to F1Laps
+        self.assertEqual(session.lap_should_be_sent_to_f1laps(1), False)
 
     def test_lap_should_be_sent_as_session(self):
         session = F12021Session(123)

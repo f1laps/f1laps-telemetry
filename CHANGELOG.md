@@ -1,6 +1,14 @@
 # Change Log
 
 
+## 2.1.1 - INSERTDATE
+
+Fixed a performance issue with outlaps
+
+### Fixed
+- Fixed unlimited session update API calls in outlaps
+
+
 ## 2.1.0 - 2021-08-11
 
 Now supporting UDP Broadcast mode
