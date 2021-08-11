@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 2.1.0 - INSERTDATEHERE
+## 2.1.0 - 2021-08-11
 
 Now supporting UDP Broadcast mode
 
