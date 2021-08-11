@@ -15,7 +15,7 @@ QLabel#statusHeadingLabel {
     color: #4B5563;
 }
 
-QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel, QLabel#statusLabel, QLabel#subscriptionLabel, QLabel#udpBroadcastHelpTextLabel {
+QLabel#apiKeyHelpTextLabel, QLabel#ipValueHelpTextLabel, QLabel#helpTextLabel, QLabel#appVersionLabel, QLabel#statusLabel, QLabel#subscriptionLabel {
     font-size: 11px;
     color: #6B7280;
 }

@@ -72,46 +72,6 @@ class PacketLapDataTest(TestCase):
         session = packet.update_telemetry(session)
         self.assertEqual(session.telemetry.lap_dict[MOCK_LAP_NUMBER].frame_dict, {2345: [4321, 1543.0, None, None, None, None, None, None]})
 
-    def test_is_outlap_race_distance_mid(self):
-        session = F12021Session(123)
-        packet = MockPacketLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
-        self.assertEqual(is_outlap, False)
-
-    def test_is_outlap_race_distance_low_no_sectors(self):
-        session = F12021Session(123)
-        packet = MockPacketOutLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
-        self.assertEqual(is_outlap, False)
-
-    def test_is_outlap_race_distance_low_with_sectors(self):
-        session = F12021Session(123)
-        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
-        packet = MockPacketOutLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
-        self.assertEqual(is_outlap, True)
-
-    def test_process_outlap(self):
-        session = F12021Session(123)
-        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
-        session.complete_lap_v2 = MagicMock()
-        session.start_new_lap = MagicMock()
-        packet = MockPacketOutLapData()
-        packet.update_telemetry = MagicMock()
-        packet.process(session)
-        self.assertEqual(session.lap_list, 
-                         {MOCK_LAP_NUMBER: {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 300}})
-        self.assertEqual(session.complete_lap_v2.call_count, 1)
-        self.assertEqual(session.start_new_lap.call_count, 0)
-        self.assertEqual(packet.update_telemetry.call_count, 0)
-
-    def test_packet_should_update_lap(self):
-        session = F12021Session(123)
-        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
-        packet = MockPacketOutLapData()
-        self.assertEqual(packet.packet_should_update_lap(session, MOCK_LAP_NUMBER), False)
-
-
 
 if __name__ == '__main__':
     unittest.main()
@@ -132,22 +92,4 @@ class MockLapData(LapData):
 class MockPacketLapData(PacketLapData):
     header = MagicMock(playerCarIndex=0, frameIdentifier=2345)
     lapData = [MockLapData, ]
-
-
-class MockOutLapData(LapData):
-    currentLapNum = MOCK_LAP_NUMBER
-    carPosition = 10
-    pitStatus = 2
-    currentLapInvalid = 0
-    currentLapTimeInMS = 0
-    lapDistance = 10
-    sector1TimeInMS = 0
-    sector2TimeInMS = 0
-    lastLapTimeInMS = 1200
-
-
-class MockPacketOutLapData(PacketLapData):
-    header = MagicMock(playerCarIndex=0, frameIdentifier=2345)
-    lapData = [MockOutLapData, ]
-
 

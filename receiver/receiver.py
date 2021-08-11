@@ -15,9 +15,13 @@ DEFAULT_PORT = 20777
 SENTRY_DSN = "https://d00edba104864bee975f5f4a71025639@o615967.ingest.sentry.io/5854730"
 
 
+class ActiveSocket:
+    socket = None
+
+
 class RaceReceiver(threading.Thread):
 
-    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True, use_udp_broadcast=False):
+    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True):
         """
         Init the receiver with all attributes needed to 
         push data to F1Laps
@@ -36,15 +40,10 @@ class RaceReceiver(threading.Thread):
         # Network settings
         self.host_ip   = host_ip or get_local_ip()
         self.host_port = host_port or int(DEFAULT_PORT)
-        self.use_udp_broadcast = use_udp_broadcast
 
         log.info("*************************************************")
-        if self.use_udp_broadcast:
-            log.info("Set your F1 game telemetry settings to broadcast mode")  
-            log.info("Set your F1 game telemetry settings port to: %s" % self.host_port)
-        else:
-            log.info("Set your F1 game telemetry IP to:   %s" % self.host_ip)
-            log.info("Set your F1 game telemetry port to: %s" % self.host_port)
+        log.info("Set your F1 game telemetry IP to:   %s" % self.host_ip)
+        log.info("Set your F1 game telemetry port to: %s" % self.host_port)
         log.info("*************************************************")
 
         # Get previously opened socket, or create new one
@@ -80,36 +79,24 @@ class RaceReceiver(threading.Thread):
 
 
     def get_socket(self):
-        # Open and bind socket
-        new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        new_socket.setsockopt(socket.SOL_SOCKET, self.get_socket_reuse_option(), 1)
-        if self.use_udp_broadcast:
-            # Enable broadcasting mode
-            log.info("Using UDP broadcast mode")
-            new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            new_socket.bind(("", self.host_port))
+        """ Get ActiveSocket or initiate it """
+        if not ActiveSocket.socket:
+            new_socket = self.open_socket()
+            ActiveSocket.socket = new_socket
+            return new_socket
         else:
-            log.info("Using UDP unicast mode")
-            new_socket.bind((self.host_ip, self.host_port))
+            return ActiveSocket.socket
+
+
+    def open_socket(self):
+        new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        # The SO_REUSEADDR setting allows us to reuse sockets
+        # Which may be necessary when a user restarts sessions
+        # I'm not 100% sure though
+        new_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        new_socket.bind((self.host_ip, self.host_port))
         log.debug("Socket opened and bound")
         return new_socket
-
-    def get_socket_reuse_option(self):
-        # The SO_REUSEPORT setting allows us to reuse sockets
-        # Which is necessary when a user restarts sessions
-        # See https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ for more details
-        # SO_REUSEPORT is what we want - you can immediately reuse a socket
-        # Windows doesn't know SO_REUSEPORT, and implemented SO_REUSEADDR as SO_REUSEPORT
-        user_os = platform.system()
-        if user_os == 'Windows':
-            return socket.SO_REUSEADDR
-        elif user_os == 'Darwin': # i.e. Mac
-            return socket.SO_REUSEPORT
-        else:
-            # TBD - SO_REUSEPORT is what we want
-            # But some might not support it
-            # Could change to SO_REUSEADDR
-            return socket.SO_REUSEPORT
 
 
     def kill(self):

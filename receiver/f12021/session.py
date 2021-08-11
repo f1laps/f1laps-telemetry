@@ -106,10 +106,10 @@ class F12021Session(SessionBase):
         return bool(self.session_type and self.get_session_type() != 'time_trial')
 
     def is_valid_for_f1laps(self):
-        if self.session_type is None:
+        if not self.session_type:
             log.warning("Attempted to send session to F1Laps without session type: %s" % self)
             return False
-        if self.team_id is None:
+        if not self.team_id:
             log.warning("Attempted to send session to F1Laps without team ID: %s" % self)
             return False
         return True

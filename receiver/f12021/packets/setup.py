@@ -45,10 +45,7 @@ class PacketCarSetupData(PacketBase):
         return self.update_setup(session)
 
     def update_setup(self, session):
-        try:
-            setup_data = self.carSetups[self.header.playerCarIndex]
-        except:
-            return session
+        setup_data = self.carSetups[self.header.playerCarIndex]
         session.setup['front_wing']                   = setup_data.frontWing
         session.setup['rear_wing']                    = setup_data.rearWing
         session.setup['diff_adjustment_on_throttle']  = setup_data.onThrottle

@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, \
-                            QVBoxLayout, QCheckBox
+                            QVBoxLayout
 from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtSvg import QSvgWidget
 import requests
@@ -65,8 +65,8 @@ class TelemetrySession:
         self.session = None
         self.is_active = False
 
-    def start(self, api_key, enable_telemetry, use_udp_broadcast):
-        receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry, use_udp_broadcast=use_udp_broadcast)
+    def start(self, api_key, enable_telemetry):
+        receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry)
         receiver_thread.start()
         self.session = receiver_thread
         self.is_active = True
@@ -83,14 +83,9 @@ class TelemetrySession:
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-
-        # Get user config (before drawing UI!)
-        self.user_config = ConfigFile().load()
         self.api_key_field = None
-        self.api_key = self.user_config.get("API_KEY") or None
-        self.broadcast_mode_enabled = self.user_config.get("UDP_BROADCAST_ENABLED") or False
+        self.api_key = ConfigFile().get_api_key()
         self.app_version = config.VERSION
-
         # Draw the window UI
         self.init_ui()
         # Show the IP to the user
@@ -109,35 +104,27 @@ class MainWindow(QWidget):
         logo_label.setFixedSize(100, 28)
 
         # 1) Enter API key section
-        api_key_field_label = F1QLabel(
-            text = "1) Enter your API key",
-            object_name = "apiKeyFieldLabel"
-            )
-        api_key_help_text_label = F1QLabel(
-            text = "You can find your API key on the <a href='https://www.f1laps.com/telemetry'>F1Laps Telemetry page</a>",
-            object_name = "apiKeyHelpTextLabel"
-            )
+        api_key_field_label = F1QLabel()
+        api_key_field_label.setText("1) Enter your API key")
+        api_key_field_label.setObjectName("apiKeyFieldLabel")
+        api_key_help_text_label = F1QLabel()
+        api_key_help_text_label.setText("You can find your API key on the <a href='https://www.f1laps.com/telemetry'>F1Laps Telemetry page</a>")
+        api_key_help_text_label.setObjectName("apiKeyHelpTextLabel")
         self.api_key_field = QLineEdit()
         self.api_key_field.setObjectName("apiKeyField")
         self.api_key_field.setText(self.api_key)
 
         # 2) Check IP section
-        ip_value_label = F1QLabel(
-            text = "2) Set your F1 game Telemetry settings",
-            object_name = "ipValueLabel"
-            )
-        ip_value_help_text_label = F1QLabel(
-            text = "Open the F1 Game Settings -> Telemetry and set the IP to this value.",
-            object_name = "ipValueHelpTextLabel"
-            )
-        self.ip_value = F1QLabel(object_name="ipValueField")
-        self.ip_value.setContentsMargins(0, 0, 0, 5)
-        udp_broadcast_help_text_label = F1QLabel(
-            text = "Alternatively you can set and use UDP broadcast mode:",
-            object_name = "udpBroadcastHelpTextLabel"
-            )
-        self.udp_broadcast_checkbox = QCheckBox("Use UDP broadcast mode")
-        self.udp_broadcast_checkbox.setChecked(self.broadcast_mode_enabled)
+        ip_value_label = F1QLabel()
+        ip_value_label.setText("2) Check your F1 game Telemetry IP setting")
+        ip_value_label.setObjectName("ipValueLabel")
+        ip_value_help_text_label = F1QLabel()
+        ip_value_help_text_label.setText("You can ignore this step if you're running this program on the same computer as the F1 game. Otherwise open Settings -> Telemetry in the F1 game and set the IP to this value.")
+        ip_value_help_text_label.setObjectName("ipValueHelpTextLabel")
+        ip_value_help_text_label.setWordWrap(True)
+        self.ip_value = F1QLabel()
+        self.ip_value.setObjectName("ipValueField")
+        self.ip_value.setContentsMargins(0, 5, 0, 0)
 
         # Start/Stop button section
         self.start_button = StartButton()
@@ -145,18 +132,16 @@ class MainWindow(QWidget):
         self.status_label = StatusLabel()
 
         # Support & notes section
-        help_text_label = F1QLabel(
-            text = "Need help? <a href='https://community.f1laps.com/c/telemetry-app-faqs'>Check out the FAQs!</a>",
-            object_name = "helpTextLabel"
-            )
-        self.app_version_label = F1QLabel(
-            text = "You're using app version %s." % self.app_version,
-            object_name = "appVersionLabel"
-            )
-        self.subscription_label = F1QLabel(
-            text = "",
-            object_name = "subscriptionLabel"
-            )
+        help_text_label = F1QLabel()
+        help_text_label.setText("Need help? <a href='https://www.notion.so/F1Laps-Telemetry-Documentation-55ad605471624066aa67bdd45543eaf7'>Check out the Documentation & Help Center!</a>")
+        help_text_label.setObjectName("helpTextLabel")
+        help_text_label.setOpenExternalLinks(True)
+        self.app_version_label = F1QLabel()
+        self.app_version_label.setText("You're using app version %s." % self.app_version)
+        self.app_version_label.setObjectName("appVersionLabel")
+        self.subscription_label = F1QLabel()
+        self.subscription_label.setText(" ")
+        self.subscription_label.setObjectName("subscriptionLabel")
 
         # Draw layout
         self.layout = QVBoxLayout()
@@ -165,36 +150,31 @@ class MainWindow(QWidget):
         self.layout.addWidget(logo_label, alignment=Qt.AlignCenter)
         self.layout.addWidget(QHSeperationLine())
 
-        # API key section
-        #self.layout.addWidget(QVSpacer(0))
+        # API key & IP section
+        self.layout.addWidget(QVSpacer(0))
         self.layout.addWidget(api_key_field_label)
         self.layout.addWidget(api_key_help_text_label)
         self.layout.addWidget(self.api_key_field)
 
-        # Telemetry settings
-        self.layout.addWidget(QVSpacer(0.5))
-        self.layout.addWidget(QHSeperationLine())
-        self.layout.addWidget(QVSpacer(0.5))
+        self.layout.addWidget(QVSpacer(10))
         self.layout.addWidget(ip_value_label)
         self.layout.addWidget(ip_value_help_text_label)
         self.layout.addWidget(self.ip_value)
-        self.layout.addWidget(udp_broadcast_help_text_label)
-        self.layout.addWidget(self.udp_broadcast_checkbox)
 
         # Start button
-        self.layout.addWidget(QVSpacer(1))
+        self.layout.addWidget(QVSpacer(2))
         self.layout.addWidget(QHSeperationLine())
         self.layout.addWidget(QVSpacer(5))
         self.layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
         self.layout.addWidget(self.status_label, alignment=Qt.AlignCenter)
 
         # Status & help
-        self.layout.addWidget(QVSpacer(1))
+        self.layout.addWidget(QVSpacer(3))
         self.layout.addWidget(QHSeperationLine())
         self.layout.addWidget(help_text_label)
         self.layout.addWidget(self.app_version_label)
         self.layout.addWidget(self.subscription_label)
-        self.layout.setContentsMargins(30, 20, 30, 10)
+        self.layout.setContentsMargins(30, 20, 30, 30)
         
         self.setLayout(self.layout)
         self.setFixedWidth(420)
@@ -202,6 +182,12 @@ class MainWindow(QWidget):
 
     def set_ip(self):
         self.ip_value.setText(get_local_ip())
+
+    def get_api_key(self):
+        """ Get API key from user input field and store it in local file """
+        api_key = self.api_key_field.text()
+        ConfigFile().set_api_key(api_key)
+        return api_key
 
     def check_version(self):
         try:
@@ -233,11 +219,8 @@ class MainWindow(QWidget):
         if self.session.is_active:
             log.error("A new session can't be started when another one is active")
             return False
-        # Update user config
-        self.api_key = self.api_key_field.text()        
-        self.broadcast_mode_enabled = self.udp_broadcast_checkbox.isChecked()
-        self.user_config.set("API_KEY", self.api_key)
-        self.user_config.set("UDP_BROADCAST_ENABLED", self.broadcast_mode_enabled)
+        # Get API key from input field
+        self.api_key = self.get_api_key()
         # Validate API key via F1Laps API
         self.validate_api_key(self.api_key)
 
@@ -271,7 +254,7 @@ class MainWindow(QWidget):
             self.start_button.set_running()
             self.status_label.set_running()
             # Actually start receiver thread
-            self.session.start(self.api_key, enable_telemetry=telemetry_enabled, use_udp_broadcast=self.broadcast_mode_enabled)
+            self.session.start(self.api_key, enable_telemetry=telemetry_enabled)
         else:
             log.info("Not starting Telemetry session (api key %s, subscription %s)" % \
                 ("valid" if api_key_valid else "invalid", subscription_plan if subscription_plan else "not set"))
