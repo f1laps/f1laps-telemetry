@@ -34,7 +34,7 @@ class TelemetryLapBase:
     # Other game modes have outlaps (TT doesnt)
     # This distinction is important because for outlaps, we dont want the outlap frames
     # But for restart, we want the new lap frames
-    SESSION_TYPES_WITHOUT_OUTLAP = [13]
+    SESSION_TYPES_WITHOUT_OUTLAP = [1, 2, 3, 4, 13]
 
     def __init__(self, number, session_type=None):
         # Current lap number
@@ -155,7 +155,7 @@ class TelemetryBase:
 
     def frame(self, frame_number):
         if not self.current_lap:
-            log.warning("Attempted to get/set a telemetry frame without a current lap")
+            log.info("Attempted to get/set a telemetry frame without a current lap")
             return None
         frame_dict = self.current_lap.frame_dict
         if frame_number not in frame_dict:

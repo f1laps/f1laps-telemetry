@@ -8,15 +8,29 @@ class FileHandlerTest(TestCase):
     def setUp(self):
         self.user_api_key_input = "vettel4tw"
         self.config = ConfigFile()
-        self.config._write = MagicMock()
-        self.config._read = MagicMock(return_value="API_KEY=%s" % self.user_api_key_input)
 
-    def test_file_handler_read(self):
-        api_key = self.config.get_api_key()
-        self.assertEqual(api_key, self.user_api_key_input)
-
-    def test_file_handler_write(self):
-        self.config.set_api_key("test")
+    def test_get(self):
+        # Clean any old values
+        self.config.set("API_KEY", None)
+        self.config.set("UDP_BROADCAST_ENABLED", None)
+        # Test various gets
+        self.assertEqual(self.config.get("API_KEY"), None)
+        self.assertEqual(self.config.get("UDP_BROADCAST_ENABLED"), None)
+        self.config.load()
+        self.assertEqual(self.config.get("API_KEY"), None)
+        self.assertEqual(self.config.get("UDP_BROADCAST_ENABLED"), None)
+        # Set first value
+        self.config.set("API_KEY", "vettel4tw")
+        self.assertEqual(self.config.get("API_KEY"), "vettel4tw")
+        self.assertEqual(self.config.get("UDP_BROADCAST_ENABLED"), None)
+        # Set second value
+        self.config.set("UDP_BROADCAST_ENABLED", True)
+        self.assertEqual(self.config.get("API_KEY"), "vettel4tw")
+        self.assertEqual(self.config.get("UDP_BROADCAST_ENABLED"), True)
+        # Load again
+        self.config.load()
+        self.assertEqual(self.config.get("API_KEY"), "vettel4tw")
+        self.assertEqual(self.config.get("UDP_BROADCAST_ENABLED"), True)
 
     def test_get_path_executable_parent(self):
         path = get_path_executable_parent("f1laps_configuration.txt")
