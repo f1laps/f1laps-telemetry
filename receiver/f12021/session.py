@@ -103,7 +103,7 @@ class F12021Session(SessionBase):
             log.info("Not sending lap #%s to F1Laps because it doesn't have non-zero values for all sectors" % lap_number)
             return False
         if lap.get(lap_f1laps_status_key):
-            log.info("Not sending lap #%s to F1Laps because it has already been posted" % lap_number)
+            log.debug("Not sending lap #%s to F1Laps because it has already been posted" % lap_number)
             return False
         # Mark this session as "already sent to F1Laps, don't send again"
         lap[lap_f1laps_status_key] = True

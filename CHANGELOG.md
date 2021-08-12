@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 2.1.1 - INSERTDATE
+## 2.1.1 - 2021-08-12
 
 Fixed a performance issue with outlaps
 
