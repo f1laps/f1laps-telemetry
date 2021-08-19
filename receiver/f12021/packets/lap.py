@@ -99,7 +99,13 @@ class PacketLapData(PacketBase):
         return session
 
     def packet_should_update_lap(self, session, lap_number):
-        """ Only allow packets to write data if we don't already have all 3 sectors """
+        """ 
+        Check if the new data is allowed to overwrite existing data
+        Only allow packets to write data if we don't already have all 3 sectors 
+        """
+        # For time trial, we should always overwrite
+        if session.is_time_trial():
+            return True
         null_values = ["0", 0, None, ""]
         lap_data = self.lapData[self.header.playerCarIndex]
         lap_list = session.lap_list[lap_number]
@@ -137,6 +143,10 @@ class PacketLapData(PacketBase):
     def is_outlap(self, session, lap_number):
         # For race outlaps (lap after last lap), the lap number doesn't increment
         # We use the following test to ignore the outlap
+        # Time trial is never an outlap
+        # For time trial, we should always overwrite
+        if session.is_time_trial():
+            return False
         lap_list = session.lap_list.get(lap_number)
         current_distance = self.get_lap_distance()
         # If we're in the middle of a lap, it's not an outlap

@@ -1,6 +1,14 @@
 # Change Log
 
 
+## 2.1.2 - 2021-08-DATE
+
+Fixed Time Trial sync issues when restarting a lap in sector 3
+
+### Fixed
+- Fixed Time Trial sync issues when restarting a lap in sector 3
+
+
 ## 2.1.1 - 2021-08-12
 
 Fixed a performance issue with outlaps
