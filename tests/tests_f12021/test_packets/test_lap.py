@@ -105,11 +105,33 @@ class PacketLapDataTest(TestCase):
         self.assertEqual(session.start_new_lap.call_count, 0)
         self.assertEqual(packet.update_telemetry.call_count, 0)
 
+    def test_process_outlap_time_trial(self):
+        session = F12021Session(123)
+        session.session_type = 13 # time trial
+        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
+        session.complete_lap_v2 = MagicMock()
+        session.start_new_lap = MagicMock()
+        packet = MockPacketOutLapData()
+        packet.update_telemetry = MagicMock()
+        packet.process(session)
+        self.assertEqual(session.lap_list, 
+                         {MOCK_LAP_NUMBER: {'car_race_position': 10, 'is_valid': True, 'lap_number': 2, 'pit_status': 2, 'sector_1_ms': 0, 'sector_2_ms': 0, 'sector_3_ms': None}})
+        self.assertEqual(session.complete_lap_v2.call_count, 0)
+        self.assertEqual(session.start_new_lap.call_count, 0)
+        self.assertEqual(packet.update_telemetry.call_count, 1)
+
     def test_packet_should_update_lap(self):
         session = F12021Session(123)
         session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
         packet = MockPacketOutLapData()
         self.assertEqual(packet.packet_should_update_lap(session, MOCK_LAP_NUMBER), False)
+
+    def test_packet_should_update_lap_time_trial(self):
+        session = F12021Session(123)
+        session.session_type = 13 # time trial
+        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
+        packet = MockPacketOutLapData()
+        self.assertEqual(packet.packet_should_update_lap(session, MOCK_LAP_NUMBER), True)
 
 
 

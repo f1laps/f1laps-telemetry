@@ -182,6 +182,9 @@ class F12021Session(SessionBase):
                     })
         return lap_times
 
+    def is_time_trial(self):
+        return self.session_type == 13
+
     def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
         """ 
         While this method is similar to new_lap_started, it's different
