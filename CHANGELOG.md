@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 2.1.2 - 2021-08-DATE
+## 2.1.2 - 2021-08-29
 
 Fixed Time Trial sync issues when restarting a lap in sector 3
 
