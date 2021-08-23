@@ -44,6 +44,14 @@ class PacketCarTelemetryData(PacketBase):
 
     def process(self, session):
         session = self.update_telemetry(session)
+        log.info("************** TELEMETRY LAP PACKET *************")
+        for index, participant in enumerate(self.carTelemetryData):
+            log.info("[%s]: speed [%s] steer [%s] throttle [%s]" % (
+                    index,
+                    participant.speed,
+                    participant.steer,
+                    participant.throttle
+                ))
         return session
 
     def update_telemetry(self, session):
