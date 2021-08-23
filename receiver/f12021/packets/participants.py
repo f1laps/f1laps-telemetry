@@ -39,7 +39,19 @@ class PacketParticipantsData(PacketBase):
             # Don't update sessions with existing team_id
             return session
         from lib.logger import log
+        log.info("************** REPR PARTICIPANTS PACKET *************")
         log.info(repr(self))
+        log.info("************** MLOG PARTICIPANTS PACKET *************")
+        log.info("Active cars: %s" % self.numActiveCars)
+        for index, participant in enumerate(self.participants):
+            log.info("[%s]: ai [%s] dId [%s] tId [%s] name[%s] yT [%s]" % (
+                    index,
+                    participant.aiControlled,
+                    participant.driverId,
+                    participant.teamId,
+                    participant.name,
+                    participant.yourTelemetry
+                ))
         try:
             participant_data = self.participants[CAR_INDEX]
         except:
