@@ -55,6 +55,14 @@ class PacketLapData(PacketBase):
     ]
 
     def process(self, session):
+        log.info("************** MLOG LAP PACKET *************")
+        for index, participant in enumerate(self.lapData):
+            log.info("[%s]: currentLapTimeInMS [%s] sector1TimeInMS [%s] lapDistance [%s]" % (
+                    index,
+                    participant.currentLapTimeInMS,
+                    participant.sector1TimeInMS,
+                    participant.lapDistance
+                ))
         # Get lap number and distance
         lap_number = self.get_lap_number()
         if not lap_number:
@@ -85,7 +93,7 @@ class PacketLapData(PacketBase):
         return session
 
     def update_current_lap(self, session):
-        lap_data = self.lapData[CAR_INDEX]
+        lap_data = self.lapData[self.header.playerCarIndex]
         lap_number = self.get_lap_number()
         # Update lap list data
         if not self.packet_should_update_lap(session, lap_number):
@@ -98,6 +106,7 @@ class PacketLapData(PacketBase):
         session.lap_list[lap_number]["sector_1_ms"]       = lap_data.sector1TimeInMS
         session.lap_list[lap_number]["sector_2_ms"]       = lap_data.sector2TimeInMS
         session.lap_list[lap_number]["sector_3_ms"]       = self.get_sector_3_ms(lap_data)
+        log.info(session.lap_list)
         return session
 
     def packet_should_update_lap(self, session, lap_number):
@@ -109,7 +118,7 @@ class PacketLapData(PacketBase):
         if session.is_time_trial():
             return True
         null_values = ["0", 0, None, ""]
-        lap_data = self.lapData[CAR_INDEX]
+        lap_data = self.lapData[self.header.playerCarIndex]
         lap_list = session.lap_list[lap_number]
         all_sectors_set = lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")
         if all_sectors_set and lap_data.sector1TimeInMS in null_values:
@@ -118,7 +127,7 @@ class PacketLapData(PacketBase):
         return True
 
     def update_previous_lap(self, session, lap_number, is_outlap=False):
-        lap_data = self.lapData[CAR_INDEX]
+        lap_data = self.lapData[self.header.playerCarIndex]
         prev_lap_num = lap_number - 1 if not is_outlap else lap_number
         if not session.lap_list.get(prev_lap_num) or \
            not (session.lap_list[prev_lap_num]["sector_1_ms"] and session.lap_list[prev_lap_num]["sector_2_ms"]):
@@ -130,8 +139,9 @@ class PacketLapData(PacketBase):
 
     def get_lap_number(self):
         try:
-            lap_data = self.lapData[CAR_INDEX]
-        except:
+            lap_data = self.lapData[self.header.playerCarIndex]
+        except Exception as ex:
+            log.info("Cant get lap data %s" % ex)
             return None
         return lap_data.currentLapNum
 
@@ -161,13 +171,13 @@ class PacketLapData(PacketBase):
         return False
 
     def get_lap_distance(self):
-        lap_data = self.lapData[CAR_INDEX]
+        lap_data = self.lapData[self.header.playerCarIndex]
         return lap_data.lapDistance
 
     def update_telemetry(self, session):
         lap_data = self.lapData[CAR_INDEX]
         frame = self.header.frameIdentifier
-        session.telemetry.set(frame, lap_time     = lap_data.currentLapTimeInMS,
+        session.telemetry.set(frame, lap_time     = self.lapData[self.header.playerCarIndex].currentLapTimeInMS,
                                      lap_distance = lap_data.lapDistance)
         return session
 

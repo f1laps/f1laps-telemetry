@@ -111,9 +111,10 @@ class TelemetryLapBase:
                         # Important to return here to not set the last_lap_distance to the current_distance
                         return
                     else:
-                        log.info("Assuming a new lap started based on distance delta - killing all old frames (current distance %s, last distance %s, first frame distance %s)" % \
-                            (current_distance, self.last_lap_distance, first_frame_distance_value))
-                        self.frame_dict = {frame_number: frame}
+                        #log.info("Assuming a new lap started based on distance delta - killing all old frames (current distance %s, last distance %s, first frame distance %s)" % \
+                        #    (current_distance, self.last_lap_distance, first_frame_distance_value))
+                        #self.frame_dict = {frame_number: frame}
+                        pass
         
         # Set the last distance value for future frames
         self.last_lap_distance = current_distance

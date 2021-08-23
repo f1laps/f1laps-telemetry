@@ -35,12 +35,10 @@ class PacketParticipantsData(PacketBase):
         return self.update_team_id(session)
 
     def update_team_id(self, session):
-        if session.team_id:
+        if session.team_id is not None:
             # Don't update sessions with existing team_id
             return session
         from lib.logger import log
-        log.info("************** REPR PARTICIPANTS PACKET *************")
-        log.info(repr(self))
         log.info("************** MLOG PARTICIPANTS PACKET *************")
         log.info("Active cars: %s" % self.numActiveCars)
         for index, participant in enumerate(self.participants):
@@ -54,8 +52,10 @@ class PacketParticipantsData(PacketBase):
                 ))
         try:
             participant_data = self.participants[CAR_INDEX]
-        except:
+        except Exception as ex:
+            log.info("Error retrieving team %s" % ex)
             return session
         udp_team_id = participant_data.teamId
         session.team_id = udp_team_id
+        log.info("Set team to %s" % session.team_id)
         return session
