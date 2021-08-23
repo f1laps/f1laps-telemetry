@@ -3,6 +3,7 @@ import ctypes
 from lib.logger import log
 from receiver.game_version import CrossGamePacketHeader
 
+CAR_INDEX = 1
 
 class PacketBase(ctypes.LittleEndianStructure):
     _pack_ = 1

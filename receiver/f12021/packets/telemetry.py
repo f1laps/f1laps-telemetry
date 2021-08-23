@@ -2,6 +2,7 @@ import ctypes
 
 from .base import PacketBase, PacketHeader
 
+from .base import CAR_INDEX
 
 class CarTelemetryData(PacketBase):
     _fields_ = [
@@ -47,7 +48,7 @@ class PacketCarTelemetryData(PacketBase):
 
     def update_telemetry(self, session):
         try:
-            telemetry_data = self.carTelemetryData[self.header.playerCarIndex]
+            telemetry_data = self.carTelemetryData[CAR_INDEX]
         except:
             return None
         frame = self.header.frameIdentifier

@@ -1,6 +1,7 @@
 import ctypes
 
 from .base import PacketBase, PacketHeader
+from .base import CAR_INDEX
 
 
 class ParticipantData(PacketBase):
@@ -37,8 +38,10 @@ class PacketParticipantsData(PacketBase):
         if session.team_id:
             # Don't update sessions with existing team_id
             return session
+        from lib.logger import log
+        log.info(repr(self))
         try:
-            participant_data = self.participants[self.header.playerCarIndex]
+            participant_data = self.participants[CAR_INDEX]
         except:
             return session
         udp_team_id = participant_data.teamId

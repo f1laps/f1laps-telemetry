@@ -1,7 +1,7 @@
 import ctypes
 
 from .base import PacketBase, PacketHeader
-
+from .base import CAR_INDEX
 
 class CarSetupData(PacketBase):
     _fields_ = [
@@ -46,7 +46,7 @@ class PacketCarSetupData(PacketBase):
 
     def update_setup(self, session):
         try:
-            setup_data = self.carSetups[self.header.playerCarIndex]
+            setup_data = self.carSetups[CAR_INDEX]
         except:
             return session
         session.setup['front_wing']                   = setup_data.frontWing

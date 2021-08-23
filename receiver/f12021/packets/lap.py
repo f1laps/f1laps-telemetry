@@ -5,6 +5,8 @@ from .base import PacketBase, PacketHeader
 
 MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
 
+from .base import CAR_INDEX
+
 
 class LapData(PacketBase):
 
@@ -83,7 +85,7 @@ class PacketLapData(PacketBase):
         return session
 
     def update_current_lap(self, session):
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData[CAR_INDEX]
         lap_number = self.get_lap_number()
         # Update lap list data
         if not self.packet_should_update_lap(session, lap_number):
@@ -107,7 +109,7 @@ class PacketLapData(PacketBase):
         if session.is_time_trial():
             return True
         null_values = ["0", 0, None, ""]
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData[CAR_INDEX]
         lap_list = session.lap_list[lap_number]
         all_sectors_set = lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")
         if all_sectors_set and lap_data.sector1TimeInMS in null_values:
@@ -116,7 +118,7 @@ class PacketLapData(PacketBase):
         return True
 
     def update_previous_lap(self, session, lap_number, is_outlap=False):
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData[CAR_INDEX]
         prev_lap_num = lap_number - 1 if not is_outlap else lap_number
         if not session.lap_list.get(prev_lap_num) or \
            not (session.lap_list[prev_lap_num]["sector_1_ms"] and session.lap_list[prev_lap_num]["sector_2_ms"]):
@@ -128,7 +130,7 @@ class PacketLapData(PacketBase):
 
     def get_lap_number(self):
         try:
-            lap_data = self.lapData[self.header.playerCarIndex]
+            lap_data = self.lapData[CAR_INDEX]
         except:
             return None
         return lap_data.currentLapNum
@@ -159,11 +161,11 @@ class PacketLapData(PacketBase):
         return False
 
     def get_lap_distance(self):
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData[CAR_INDEX]
         return lap_data.lapDistance
 
     def update_telemetry(self, session):
-        lap_data = self.lapData[self.header.playerCarIndex]
+        lap_data = self.lapData[CAR_INDEX]
         frame = self.header.frameIdentifier
         session.telemetry.set(frame, lap_time     = lap_data.currentLapTimeInMS,
                                      lap_distance = lap_data.lapDistance)

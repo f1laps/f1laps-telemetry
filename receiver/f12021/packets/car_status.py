@@ -2,6 +2,7 @@ import ctypes
 
 from .base import PacketBase, PacketHeader
 
+from .base import CAR_INDEX
 
 class CarStatusData(PacketBase):
     """
@@ -60,7 +61,7 @@ class PacketCarStatusData(PacketBase):
 
     def update_tyre_visual(self, session):
         try:
-            car_status = self.carStatusData[self.header.playerCarIndex]
+            car_status = self.carStatusData[CAR_INDEX]
         except:
             return session
         if session.lap_list:

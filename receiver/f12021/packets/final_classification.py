@@ -2,6 +2,7 @@ import ctypes
 
 from .base import PacketBase, PacketHeader
 
+from .base import CAR_INDEX
 
 class FinalClassificationData(PacketBase):
     _fields_ = [
@@ -34,7 +35,7 @@ class PacketFinalClassificationData(PacketBase):
 
     def set_results(self, session):
         try:
-            classification_data = self.classificationData[self.header.playerCarIndex]
+            classification_data = self.classificationData[CAR_INDEX]
         except:
             return session
         session.finish_position = classification_data.position
