@@ -9,9 +9,11 @@ from .telemetry import PacketCarTelemetryData
 from .car_status import PacketCarStatusData
 from .final_classification import PacketFinalClassificationData
 from .session_history import PacketSessionHistoryData
+from .motion import PacketMotionData
 
 
 HeaderFieldsToPacketType = {
+     0: PacketMotionData,
      1: PacketSessionData,
      2: PacketLapData,
      3: PacketEventData,
