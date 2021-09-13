@@ -60,7 +60,7 @@ class PacketMotionData(PacketBase):
     ]
 
     def process(self, session):
-        self.update_map_data(session)
+        # self.update_map_data(session)
         return session
 
     def update_map_data(self, session):

@@ -43,8 +43,9 @@ class F12021Session(SessionBase):
         # Data we get from F1Laps
         self.f1_laps_session_id = None
 
-        self.last_logged_distance = None
-        self.lap_distance = None
+        # Enable for motion packet / minimap
+        # self.last_logged_distance = None
+        # self.lap_distance = None
 
     def start(self):
         log.info("*************************************************")
