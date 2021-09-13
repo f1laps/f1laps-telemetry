@@ -1,6 +1,7 @@
 import ctypes
 
 from .base import PacketBase, PacketHeader
+from lib.logger import log
 
 MINIMAP_ROUNDING = 0
 MINIMAP_SPACING_M = 1
@@ -40,7 +41,7 @@ class PacketMotionData(PacketBase):
 
     _fields_ = [
         ("header", PacketHeader), 
-        ("carMotionData", CarSetupData * 22),
+        ("carMotionData", CarMotionData * 22),
         ("suspensionPosition", ctypes.c_float * 4),
         ("suspensionVelocity", ctypes.c_float * 4),
         ("suspensionAcceleration", ctypes.c_float * 4),

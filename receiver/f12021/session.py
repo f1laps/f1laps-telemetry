@@ -43,6 +43,9 @@ class F12021Session(SessionBase):
         # Data we get from F1Laps
         self.f1_laps_session_id = None
 
+        self.last_logged_distance = None
+        self.lap_distance = None
+
     def start(self):
         log.info("*************************************************")
         log.info("New session started: %s %s (ID %s)" % (self.get_track_name(), 

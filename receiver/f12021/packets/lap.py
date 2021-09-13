@@ -60,6 +60,7 @@ class PacketLapData(PacketBase):
             log.info("Can't retrieve lap number from lap packet - not processing")
             return session
         lap_distance = self.get_lap_distance()
+        session.lap_distance = lap_distance
 
         # Handle outlaps - essentially ignore everything, just update lap before outlap
         is_outlap = self.is_outlap(session, lap_number)
