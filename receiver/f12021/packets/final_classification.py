@@ -49,12 +49,10 @@ class PacketFinalClassificationData(PacketBase):
     def update_participants(self, session):
         num_participants = len(session.participants)
         for index, classification in enumerate(self.classificationData):
-            index_real_count = index+1 # +1 because 0-indexing -- for comparison and logging purposes only
-            if index_real_count > num_participants:   
-                # This should never happen
-                log.warning("Classification count of %s (or more) is higher than participant count of %s" % (index_real_count, num_participants))
-                break
-            participant = session.participants[index]
+            try:
+                participant = session.participants[index]
+            except:
+                continue
             participant.points = classification.points
             participant.finish_position = classification.position
             participant.result_status = classification.resultStatus
