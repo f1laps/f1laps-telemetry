@@ -51,9 +51,10 @@ class PacketParticipantsData(PacketBase):
             # Don't update participants when they're already set
             return 
         for index, participant in enumerate(self.participants):
-            session.add_participant(
-                name = participant.name,
-                team = participant.teamId,
-                driver = participant.driverId,
-                driver_index = index
-            )
+            if (index+1) <= self.numActiveCars:
+                session.add_participant(
+                    name = participant.name,
+                    team = participant.teamId,
+                    driver = participant.driverId,
+                    driver_index = index
+                )

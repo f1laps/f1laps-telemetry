@@ -57,8 +57,8 @@ class PacketFinalClassificationData(PacketBase):
             participant.finish_position = classification.position
             participant.result_status = classification.resultStatus
             participant.lap_time_best = classification.bestLapTimeInMS
-            participant.race_time_total = classification.totalRaceTime
-            participant.penalties_time_total = classification.penaltiesTime
+            participant.race_time_total = int(classification.totalRaceTime*1000)
+            participant.penalties_time_total = int(classification.penaltiesTime*1000)
 
 
 
