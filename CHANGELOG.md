@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 2.2.0 - INSERTDATE
+## 2.2.0 - 2021-09-15
 
 Starting the collection of Final Classification data
 

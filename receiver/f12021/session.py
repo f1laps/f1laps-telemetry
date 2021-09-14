@@ -222,7 +222,7 @@ class F12021Session(SessionBase):
     def add_participant(self, **kwargs):
         participant = ParticipantBase(**kwargs)
         self.participants.append(participant)
-        log.info("Added Participant: %s" % participant)
+        log.debug("Added Participant: %s" % participant)
 
     def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
         """ 
