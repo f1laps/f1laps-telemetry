@@ -1,7 +1,7 @@
 import json
 
 from lib.logger import log
-from receiver.session_base import SessionBase
+from receiver.session_base import SessionBase, ParticipantBase
 from .types import SessionType, Track
 from .api import F1LapsAPI2021
 from .telemetry import F12021Telemetry
@@ -36,6 +36,7 @@ class F12021Session(SessionBase):
         self.telemetry = F12021Telemetry()
 
         # Final classification
+        self.participants = []
         self.finish_position = None
         self.result_status = None
         self.points = None
@@ -163,7 +164,8 @@ class F12021Session(SessionBase):
             lap_times         = self.get_f1laps_lap_times_list(),
             setup_data        = self.setup,
             is_online_game    = self.is_online_game,
-            ai_difficulty     = self.ai_difficulty or None
+            ai_difficulty     = self.ai_difficulty or None,
+            classifications   = self.get_classification_list()
         )
         if success:
             log.info("Session successfully updated in F1Laps")
@@ -186,8 +188,41 @@ class F12021Session(SessionBase):
                     })
         return lap_times
 
+    def get_classification_list(self):
+        if not self.has_final_classification():
+            return []
+        classifications = []
+        for participant in self.participants:
+            classifications.append({
+                "driver": participant.driver,
+                "driver_index": participant.driver_index,
+                "team": participant.team,
+                "result_status": participant.result_status,
+                "points": participant.points or None,
+                "finish_position": participant.finish_position or None,
+                "lap_time_best": participant.lap_time_best or None,
+                "race_time_total": participant.race_time_total or None,
+                "penalties_time_total": participant.penalties_time_total or None
+            })
+        return classifications
+
+    def has_final_classification(self):
+        has_user_classification = bool(self.result_status)
+        if has_user_classification:
+            return True
+        participants_count = len(self.participants)
+        if not participants_count:
+            return False
+        last_participant = self.participants[participants_count-1]
+        return bool(last_participant.result_status)
+
     def is_time_trial(self):
         return self.session_type == 13
+
+    def add_participant(self, **kwargs):
+        participant = ParticipantBase(**kwargs)
+        self.participants.append(participant)
+        log.debug("Added Participant: %s" % participant)
 
     def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
         """ 
@@ -212,6 +247,5 @@ class F12021Session(SessionBase):
         self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
         self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
         self.post_process(lap_number)
-
 
 

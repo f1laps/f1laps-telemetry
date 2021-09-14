@@ -1,5 +1,6 @@
 import ctypes
 
+from lib.logger import log
 from .base import PacketBase, PacketHeader
 
 
@@ -29,16 +30,37 @@ class PacketFinalClassificationData(PacketBase):
     ]
 
     def process(self, session):
-        session = self.set_results(session)
+        # Update user's results in session
+        self.set_results(session)
+        # Update all participants in session array
+        self.update_participants(session)
+        session.complete_session()
         return session
 
     def set_results(self, session):
         try:
             classification_data = self.classificationData[self.header.playerCarIndex]
         except:
-            return session
+            return
         session.finish_position = classification_data.position
         session.result_status   = classification_data.resultStatus
         session.points          = classification_data.points
-        session.complete_session()
-        return session
+
+    def update_participants(self, session):
+        num_participants = len(session.participants)
+        for index, classification in enumerate(self.classificationData):
+            try:
+                participant = session.participants[index]
+            except:
+                continue
+            participant.points = classification.points
+            participant.finish_position = classification.position
+            participant.result_status = classification.resultStatus
+            participant.lap_time_best = classification.bestLapTimeInMS
+            if classification.totalRaceTime:
+                participant.race_time_total = int(classification.totalRaceTime*1000)
+            if classification.penaltiesTime:
+                participant.penalties_time_total = int(classification.penaltiesTime*1000)
+
+
+
