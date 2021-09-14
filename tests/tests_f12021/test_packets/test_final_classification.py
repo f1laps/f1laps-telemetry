@@ -16,6 +16,18 @@ class PacketFinalClassificationDataTest(TestCase):
         self.assertEqual(session.points, 8)
         mock_send_to_f1laps.assert_called_with()
 
+    def test_update_participants(self):
+        session = F12021Session(123)
+        packet = MockPacketFinalClassificationData()
+        # Processing without participants should log a warning, nothing else
+        packet.process(session)
+        self.assertEqual(session.participants, [])
+        # Now add a participant and process classification
+        session.add_participant(name="Player", team=0, driver=255, driver_index=0)
+        packet.process(session)
+        self.assertEqual(len(session.participants), 1)
+        self.assertEqual(session.participants[0].points, 8)
+
 
 if __name__ == '__main__':
     unittest.main()

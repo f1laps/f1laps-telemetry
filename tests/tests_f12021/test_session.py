@@ -74,7 +74,7 @@ class F12021SessionTest(TestCase):
         session.lap_list = {}
         session.send_session_to_f1laps()
         self.assertEqual(session.f1_laps_session_id, "vettel2021")
-        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type='race', finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False, ai_difficulty=None)
+        mock_api.assert_called_with(f1laps_session_id=None, track_id=10, team_id=2, session_uid=123, conditions='dry', session_type='race', finish_position=None, points=None, result_status=None, lap_times=[], setup_data={}, is_online_game=False, ai_difficulty=None, classifications=[])
 
     def test_is_valid_for_f1laps_team_zero(self):
         session = F12021Session(123)
@@ -83,6 +83,35 @@ class F12021SessionTest(TestCase):
         self.assertEqual(session.is_valid_for_f1laps(), True)
         session.team_id = None
         self.assertEqual(session.is_valid_for_f1laps(), False)
+
+    def test_has_final_classification(self):
+        session = F12021Session(123)
+        self.assertEqual(session.has_final_classification(), False)
+        # A positive result status on the session itself always is true
+        session.result_status = 5
+        self.assertEqual(session.has_final_classification(), True)
+        session.result_status = None
+        # Participants with no result status - false
+        session.add_participant(name="Player", team=0, driver=255, driver_index=0)
+        self.assertEqual(session.has_final_classification(), False)
+        session.participants[0].result_status = 5
+        self.assertEqual(session.has_final_classification(), True)
+
+    def test_get_classification_list(self):
+        session = F12021Session(123)
+        classifications = session.get_classification_list()
+        self.assertEqual(classifications, [])
+        session.add_participant(name="Player", team=0, driver=255, driver_index=0)
+        session.participants[0].result_status = 5
+        session.participants[0].position = 20
+        session.add_participant(name="Mick Schumi", team=1, driver=1, driver_index=1)
+        session.participants[1].result_status = 4
+        session.participants[1].position = 5
+        session.participants[1].points = 10
+        classifications = session.get_classification_list()
+        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'points': None, 'finish_position': None, 'result_status': 5, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None}, {'driver': 1, 'driver_index': 1, 'team': 1, 'points': 10, 'finish_position': None, 'result_status': 4, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None}])
+
+        
 
 
 if __name__ == '__main__':

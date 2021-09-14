@@ -1,6 +1,13 @@
 # Change Log
 
 
+## 2.2.0 - INSERTDATE
+
+Starting the collection of Final Classification data
+
+### Added
+- Final Classification data is now saved for all players in a session
+
 ## 2.1.2 - 2021-08-20
 
 Fixed Time Trial sync issues when restarting a lap in sector 3

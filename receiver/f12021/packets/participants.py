@@ -31,16 +31,29 @@ class PacketParticipantsData(PacketBase):
     ]
 
     def process(self, session):
-        return self.update_team_id(session)
+        self.update_team_id(session)
+        self.update_participants(session)
+        return session
 
     def update_team_id(self, session):
         if session.team_id:
             # Don't update sessions with existing team_id
-            return session
+            return 
         try:
             participant_data = self.participants[self.header.playerCarIndex]
         except:
-            return session
+            return 
         udp_team_id = participant_data.teamId
         session.team_id = udp_team_id
-        return session
+
+    def update_participants(self, session):
+        if len(session.participants) >= self.numActiveCars:
+            # Don't update participants when they're already set
+            return 
+        for index, participant in enumerate(self.participants):
+            session.add_participant(
+                name = participant.name,
+                team = participant.teamId,
+                driver = participant.driverId,
+                driver_index = index
+            )

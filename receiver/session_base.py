@@ -34,3 +34,25 @@ class SessionBase:
             if telemetry_data:
                 return json.dumps(telemetry_data)
         return None
+
+
+class ParticipantBase:
+    name = None
+    team = None
+    driver = None # Driver ID
+    driver_index = None # Index in the UDP arrays, used as unique ID per session
+    points = None
+    finish_position = None
+    result_status = None
+    lap_time_best = None
+    race_time_total = None
+    penalties_time_total = None
+
+    def __init__(self, name, team, driver, driver_index):
+        self.name = name
+        self.team = team
+        self.driver = driver
+        self.driver_index = driver_index
+
+    def __str__(self):
+        return "%s (DID %s, TID %s, SID %s)" % (self.name, self.driver, self.team, self.driver_index)
