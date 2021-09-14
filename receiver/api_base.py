@@ -18,6 +18,7 @@ class F1LapsAPIBase:
     def call_api(self, method, endpoint, params=None):
         headers = self._get_headers()
         path = self.base_url + self.game_version + "/" + endpoint 
+        log.info("---------> API call to F1Laps with params: %s" % params)
         if method == "GET":
             return requests.get(path , headers=headers)
         elif method == "POST":
