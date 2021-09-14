@@ -197,12 +197,12 @@ class F12021Session(SessionBase):
                 "driver": participant.driver,
                 "driver_index": participant.driver_index,
                 "team": participant.team,
-                "points": participant.points,
-                "finish_position": participant.finish_position,
                 "result_status": participant.result_status,
-                "lap_time_best": participant.lap_time_best,
-                "race_time_total": participant.race_time_total,
-                "penalties_time_total": participant.penalties_time_total
+                "points": participant.points or None,
+                "finish_position": participant.finish_position or None,
+                "lap_time_best": participant.lap_time_best or None,
+                "race_time_total": participant.race_time_total or None,
+                "penalties_time_total": participant.penalties_time_total or None
             })
         return classifications
 
