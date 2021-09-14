@@ -37,6 +37,8 @@ class MockFinalClassificationData(FinalClassificationData):
     position = 5
     resultStatus = 6
     points = 8
+    totalRaceTime = 50
+    penaltiesTime = None
 
 
 class MockPacketFinalClassificationData(PacketFinalClassificationData):
