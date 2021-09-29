@@ -13,7 +13,10 @@ from .motion import PacketMotionData
 
 
 HeaderFieldsToPacketType = {
-     0: PacketMotionData,
+     # The Motion packet sometimes returns:
+     # 'Buffer size too small (36 instead of at least 1464 bytes)'
+     # We don't need the packet in prod, only for maps, so we're skipping it by default.
+     #0: PacketMotionData,
      1: PacketSessionData,
      2: PacketLapData,
      3: PacketEventData,
