@@ -30,19 +30,14 @@ class PacketFinalClassificationData(PacketBase):
     ]
 
     def process(self, session):
-        log.info("FC: start")
         # Update user's results in session
         self.set_results(session)
-        log.info("FC: done 1")
         # Update all participants in session array
         self.update_participants(session)
-        log.info("FC: done 2")
         session.complete_session()
-        log.info("FC: done 3")
         return session
 
     def set_results(self, session):
-        log.info("FC: set_results - start")
         try:
             classification_data = self.classificationData[self.header.playerCarIndex]
         except:
@@ -50,10 +45,8 @@ class PacketFinalClassificationData(PacketBase):
         session.finish_position = classification_data.position
         session.result_status   = classification_data.resultStatus
         session.points          = classification_data.points
-        log.info("FC: set_results - set fp to %s" % session.finish_position)
 
     def update_participants(self, session):
-        log.info("FC: update_participants - start")
         num_participants = len(session.participants)
         for index, classification in enumerate(self.classificationData):
             try:
@@ -68,7 +61,6 @@ class PacketFinalClassificationData(PacketBase):
                 participant.race_time_total = int(classification.totalRaceTime*1000)
             if classification.penaltiesTime:
                 participant.penalties_time_total = int(classification.penaltiesTime*1000)
-        log.info("FC: update_participants - end")
 
 
 
