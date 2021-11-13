@@ -19,11 +19,33 @@ class F1LapsAPIBase:
         headers = self._get_headers()
         path = self.base_url + self.game_version + "/" + endpoint 
         if method == "GET":
-            return requests.get(path , headers=headers)
+            return self.call_api_get(path , headers=headers)
         elif method == "POST":
-            return requests.post(path, headers=headers, json=params)
+            return self.call_api_post(path, headers=headers, json=params)
         elif method == "PUT":
-            return requests.put(path , headers=headers, json=params)
+            return self.call_api_put(path , headers=headers, json=params)
+
+    def call_api_get(self, path, headers):
+        try:
+            return requests.get(path , headers=headers)
+        except requests.ConnectionError as ex:
+            log.info("ConnectionError calling %s: %s" % (path, ex))
+            return None
+
+    def call_api_post(self, path, headers, json):
+        try:
+            return requests.post(path, headers=headers, json=json)
+        except requests.ConnectionError as ex:
+            log.info("ConnectionError calling %s: %s" % (path, ex))
+            return None
+
+    def call_api_put(self, path, headers, json):
+        try:
+            return requests.put(path , headers=headers, json=json)
+        except requests.ConnectionError as ex:
+            log.info("ConnectionError calling %s: %s" % (path, ex))
+            return None
+
 
     def lap_create(self, track_id, team_id, conditions, game_mode, 
                    sector_1_time, sector_2_time, sector_3_time, setup_data, 
@@ -111,7 +133,11 @@ class F1LapsAPIBase:
             kwargs_exclude_in_create = ['f1laps_session_id']
             session_create_params = {k:v for k,v in kwargs.items() if k not in kwargs_exclude_in_create}
             response = self.session_create(**session_create_params)
-            if response.status_code == 201:
+            if not response:
+                # API call failed, e.g. due to Connection Error
+                log.info("API call failed - not updating in F1Laps")
+                success = False
+            elif response.status_code == 201:
                 log.info("Session successfully created in F1Laps")
                 f1_laps_session_id = json.loads(response.content)['id']
                 success = True
@@ -138,11 +164,14 @@ class F1LapsAPIBase:
     def update_session_in_f1laps(self, **kwargs):
         """ Update existing Session in F1Laps """
         response = self.session_update(**kwargs)
-        return response.status_code == 200
+        return response.status_code == 200 if response else False
 
     def retrieve_f1_laps_session_id(self, session_uid):
         """ Try to retrieve previous session id from F1Laps by listing all sessions """
         list_response = self.session_list(session_uid)
+        if not list_response:
+            log.info("API list call failed")
+            return None
         list_response_content = json.loads(list_response.content)
         if list_response_content['results'] and len(list_response_content['results']) == 1:
             f1_laps_session_id = list_response_content['results'][0]['id']

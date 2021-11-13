@@ -142,7 +142,9 @@ class F12021Session(SessionBase):
             is_valid              = self.lap_list[lap_number].get("is_valid", True),
             telemetry_data_string = self.get_lap_telemetry_data(lap_number)
         )
-        if response.status_code == 201:
+        if not response:
+            log.info("API call failed - lap not created in F1Laps")
+        elif response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
         else:
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
