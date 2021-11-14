@@ -72,27 +72,29 @@ class PacketLapDataTest(TestCase):
         session = packet.update_telemetry(session)
         self.assertEqual(session.telemetry.lap_dict[MOCK_LAP_NUMBER].frame_dict, {2345: [4321, 1543.0, None, None, None, None, None, None]})
 
-    def test_is_outlap_race_distance_mid(self):
+    def test_is_inlap_race_distance_mid(self):
         session = F12021Session(123)
         packet = MockPacketLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
+        is_outlap = packet.is_race_inlap(session, MOCK_LAP_NUMBER)
         self.assertEqual(is_outlap, False)
 
-    def test_is_outlap_race_distance_low_no_sectors(self):
+    def test_is_inlap_race_distance_low_no_sectors(self):
         session = F12021Session(123)
         packet = MockPacketOutLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
+        is_outlap = packet.is_race_inlap(session, MOCK_LAP_NUMBER)
         self.assertEqual(is_outlap, False)
 
-    def test_is_outlap_race_distance_low_with_sectors(self):
+    def test_is_inlap_race_distance_low_with_sectors(self):
         session = F12021Session(123)
         session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
         packet = MockPacketOutLapData()
-        is_outlap = packet.is_outlap(session, MOCK_LAP_NUMBER)
+        is_outlap = packet.is_race_inlap(session, MOCK_LAP_NUMBER)
         self.assertEqual(is_outlap, True)
 
-    def test_process_outlap(self):
+    def test_process_inlap(self):
+        # First, test race (type 10), which should not process inlap
         session = F12021Session(123)
+        session.session_type = 10
         session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
         session.complete_lap_v2 = MagicMock()
         session.start_new_lap = MagicMock()
@@ -104,8 +106,22 @@ class PacketLapDataTest(TestCase):
         self.assertEqual(session.complete_lap_v2.call_count, 1)
         self.assertEqual(session.start_new_lap.call_count, 0)
         self.assertEqual(packet.update_telemetry.call_count, 0)
+        # Second, test time trial (type 13), which should process "inlap"
+        session = F12021Session(123)
+        session.session_type = 13
+        session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
+        session.complete_lap_v2 = MagicMock()
+        session.start_new_lap = MagicMock()
+        packet = MockPacketOutLapData()
+        packet.update_telemetry = MagicMock()
+        packet.process(session)
+        self.assertEqual(session.lap_list, 
+                         {MOCK_LAP_NUMBER: {'sector_1_ms': 0, 'sector_2_ms': 0, 'sector_3_ms': None, 'lap_number': 2, 'car_race_position': 10, 'pit_status': 2, 'is_valid': True}})
+        self.assertEqual(session.complete_lap_v2.call_count, 0)
+        self.assertEqual(session.start_new_lap.call_count, 0)
+        self.assertEqual(packet.update_telemetry.call_count, 1)
 
-    def test_process_outlap_time_trial(self):
+    def test_process_inlap_time_trial(self):
         session = F12021Session(123)
         session.session_type = 13 # time trial
         session.lap_list[MOCK_LAP_NUMBER] = {'sector_1_ms': 500, 'sector_2_ms': 400, 'sector_3_ms': 100}
