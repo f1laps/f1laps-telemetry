@@ -149,7 +149,7 @@ class RaceReceiver(threading.Thread):
                 if self.processor:
                     self.processor.process(incoming_udp_packet)
             except Exception as ex:
-                log.info(ex)
+                log.info("Unknown main receiver exception: %s" % ex)
                 sentry_sdk.capture_exception(ex)
             
 

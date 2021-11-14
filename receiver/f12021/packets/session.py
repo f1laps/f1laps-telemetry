@@ -103,7 +103,7 @@ class PacketSessionData(PacketBase):
         if self.weather not in session.weather_ids:
             session.weather_ids.append(self.weather)
         session.start()
-        log.info("Session vals: season %s weekend %s session %s UID %s" % (
+        log.debug("Session vals: season %s weekend %s session %s UID %s" % (
             self.seasonLinkIdentifier,
             self.weekendLinkIdentifier,
             self.sessionLinkIdentifier,

@@ -155,7 +155,7 @@ class TelemetryBase:
 
     def frame(self, frame_number):
         if not self.current_lap:
-            log.info("Attempted to get/set a telemetry frame without a current lap")
+            log.debug("Attempted to get/set a telemetry frame without a current lap")
             return None
         frame_dict = self.current_lap.frame_dict
         if frame_number not in frame_dict:

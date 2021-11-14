@@ -133,7 +133,7 @@ class F1LapsAPIBase:
             kwargs_exclude_in_create = ['f1laps_session_id']
             session_create_params = {k:v for k,v in kwargs.items() if k not in kwargs_exclude_in_create}
             response = self.session_create(**session_create_params)
-            if not response:
+            if response is None:
                 # API call failed, e.g. due to Connection Error
                 log.info("API call failed - not updating in F1Laps")
                 success = False
@@ -169,7 +169,7 @@ class F1LapsAPIBase:
     def retrieve_f1_laps_session_id(self, session_uid):
         """ Try to retrieve previous session id from F1Laps by listing all sessions """
         list_response = self.session_list(session_uid)
-        if not list_response:
+        if list_response is None:
             log.info("API list call failed")
             return None
         list_response_content = json.loads(list_response.content)

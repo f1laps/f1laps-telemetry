@@ -62,12 +62,29 @@ class PacketLapData(PacketBase):
         lap_distance = self.get_lap_distance()
         # session.lap_distance = lap_distance # Enable this for motion packet / minimap
 
-        # Handle outlaps - essentially ignore everything, just update lap before outlap
-        is_outlap = self.is_outlap(session, lap_number)
-        if is_outlap:
-            self.update_previous_lap(session, lap_number, is_outlap=is_outlap)
-            session.complete_lap_v2(lap_number)
+        # Handle in- and outlaps - essentially ignore everything, just update lap before outlap
+        # Race sessions have 1 outlap at the end
+        if session.is_race() or session.is_qualifying_one_shot():
+            is_out_or_inlap = self.is_race_inlap(session, lap_number)
+        # Quali sessions have inlaps and outlaps
+        elif session.is_qualifying_non_one_shot():
+            is_out_or_inlap = self.is_quali_out_or_inlap(session, lap_number)
+        else: # time trial, practive
+            is_out_or_inlap = False
+        
+        if is_out_or_inlap:
+            if not session.current_lap_in_outlap_logging_status:
+                log.info("Skipping lap #%s because it's an in-/outlap" % lap_number)
+                # In normal quali, the inlap is #n+1; In race it's #n
+                lap_number_to_update = lap_number if not session.is_qualifying_non_one_shot() else lap_number - 1
+                self.update_previous_lap(session, lap_number_to_update+1) # +1 because we're updating the previous lap
+                session.complete_lap_v2(lap_number_to_update)
+            # Make sure to not log for this lap anymore
+            session.current_lap_in_outlap_logging_status = True
             return session
+        else:
+            # Reset outlap logger
+            session.current_lap_in_outlap_logging_status = False
 
         # Handle new laps
         if self.is_new_lap(session, lap_number):
@@ -112,13 +129,12 @@ class PacketLapData(PacketBase):
         lap_list = session.lap_list[lap_number]
         all_sectors_set = lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")
         if all_sectors_set and lap_data.sector1TimeInMS in null_values:
-            log.info("[THIS LAP DEBUG LOG] Removing sector 1 time for lap %s" % lap_number)
             return False
         return True
 
-    def update_previous_lap(self, session, lap_number, is_outlap=False):
+    def update_previous_lap(self, session, lap_number):
         lap_data = self.lapData[self.header.playerCarIndex]
-        prev_lap_num = lap_number - 1 if not is_outlap else lap_number
+        prev_lap_num = lap_number - 1
         if not session.lap_list.get(prev_lap_num) or \
            not (session.lap_list[prev_lap_num]["sector_1_ms"] and session.lap_list[prev_lap_num]["sector_2_ms"]):
             log.info("Lap packet: not updating previous lap %s because it doesn't exist" % prev_lap_num)
@@ -141,23 +157,23 @@ class PacketLapData(PacketBase):
     def is_new_lap(self, session, lap_number):
         return not session.lap_list.get(lap_number)
 
-    def is_outlap(self, session, lap_number):
-        # For race outlaps (lap after last lap), the lap number doesn't increment
-        # We use the following test to ignore the outlap
-        # Time trial is never an outlap
-        # For time trial, we should always overwrite
-        if session.is_time_trial():
-            return False
+    def is_race_inlap(self, session, lap_number):
+        # For race or OSQ inlaps (lap after last lap), the lap number doesn't increment
+        # We use the following test to ignore the inlap
         lap_list = session.lap_list.get(lap_number)
         current_distance = self.get_lap_distance()
-        # If we're in the middle of a lap, it's not an outlap
-        if not current_distance or not current_distance < MAX_DISTANCE_COUNT_AS_NEW_LAP:
-            return False
-        # If we're in the first x meters of a lap, but also have all sector data -- it's an outlap
-        if lap_list and lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms"):
-            log.info("Assuming this new lap (#%s) is an outlap - ignoring data" % lap_number)
+        # If we're in the first x meters of a lap and also have all sector data -- it's an inlap
+        if (current_distance and current_distance < MAX_DISTANCE_COUNT_AS_NEW_LAP) and \
+           (lap_list and lap_list.get("sector_1_ms") and lap_list.get("sector_2_ms") and lap_list.get("sector_3_ms")):
+            log.info("Skipping lap #%s because it's an inlap" % lap_number)
             return True
         return False
+
+    def is_quali_out_or_inlap(self, session, lap_number):
+        # For qualifying sessions (non-OSQ), the inlap and outlaps need to be ignored
+        # We check this based on pit status -- if no pits on entire lap, it's a real lap
+        lap_data = self.lapData[self.header.playerCarIndex]
+        return lap_data.pitStatus != 0
 
     def get_lap_distance(self):
         lap_data = self.lapData[self.header.playerCarIndex]
@@ -175,7 +191,7 @@ class PacketLapData(PacketBase):
         # we want to keep the highest number of 
         # 0 = no pit; 1 = pit entry/exit; 2 = pitting
         # so that we store the "slowest" pit value
-        if session.lap_list[lap_number].get("pit_status"):
+        if session.lap_list.get(lap_number) and session.lap_list[lap_number].get("pit_status"):
             return max(session.lap_list[lap_number]["pit_status"], lap_data.pitStatus)
         else:
             return lap_data.pitStatus
