@@ -234,11 +234,16 @@ class MainWindow(QWidget):
         if not self.session.is_active:
             log.info("Starting new session")
             self.start_telemetry()
+            self.api_key_field.setDisabled(True)
+            self.port_value_field.setReadOnly(True)
+            self.udp_broadcast_checkbox.setDisabled(True)
         else:
             log.info("Stopping session...")
             self.stop_telemetry()
-            self.start_button.setText("Start Telemetry")
-            self.start_button.setStyleSheet("background-color: #4338CA;")
+            self.start_button.reset()
+            self.api_key_field.setDisabled(False)
+            self.port_value_field.setReadOnly(False)
+            self.udp_broadcast_checkbox.setDisabled(False)
             self.status_label.setText("Status: stopped")
 
     def start_telemetry(self):
@@ -292,6 +297,9 @@ class MainWindow(QWidget):
                 ("valid" if api_key_valid else "invalid", subscription_plan if subscription_plan else "not set"))
             self.display_subscription_information(subscription_plan, subscription_expires)
             self.start_button.reset()
+            self.api_key_field.setDisabled(False)
+            self.port_value_field.setReadOnly(False)
+            self.udp_broadcast_checkbox.setDisabled(False)
             self.status_label.set_invalid_api_key()
 
     def get_port_value(self):
