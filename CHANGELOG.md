@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 2.3.0 - 2021-11-XX
+## 2.3.0 - 2021-11-15
 
 Added support for different port values. Fixed qualification session in- and outlaps
 
