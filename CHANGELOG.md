@@ -1,6 +1,16 @@
 # Change Log
 
 
+## 2.3.0 - 2021-11-15
+
+Added support for different port values. Fixed qualification session in- and outlaps
+
+### Added
+- The telemetry port can now be changed
+
+### Fixed
+- Inlaps and outlaps in qualification sessions are now ignored by the app, allowing for correct import of actual quali laps
+
 ## 2.2.0 - 2021-09-15
 
 Starting the collection of Final Classification data

@@ -7,8 +7,8 @@ SessionType = {
      5: "qualifying_1",
      6: "qualifying_2",
      7: "qualifying_3",
-     8: "qualifying",
-     9: "qualifying",
+     8: "qualifying", # short
+     9: "qualifying", # OSQ
     10: "race",
     11: "race",
     12: "race",

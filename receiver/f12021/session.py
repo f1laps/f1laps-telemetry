@@ -28,6 +28,7 @@ class F12021Session(SessionBase):
 
         # Laps
         self.lap_list = {}
+        self.current_lap_in_outlap_logging_status = False
 
         # Setup 
         self.setup = {}
@@ -142,7 +143,9 @@ class F12021Session(SessionBase):
             is_valid              = self.lap_list[lap_number].get("is_valid", True),
             telemetry_data_string = self.get_lap_telemetry_data(lap_number)
         )
-        if response.status_code == 201:
+        if response is None:
+            log.info("API call failed - lap not created in F1Laps")
+        elif response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
         else:
             log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
@@ -217,7 +220,16 @@ class F12021Session(SessionBase):
         return bool(last_participant.result_status)
 
     def is_time_trial(self):
-        return self.session_type == 13
+        return self.session_type in [13]
+
+    def is_race(self):
+        return self.session_type in [10, 11, 12]
+
+    def is_qualifying_non_one_shot(self):
+        return self.session_type in [5, 6, 7, 8]
+
+    def is_qualifying_one_shot(self):
+        return self.session_type in [9]
 
     def add_participant(self, **kwargs):
         participant = ParticipantBase(**kwargs)
