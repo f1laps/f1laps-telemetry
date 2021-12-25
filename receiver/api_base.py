@@ -65,7 +65,9 @@ class F1LapsAPIBase:
             'is_valid': is_valid,
             'telemetry_data_string': telemetry_data_string
         }
-        return self.call_api(method, endpoint, params)
+        response = self.call_api(method, endpoint, params)
+        self._log_f1laps_response_status(response, descriptor="Lap_create")
+        return 
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
@@ -155,7 +157,7 @@ class F1LapsAPIBase:
                     else:
                         log.info("Session can't be created, and no existing session found in F1Laps.")
                 else:
-                    log.error("Error creating session in F1Laps: %s" % json.loads(response.content))
+                    self._log_f1laps_response_status(response, descriptor="Session_create")
         else:
             # Update session
             success = self.update_session_in_f1laps(**kwargs)
@@ -181,6 +183,21 @@ class F1LapsAPIBase:
             log.info("No session found in F1Laps")
             return None
 
+    def _log_f1laps_response_status(self, response, descriptor):
+        if response is None:
+            log.info("%s failed, empty response" % descriptor)
+        elif response.status_code == 201:
+            log.info("%s succeeded" % descriptor)
+        elif response.status_code == 400:
+            # Log level depends on error type
+            error_message = response.content.get('detail')
+            if error_message != 'You need an active subscription to use the F1Laps Telemetry App.':
+                log.info("%s failed: no active F1Laps subscription" % descriptor)
+            else:
+                log.error("%s failed: %s" % (descriptor, json.loads(error_message)))
+        else:
+            log.error("%s failed: %s" % (descriptor, json.loads(response.content)))
+
     def _get_headers(self):
         return {
             'Content-Type'      : 'application/json',
@@ -191,6 +208,3 @@ class F1LapsAPIBase:
 
     def _get_platform(self):
         return "%s %s" % (platform.system(), platform.release())
-
-
-

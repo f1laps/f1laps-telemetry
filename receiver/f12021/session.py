@@ -131,7 +131,7 @@ class F12021Session(SessionBase):
         if not self.is_valid_for_f1laps():
             return 
         api = F1LapsAPI2021(self.f1laps_api_key, self.game_version)
-        response = api.lap_create(
+        success = api.lap_create(
             track_id              = self.track_id,
             team_id               = self.team_id,
             conditions            = self.map_weather_ids_to_f1laps_token(),
@@ -143,12 +143,7 @@ class F12021Session(SessionBase):
             is_valid              = self.lap_list[lap_number].get("is_valid", True),
             telemetry_data_string = self.get_lap_telemetry_data(lap_number)
         )
-        if response is None:
-            log.info("API call failed - lap not created in F1Laps")
-        elif response.status_code == 201:
-            log.info("Lap #%s successfully created in F1Laps" % lap_number)
-        else:
-            log.error("Error creating lap %s in F1Laps: %s" % (lap_number, json.loads(response.content)))
+        log.info("Lap %s successfully created in F1Laps" % lap_number) if success else log.info("Lap %s not created in F1Laps" % lap_number)
 
     def send_session_to_f1laps(self):
         if not self.is_valid_for_f1laps():
@@ -170,10 +165,7 @@ class F12021Session(SessionBase):
             ai_difficulty     = self.ai_difficulty or None,
             classifications   = self.get_classification_list()
         )
-        if success:
-            log.info("Session successfully updated in F1Laps")
-        else:
-            log.info("Session not updated in F1Laps")
+        log.info("Session successfully updated in F1Laps") if success else log.info("Session not updated in F1Laps")
 
     def get_f1laps_lap_times_list(self):
         lap_times = []
