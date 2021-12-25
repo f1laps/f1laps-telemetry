@@ -76,9 +76,12 @@ class PacketLapData(PacketBase):
             if not session.current_lap_in_outlap_logging_status:
                 log.info("Skipping lap #%s because it's an in-/outlap" % lap_number)
                 # In normal quali, the inlap is #n+1; In race it's #n
-                lap_number_to_update = lap_number if not session.is_qualifying_non_one_shot() else lap_number - 1
-                self.update_previous_lap(session, lap_number_to_update+1) # +1 because we're updating the previous lap
-                session.complete_lap_v2(lap_number_to_update)
+                last_valid_lap_number = lap_number if not session.is_qualifying_non_one_shot() else lap_number - 1
+                self.update_previous_lap(session, last_valid_lap_number+1) # +1 because we're updating the previous lap
+                session.complete_lap_v2(last_valid_lap_number)
+                # Drop all data of this lap, so that telemetry gets reset
+                lap_number_to_drop = lap_number + 1 if not session.is_qualifying_non_one_shot() else lap_number
+                session.drop_lap_data(lap_number_to_drop)
             # Make sure to not log for this lap anymore
             session.current_lap_in_outlap_logging_status = True
             return session
@@ -155,7 +158,8 @@ class PacketLapData(PacketBase):
         return round(sector_3_ms) if sector_3_ms else None 
 
     def is_new_lap(self, session, lap_number):
-        return not session.lap_list.get(lap_number)
+        """ Empty dict {} should not count as new lap, so test for None only """
+        return session.lap_list.get(lap_number) is None
 
     def is_race_inlap(self, session, lap_number):
         # For race or OSQ inlaps (lap after last lap), the lap number doesn't increment

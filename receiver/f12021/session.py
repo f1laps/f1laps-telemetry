@@ -94,6 +94,19 @@ class F12021Session(SessionBase):
                 self.send_session_to_f1laps()
             else:
                 self.send_lap_to_f1laps(lap_number)
+    
+    def drop_lap_data(self, lap_number):
+        """ 
+        Drop telemetry and lap data for in/out-laps
+        For race or OSQ, the lap data never gets posted in the first place,
+        so make sure to only update if it already exists
+        """ 
+        if self.lap_list.get(lap_number):
+            # Drop telemetry
+            self.telemetry.drop_lap(lap_number)
+            # Remove data from lap dict (but keep it in there so that it doesn't need to be started again)
+            self.lap_list[lap_number] = {}
+            log.info("Session (via Lap packet): dropped lap %s" % lap_number)
 
     def complete_session(self):
         log.info("Session: complete session")

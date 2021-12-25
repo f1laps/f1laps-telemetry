@@ -198,3 +198,10 @@ class TelemetryBase:
 
     def process_flashback_event(self, frame_id_flashed_back_to):
         self.current_lap.process_flashback_event(frame_id_flashed_back_to)
+    
+    def drop_lap(self, lap_number):
+        """ Drop all frames from current lap, if it exists """
+        if self.lap_dict.get(lap_number):
+            self.current_lap_number = lap_number
+            self.lap_dict[lap_number] = self.TelemetryLapModel(lap_number, session_type=self.session_type)
+            log.info("Telemetry: dropped telemetry of lap %s" % lap_number)
