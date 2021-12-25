@@ -203,9 +203,11 @@ class F12021Session(SessionBase):
                 "result_status": participant.result_status,
                 "points": participant.points or None,
                 "finish_position": participant.finish_position or None,
+                "grid_position": participant.grid_position,
                 "lap_time_best": participant.lap_time_best or None,
                 "race_time_total": participant.race_time_total or None,
-                "penalties_time_total": participant.penalties_time_total or None
+                "penalties_time_total": participant.penalties_time_total or None,
+                "penalties_number": participant.penalties_number
             })
         return classifications
 

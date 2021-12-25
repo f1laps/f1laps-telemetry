@@ -55,8 +55,10 @@ class PacketFinalClassificationData(PacketBase):
                 continue
             participant.points = classification.points
             participant.finish_position = classification.position
+            participant.grid_position = classification.gridPosition
             participant.result_status = classification.resultStatus
             participant.lap_time_best = classification.bestLapTimeInMS
+            participant.penalties_number = classification.numPenalties
             if classification.totalRaceTime:
                 participant.race_time_total = int(classification.totalRaceTime*1000)
             if classification.penaltiesTime:

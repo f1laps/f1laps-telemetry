@@ -43,10 +43,12 @@ class ParticipantBase:
     driver_index = None # Index in the UDP arrays, used as unique ID per session
     points = None
     finish_position = None
+    grid_position = None
     result_status = None
     lap_time_best = None
     race_time_total = None
     penalties_time_total = None
+    penalties_number = None
 
     def __init__(self, name, team, driver, driver_index):
         self.name = name
