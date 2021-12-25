@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.4.0 - 2021-XX-XX
+
+TBD
+
+### Added
+
+### Changed
 
 ## 2.3.0 - 2021-11-15
 
