@@ -230,28 +230,5 @@ class F12021Session(SessionBase):
         self.participants.append(participant)
         log.debug("Added Participant: %s" % participant)
 
-    def complete_lap(self, lap_number, sector_1_ms, sector_2_ms, sector_3_ms, tyre_visual):
-        """ 
-        While this method is similar to new_lap_started, it's different
-        It's not called as soon as possible, but when all previous lap data is available
-        There might be a ~1 second gap after the line is crossed
-
-        As set by the SessionHistory packet, this method is called 
-        when the previous lap data was published in the history packet
-        """
-        # Temp hack: there is a bug in the telemetry that the SessionHistory gets sent with 
-        # laps from the last session. This prevents the telemetry from being started by
-        # our lap packet. So we start it here too. 
-        # Remove this once the bug is fixed
-        self.telemetry.start_new_lap(lap_number)
-        log.info("Session (via History packet): complete lap %s" % lap_number)
-        if not self.lap_list.get(lap_number):
-            self.lap_list[lap_number] = {}
-        self.lap_list[lap_number]['lap_number']  = lap_number
-        self.lap_list[lap_number]['sector_1_ms'] = sector_1_ms
-        self.lap_list[lap_number]['sector_2_ms'] = sector_2_ms
-        self.lap_list[lap_number]['sector_3_ms'] = sector_3_ms
-        self.lap_list[lap_number]['tyre_compound_visual'] = tyre_visual
-        self.post_process(lap_number)
 
 

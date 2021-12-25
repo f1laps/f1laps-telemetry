@@ -15,13 +15,6 @@ class F12021SessionTest(TestCase):
         session.session_type = 6
         self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type qualifying_2, offline, 1 laps)")
 
-    @patch('receiver.f12021.session.F12021Session.post_process')
-    def test_complete_lap(self, mock_post_process):
-        session = F12021Session(123)
-        session.complete_lap(lap_number = 1, sector_1_ms = 11111, sector_2_ms = 22222, sector_3_ms = 33333, tyre_visual = 16)
-        self.assertEqual(session.lap_list, {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'sector_3_ms': 33333, 'tyre_compound_visual': 16}})
-        self.assertEqual(mock_post_process.call_count, 1)
-
     def test_get_track_name(self):
         session = F12021Session(123)
         session.track_id = 5
