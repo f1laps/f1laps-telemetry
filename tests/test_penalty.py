@@ -32,6 +32,7 @@ class PenaltyBaseTest(TestCase):
     def test_success_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = False
         api_mock = MagicMock()
         api_mock.return_value.penalty_create.return_value = True
         penalty.f1laps_api_class = api_mock
@@ -43,6 +44,7 @@ class PenaltyBaseTest(TestCase):
     def test_error_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = False
         api_mock = MagicMock()
         api_mock.return_value.penalty_create.return_value = False
         penalty.f1laps_api_class = api_mock
