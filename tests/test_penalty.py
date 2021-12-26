@@ -16,27 +16,33 @@ class PenaltyBaseTest(TestCase):
         penalty.f1laps_api_class = MagicMock()
         self.assertIsNone(penalty.send_to_f1laps())
     
+    def test_no_session_id_returns_none(self):
+        penalty = PenaltyBase()
+        penalty.f1laps_api_class = MagicMock()
+        penalty.session = MagicMock(f1_laps_session_id=None)
+        self.assertIsNone(penalty.send_to_f1laps())
+    
     def test_success_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
         api_mock = MagicMock()
-        api_mock.penalty_create.return_value = True
+        api_mock.return_value.penalty_create.return_value = True
         penalty.f1laps_api_class = api_mock
         penalty.infringement_type = 5
         success = penalty.send_to_f1laps()
         self.assertTrue(success)
-        penalty.f1laps_api_class.return_value.penalty_create.assert_called_with(penalty_type=None, infringement_type=5, vehicle_index=None, other_vehicle_index=None, time_spent_gained=None, lap_number=None, places_gained=None)
+        penalty.f1laps_api_class.return_value.penalty_create.assert_called_with(f1_laps_session_id=penalty.session.f1_laps_session_id, penalty_type=None, infringement_type=5, vehicle_index=None, other_vehicle_index=None, time_spent_gained=None, lap_number=None, places_gained=None)
     
     def test_error_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
         api_mock = MagicMock()
-        api_mock.penalty_create.return_value = False
+        api_mock.return_value.penalty_create.return_value = False
         penalty.f1laps_api_class = api_mock
         penalty.infringement_type = 5
         success = penalty.send_to_f1laps()
         self.assertFalse(success)
-        penalty.f1laps_api_class.return_value.penalty_create.assert_called_with(penalty_type=None, infringement_type=5, vehicle_index=None, other_vehicle_index=None, time_spent_gained=None, lap_number=None, places_gained=None)
+        penalty.f1laps_api_class.return_value.penalty_create.assert_called_with(f1_laps_session_id=penalty.session.f1_laps_session_id, penalty_type=None, infringement_type=5, vehicle_index=None, other_vehicle_index=None, time_spent_gained=None, lap_number=None, places_gained=None)
 
 
 if __name__ == '__main__':
