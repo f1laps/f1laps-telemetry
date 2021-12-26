@@ -2,6 +2,7 @@ import ctypes
 
 from lib.logger import log
 from .base import PacketBase, PacketHeader
+from receiver.f12021.penalty import F12021Penalty
 
 
 class FlashbackData(PacketBase):
@@ -13,11 +14,26 @@ class FlashbackData(PacketBase):
     ]
 
 
+class PenaltyData(PacketBase):
+    """Event data for Penalties (PENA)"""
+
+    _fields_ = [
+        ("penaltyType", ctypes.c_uint8),  # Penalty type – see Appendices
+        ("infringementType", ctypes.c_uint8),  # Infringement type – see Appendices
+        ("vehicleIdx", ctypes.c_uint8),  # Vehicle index of the car the penalty is applied to
+        ("otherVehicleIdx", ctypes.c_uint8),  # Vehicle index of the other car involved
+        ("time", ctypes.c_uint8),  # Time gained, or time spent doing action in seconds
+        ("lapNum", ctypes.c_uint8),  # Lap the penalty occurred on
+        ("placesGained", ctypes.c_uint8),  # Number of places gained by this
+    ]
+
+
 class EventDataDetails(ctypes.Union):
     """Union for the different event data types"""
 
     _fields_ = [
         ("flashback", FlashbackData),
+        ("penalty", PenaltyData),
     ]
 
 
@@ -37,8 +53,27 @@ class PacketEventData(PacketBase):
 
     def process(self, session):
         if self.eventStringCode == b"FLBK":
-            frame_id = self.eventDetails.flashback.flashbackFrameIdentifier
-            session_time = self.eventDetails.flashback.flashbackSessionTime
-            log.info("Event: Flashback happened to frame %s and session time %s. Deleting frames." % (frame_id, session_time))
-            session.telemetry.process_flashback_event(frame_id)
+            self.process_flashback(session)
+        elif self.eventStringCode == b"PENA":
+            self.process_pentalty(session)
         return session
+    
+    def process_flashback(self, session):
+        frame_id = self.eventDetails.flashback.flashbackFrameIdentifier
+        session_time = self.eventDetails.flashback.flashbackSessionTime
+        log.info("Event: Flashback happened to frame %s and session time %s. Deleting frames." % (frame_id, session_time))
+        session.telemetry.process_flashback_event(frame_id)
+    
+    def process_pentalty(self, session):
+        penalty = F12021Penalty()
+        penalty.penalty_type = self.eventDetails.penalty.penaltyType
+        penalty.infringement_type = self.eventDetails.penalty.infringementType
+        penalty.vehicle_index = self.eventDetails.penalty.vehicleIdx
+        penalty.other_vehicle_index = self.eventDetails.penalty.otherVehicleIdx
+        penalty.time_spent_gained = self.eventDetails.penalty.time
+        penalty.lap_number = self.eventDetails.penalty.lapNum
+        penalty.places_gained = self.eventDetails.penalty.placesGained
+        penalty.session = session
+        penalty.send_to_f1laps()
+        log.info("Processing %s" % penalty)
+        return penalty

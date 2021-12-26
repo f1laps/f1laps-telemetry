@@ -66,8 +66,16 @@ class F1LapsAPIBase:
             'telemetry_data_string': telemetry_data_string
         }
         response = self.call_api(method, endpoint, params)
-        self._log_f1laps_response_status(response, descriptor="Lap_create")
-        return 
+        success = self._log_f1laps_response_status(response, descriptor="Lap_create")
+        return success
+    
+    def penalty_create(self, **params):
+        """ Create a Penalty in F1Laps """
+        endpoint = "penalties/"
+        method   = "POST"
+        response = self.call_api(method, endpoint, params)
+        success = self._log_f1laps_response_status(response, descriptor="Penalty_create")
+        return success
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
@@ -186,8 +194,10 @@ class F1LapsAPIBase:
     def _log_f1laps_response_status(self, response, descriptor):
         if response is None:
             log.info("%s failed, empty response" % descriptor)
-        elif response.status_code == 201:
+            return False
+        elif response.status_code >= 200 and response.status_code < 300:
             log.info("%s succeeded" % descriptor)
+            return True
         elif response.status_code == 400:
             # Log level depends on error type
             error_message = response.content.get('detail')
@@ -195,8 +205,10 @@ class F1LapsAPIBase:
                 log.info("%s failed: no active F1Laps subscription" % descriptor)
             else:
                 log.error("%s failed: %s" % (descriptor, json.loads(error_message)))
+            return False
         else:
             log.error("%s failed: %s" % (descriptor, json.loads(response.content)))
+            return False
 
     def _get_headers(self):
         return {
