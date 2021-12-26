@@ -22,6 +22,13 @@ class PenaltyBaseTest(TestCase):
         penalty.session = MagicMock(f1_laps_session_id=None)
         self.assertIsNone(penalty.send_to_f1laps())
     
+    def test_time_trial_returns_none(self):
+        penalty = PenaltyBase()
+        penalty.f1laps_api_class = MagicMock()
+        penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = True
+        self.assertIsNone(penalty.send_to_f1laps())
+    
     def test_success_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
