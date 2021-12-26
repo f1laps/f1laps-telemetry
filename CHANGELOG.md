@@ -7,6 +7,7 @@ TBD
 ### Added
 - Grid position (final classification) is now collected
 - Number of penalties (final classification) is now collected
+- Penalty events (warnings etc.) are now collected
 
 ### Fixed
 - Qualifying laps now show telemetry correctly
