@@ -57,7 +57,7 @@ class PacketLapData(PacketBase):
         lap_number = self.get_lap_number()
         if not lap_number:
             # If we can't retrieve lap number, we can't do anything here
-            log.info("Can't retrieve lap number from lap packet - not processing")
+            log.debug("Can't retrieve lap number from lap packet - not processing")
             return session
         lap_distance = self.get_lap_distance()
         # session.lap_distance = lap_distance # Enable this for motion packet / minimap

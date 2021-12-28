@@ -74,6 +74,6 @@ class PacketEventData(PacketBase):
         penalty.lap_number = self.eventDetails.penalty.lapNum
         penalty.places_gained = self.eventDetails.penalty.placesGained
         penalty.session = session
-        penalty.send_to_f1laps()
         log.info("Processing %s" % penalty)
+        penalty.send_to_f1laps()
         return penalty

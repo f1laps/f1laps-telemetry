@@ -250,6 +250,9 @@ class F12021Session(SessionBase):
         participant = ParticipantBase(**kwargs)
         self.participants.append(participant)
         log.debug("Added Participant: %s" % participant)
+    
+    def has_ended(self):
+        return bool(self.finish_position is not None)
 
 
 

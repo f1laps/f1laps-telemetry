@@ -28,6 +28,7 @@ class PenaltyBaseTest(TestCase):
         penalty.session = MagicMock(f1_laps_session_id=None)
         penalty.session.send_session_to_f1laps.return_value = True
         penalty.session.is_time_trial.return_value = False
+        penalty.session.has_ended.return_value = False
         penalty.infringement_type = 5
         success = penalty.send_to_f1laps()
         self.assertTrue(success)
@@ -41,10 +42,18 @@ class PenaltyBaseTest(TestCase):
         penalty.session.send_session_to_f1laps.return_value = False
         self.assertIsNone(penalty.send_to_f1laps())
     
+    def test_session_has_ended(self):
+        penalty = PenaltyBase()
+        penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = False
+        penalty.session.has_ended.return_value = True
+        self.assertIsNone(penalty.send_to_f1laps())
+    
     def test_success_api(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
         penalty.session.is_time_trial.return_value = False
+        penalty.session.has_ended.return_value = False
         api_mock = MagicMock()
         api_mock.return_value.penalty_create.return_value = True
         penalty.f1laps_api_class = api_mock
@@ -57,6 +66,7 @@ class PenaltyBaseTest(TestCase):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
         penalty.session.is_time_trial.return_value = False
+        penalty.session.has_ended.return_value = False
         api_mock = MagicMock()
         api_mock.return_value.penalty_create.return_value = False
         penalty.f1laps_api_class = api_mock
