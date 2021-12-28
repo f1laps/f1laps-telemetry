@@ -199,10 +199,10 @@ class F1LapsAPIBase:
         elif response.status_code >= 200 and response.status_code < 300:
             log.info("%s succeeded" % descriptor)
             return True
-        elif response.status_code == 400:
+        elif response.status_code >= 400 and response.status_code < 500:
             # Log level depends on error type
             error_message = self._get_error_message(response.content)
-            if error_message != 'You need an active subscription to use the F1Laps Telemetry App.':
+            if error_message == 'You need an active subscription to use the F1Laps Telemetry App.':
                 log.info("%s failed: no active F1Laps subscription" % descriptor)
             else:
                 log.error("%s failed: %s" % (descriptor, error_message))
