@@ -23,14 +23,17 @@ class PenaltyBase:
             )
     
     def send_to_f1laps(self):
+        if not self.session:
+            log.error("No session defined for %s" % self)
+            return None
+        if self.session.is_time_trial():
+            log.info("Skipping F1Laps sync because it's Time Trial, for %s" % self)
+            return None
         if not self.f1laps_api_class:
             log.error("No F1Laps API class defined for %s" % self)
             return None
-        if not self.session or not self.session.f1_laps_session_id:
-            log.error("No session or ID defined for %s" % self)
-            return None
-        if self.session.is_time_trial():
-            log.info("Skipping F1Laps sync for %s" % self)
+        if not self.session.f1_laps_session_id:
+            log.error("No session ID defined for %s" % self)
             return None
         api = self.f1laps_api_class(self.session.f1laps_api_key, self.session.game_version)
         success = api.penalty_create(

@@ -131,6 +131,13 @@ class F1LapsAPITest(TestCase):
         self.assertEqual(mock_session_create.call_count, 0)
         self.assertEqual(mock_session_update.call_count, 1)
         self.assertEqual(mock_session_list.call_count, 0)
+    
+    def test__get_error_message(self):
+        api = F1LapsAPI("vettel4tw", "f12020")
+        response_content = '{"detail":"Invalid token."}'
+        self.assertEqual(api._get_error_message(response_content), "Invalid token.")
+        response_content = 'notavalidjson'
+        self.assertEqual(api._get_error_message(response_content), "notavalidjson")
 
 
 if __name__ == '__main__':

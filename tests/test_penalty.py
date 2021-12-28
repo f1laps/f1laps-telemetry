@@ -6,6 +6,12 @@ from receiver.penalty_base import PenaltyBase
 
 class PenaltyBaseTest(TestCase):
 
+    def test_time_trial_returns_none(self):
+        penalty = PenaltyBase()
+        penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = True
+        self.assertIsNone(penalty.send_to_f1laps())
+
     def test_no_api_class_returns_none(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
@@ -13,20 +19,12 @@ class PenaltyBaseTest(TestCase):
     
     def test_no_session_returns_none(self):
         penalty = PenaltyBase()
-        penalty.f1laps_api_class = MagicMock()
         self.assertIsNone(penalty.send_to_f1laps())
     
     def test_no_session_id_returns_none(self):
         penalty = PenaltyBase()
         penalty.f1laps_api_class = MagicMock()
         penalty.session = MagicMock(f1_laps_session_id=None)
-        self.assertIsNone(penalty.send_to_f1laps())
-    
-    def test_time_trial_returns_none(self):
-        penalty = PenaltyBase()
-        penalty.f1laps_api_class = MagicMock()
-        penalty.session = MagicMock()
-        penalty.session.is_time_trial.return_value = True
         self.assertIsNone(penalty.send_to_f1laps())
     
     def test_success_api(self):

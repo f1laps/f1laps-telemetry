@@ -174,6 +174,7 @@ class F1LapsAPIBase:
     def update_session_in_f1laps(self, **kwargs):
         """ Update existing Session in F1Laps """
         response = self.session_update(**kwargs)
+        self._log_f1laps_response_status(response, descriptor="Session_update")
         return response.status_code == 200 if response else False
 
     def retrieve_f1_laps_session_id(self, session_uid):
@@ -200,15 +201,23 @@ class F1LapsAPIBase:
             return True
         elif response.status_code == 400:
             # Log level depends on error type
-            error_message = response.content.get('detail')
+            error_message = self._get_error_message(response.content)
             if error_message != 'You need an active subscription to use the F1Laps Telemetry App.':
                 log.info("%s failed: no active F1Laps subscription" % descriptor)
             else:
-                log.error("%s failed: %s" % (descriptor, json.loads(error_message)))
+                log.error("%s failed: %s" % (descriptor, error_message))
             return False
         else:
-            log.error("%s failed: %s" % (descriptor, json.loads(response.content)))
+            log.error("%s failed: %s" % (descriptor, self._get_error_message(response.content)))
             return False
+    
+    def _get_error_message(self, response_content):
+        """Parse error message from json API response"""
+        try:
+            error_message = json.loads(response_content)['detail']
+        except:
+            error_message = response_content
+        return error_message
 
     def _get_headers(self):
         return {
