@@ -219,9 +219,6 @@ class F12021Session(SessionBase):
                 "penalties_time_total": participant.penalties_time_total or None,
                 "penalties_number": participant.penalties_number or None
             })
-        log.info("--------------- DEBUG CLASSIFICATIONS")
-        log.info(classifications)
-        log.info("--------------- END")
         return classifications
 
     def has_final_classification(self):

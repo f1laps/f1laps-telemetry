@@ -2,12 +2,12 @@
 
 ## 2.4.0 - 2021-XX-XX
 
-TBD
+Support for penalties and grid position, and fix for qualifying lap telemetry.
 
 ### Added
+- Penalty events (warnings etc.) are now collected
 - Grid position (final classification) is now collected
 - Number of penalties (final classification) is now collected
-- Penalty events (warnings etc.) are now collected
 
 ### Fixed
 - Qualifying laps now show telemetry correctly
