@@ -79,15 +79,17 @@ class PacketLapData(PacketBase):
                 last_valid_lap_number = lap_number if not session.is_qualifying_non_one_shot() else lap_number - 1
                 self.update_previous_lap(session, last_valid_lap_number+1) # +1 because we're updating the previous lap
                 session.complete_lap_v2(last_valid_lap_number)
-                # Drop all data of this lap, so that telemetry gets reset
-                lap_number_to_drop = lap_number + 1 if not session.is_qualifying_non_one_shot() else lap_number
-                session.drop_lap_data(lap_number_to_drop)
             # Make sure to not log for this lap anymore
             session.current_lap_in_outlap_logging_status = True
             return session
         else:
-            # Reset outlap logger
-            session.current_lap_in_outlap_logging_status = False
+            # Perform clean-up of previous in-/outlap data 
+            if session.current_lap_in_outlap_logging_status:
+                # Drop all data of this lap, so that telemetry gets reset
+                lap_number_to_drop = lap_number + 1 if not session.is_qualifying_non_one_shot() else lap_number
+                session.drop_lap_data(lap_number_to_drop)
+                # Reset outlap logger
+                session.current_lap_in_outlap_logging_status = False
 
         # Handle new laps
         if self.is_new_lap(session, lap_number):

@@ -213,12 +213,15 @@ class F12021Session(SessionBase):
                 "result_status": participant.result_status,
                 "points": participant.points or None,
                 "finish_position": participant.finish_position or None,
-                "grid_position": participant.grid_position,
+                "grid_position": participant.grid_position or None,
                 "lap_time_best": participant.lap_time_best or None,
                 "race_time_total": participant.race_time_total or None,
                 "penalties_time_total": participant.penalties_time_total or None,
-                "penalties_number": participant.penalties_number
+                "penalties_number": participant.penalties_number or None
             })
+        log.info("--------------- DEBUG CLASSIFICATIONS")
+        log.info(classifications)
+        log.info("--------------- END")
         return classifications
 
     def has_final_classification(self):
