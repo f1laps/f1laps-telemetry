@@ -15,16 +15,30 @@ class PenaltyBaseTest(TestCase):
     def test_no_api_class_returns_none(self):
         penalty = PenaltyBase()
         penalty.session = MagicMock()
+        penalty.session.is_time_trial.return_value = False
         self.assertIsNone(penalty.send_to_f1laps())
     
     def test_no_session_returns_none(self):
         penalty = PenaltyBase()
         self.assertIsNone(penalty.send_to_f1laps())
     
-    def test_no_session_id_returns_none(self):
+    def test_no_session_id_create_success(self):
         penalty = PenaltyBase()
         penalty.f1laps_api_class = MagicMock()
         penalty.session = MagicMock(f1_laps_session_id=None)
+        penalty.session.send_session_to_f1laps.return_value = True
+        penalty.session.is_time_trial.return_value = False
+        penalty.infringement_type = 5
+        success = penalty.send_to_f1laps()
+        self.assertTrue(success)
+        penalty.f1laps_api_class.return_value.penalty_create.assert_called_with(f1_laps_session_id=penalty.session.f1_laps_session_id, penalty_type=None, infringement_type=5, vehicle_index=None, other_vehicle_index=None, time_spent_gained=None, lap_number=None, places_gained=None)
+    
+    def test_no_session_id_create_fails(self):
+        penalty = PenaltyBase()
+        penalty.f1laps_api_class = MagicMock()
+        penalty.session = MagicMock(f1_laps_session_id=None)
+        penalty.session.is_time_trial.return_value = False
+        penalty.session.send_session_to_f1laps.return_value = False
         self.assertIsNone(penalty.send_to_f1laps())
     
     def test_success_api(self):

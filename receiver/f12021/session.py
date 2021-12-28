@@ -178,7 +178,12 @@ class F12021Session(SessionBase):
             ai_difficulty     = self.ai_difficulty or None,
             classifications   = self.get_classification_list()
         )
-        log.info("Session successfully updated in F1Laps") if success else log.info("Session not updated in F1Laps")
+        if success:
+            log.info("Session successfully updated in F1Laps")
+            return True
+        else:
+            log.info("Session not updated in F1Laps")
+            return False
 
     def get_f1laps_lap_times_list(self):
         lap_times = []
