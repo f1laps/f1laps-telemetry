@@ -1,6 +1,6 @@
 # Change Log
 
-## 2.4.0 - 2021-XX-XX
+## 2.4.0 - 2021-12-31
 
 Support for penalties and grid position, and fix for qualifying lap telemetry.
 
