@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.4.0 - 2021-12-31
+
+Support for penalties and grid position, and fix for qualifying lap telemetry.
+
+### Added
+- Penalty events (warnings etc.) are now collected
+- Grid position (final classification) is now collected
+- Number of penalties (final classification) is now collected
+
+### Fixed
+- Qualifying laps now show telemetry correctly
+
+### Changed
+- Removed old SessionHistory lap update logic
+- Stopped logging subscription warning as error
 
 ## 2.3.0 - 2021-11-15
 

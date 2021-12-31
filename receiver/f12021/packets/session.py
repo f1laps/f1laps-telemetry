@@ -72,7 +72,7 @@ class PacketSessionData(PacketBase):
     def process(self, session):
         # if the user is spectating, we don't create a session
         if self.isSpectating:
-            log.debug("Spectating mode - no data is synced with F1Laps")
+            log.debug("Session is in spectating mode")
             return None
         if not self.is_active_session(session):
             return self.create_session()

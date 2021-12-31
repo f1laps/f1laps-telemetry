@@ -65,7 +65,17 @@ class F1LapsAPIBase:
             'is_valid': is_valid,
             'telemetry_data_string': telemetry_data_string
         }
-        return self.call_api(method, endpoint, params)
+        response = self.call_api(method, endpoint, params)
+        success = self._log_f1laps_response_status(response, descriptor="Lap_create")
+        return success
+    
+    def penalty_create(self, **params):
+        """ Create a Penalty in F1Laps """
+        endpoint = "penalties/"
+        method   = "POST"
+        response = self.call_api(method, endpoint, params)
+        success = self._log_f1laps_response_status(response, descriptor="Penalty_create")
+        return success
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
@@ -155,7 +165,7 @@ class F1LapsAPIBase:
                     else:
                         log.info("Session can't be created, and no existing session found in F1Laps.")
                 else:
-                    log.error("Error creating session in F1Laps: %s" % json.loads(response.content))
+                    self._log_f1laps_response_status(response, descriptor="Session_create")
         else:
             # Update session
             success = self.update_session_in_f1laps(**kwargs)
@@ -164,6 +174,7 @@ class F1LapsAPIBase:
     def update_session_in_f1laps(self, **kwargs):
         """ Update existing Session in F1Laps """
         response = self.session_update(**kwargs)
+        self._log_f1laps_response_status(response, descriptor="Session_update")
         return response.status_code == 200 if response else False
 
     def retrieve_f1_laps_session_id(self, session_uid):
@@ -181,6 +192,33 @@ class F1LapsAPIBase:
             log.info("No session found in F1Laps")
             return None
 
+    def _log_f1laps_response_status(self, response, descriptor):
+        if response is None:
+            log.info("%s failed, empty response" % descriptor)
+            return False
+        elif response.status_code >= 200 and response.status_code < 300:
+            log.info("%s succeeded" % descriptor)
+            return True
+        elif response.status_code >= 400 and response.status_code < 500:
+            # Log level depends on error type
+            error_message = self._get_error_message(response.content)
+            if error_message == 'You need an active subscription to use the F1Laps Telemetry App.':
+                log.info("%s failed: no active F1Laps subscription" % descriptor)
+            else:
+                log.error("%s failed: %s" % (descriptor, error_message))
+            return False
+        else:
+            log.error("%s failed: %s" % (descriptor, self._get_error_message(response.content)))
+            return False
+    
+    def _get_error_message(self, response_content):
+        """Parse error message from json API response"""
+        try:
+            error_message = json.loads(response_content)['detail']
+        except:
+            error_message = response_content
+        return error_message
+
     def _get_headers(self):
         return {
             'Content-Type'      : 'application/json',
@@ -191,6 +229,3 @@ class F1LapsAPIBase:
 
     def _get_platform(self):
         return "%s %s" % (platform.system(), platform.release())
-
-
-

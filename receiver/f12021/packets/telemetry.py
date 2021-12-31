@@ -49,7 +49,7 @@ class PacketCarTelemetryData(PacketBase):
         try:
             telemetry_data = self.carTelemetryData[self.header.playerCarIndex]
         except:
-            return None
+            return session
         frame = self.header.frameIdentifier
         session.telemetry.set(frame, speed    = telemetry_data.speed,
                                      brake    = telemetry_data.brake,

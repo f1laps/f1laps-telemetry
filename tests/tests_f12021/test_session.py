@@ -15,13 +15,6 @@ class F12021SessionTest(TestCase):
         session.session_type = 6
         self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type qualifying_2, offline, 1 laps)")
 
-    @patch('receiver.f12021.session.F12021Session.post_process')
-    def test_complete_lap(self, mock_post_process):
-        session = F12021Session(123)
-        session.complete_lap(lap_number = 1, sector_1_ms = 11111, sector_2_ms = 22222, sector_3_ms = 33333, tyre_visual = 16)
-        self.assertEqual(session.lap_list, {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'sector_3_ms': 33333, 'tyre_compound_visual': 16}})
-        self.assertEqual(mock_post_process.call_count, 1)
-
     def test_get_track_name(self):
         session = F12021Session(123)
         session.track_id = 5
@@ -108,8 +101,9 @@ class F12021SessionTest(TestCase):
         session.participants[1].result_status = 4
         session.participants[1].position = 5
         session.participants[1].points = 10
+        session.participants[1].grid_position = 19
         classifications = session.get_classification_list()
-        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'points': None, 'finish_position': None, 'result_status': 5, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None}, {'driver': 1, 'driver_index': 1, 'team': 1, 'points': 10, 'finish_position': None, 'result_status': 4, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None}])
+        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'points': None, 'finish_position': None, 'grid_position': None, 'result_status': 5, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}, {'driver': 1, 'driver_index': 1, 'team': 1, 'points': 10, 'finish_position': None, 'grid_position': 19, 'result_status': 4, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}])
 
         
 

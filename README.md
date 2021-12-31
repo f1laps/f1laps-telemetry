@@ -31,8 +31,8 @@ python3 -m PyInstaller app.py --onefile --name F1Laps --icon images/app-icon.icn
 
 ```bash
 # First one returns GUI exe; second one returns GUI+console exe
-pyinstaller app.py --onefile --noconsole --name F1Laps --icon images/app-icon.ico --add-data "logo.svg;."
-pyinstaller app.py --onefile --name F1Laps --icon images/app-icon.ico --add-data "logo.svg;."
+python -m PyInstaller app.py --onefile --noconsole --name F1Laps --icon images/app-icon.ico --add-data "logo.svg;."
+python -m PyInstaller app.py --onefile --name F1Laps --icon images/app-icon.ico --add-data "logo.svg;."
 ```
 
 ## Credits & Contributions
