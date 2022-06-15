@@ -1,4 +1,6 @@
-from lib.logger import log
+import logging
+log = logging.getLogger(__name__)
+
 from .packets.helpers import unpack_udp_packet
 
 class F12021Processor:
@@ -19,7 +21,6 @@ class F12021Processor:
             # or if packet sets a new session (i.e. the session packet)
             if self.session or packet.creates_session_object:
                 self.session = packet.process(self.session)
-                #log.info("PROCESSED %s and got %s" % (packet.__class__.__name__, self.session))
             if self.session:
                 # Make sure session has user info
                 self.session.f1laps_api_key = self.f1laps_api_key

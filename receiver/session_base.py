@@ -1,6 +1,5 @@
 import json
 
-
 class SessionBase:
     weather_ids = []
     telemetry_enabled = True
