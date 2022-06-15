@@ -19,15 +19,15 @@ HeaderFieldsToPacketType = {
      # 'Buffer size too small (36 instead of at least 1464 bytes)'
      # We don't need the packet in prod, only for maps, so we're skipping it by default.
      #0: PacketMotionData,
-     1: PacketSessionData,
-     2: PacketLapData,
-     3: PacketEventData,
-     4: PacketParticipantsData,
-     5: PacketCarSetupData,
-     6: PacketCarTelemetryData,
-     7: PacketCarStatusData,
-     8: PacketFinalClassificationData,
-    11: PacketSessionHistoryData
+    #1: PacketSessionData,
+    #2: PacketLapData,
+    #3: PacketEventData,
+    #4: PacketParticipantsData,
+    #5: PacketCarSetupData,
+    #6: PacketCarTelemetryData,
+    #7: PacketCarStatusData,
+    #8: PacketFinalClassificationData,
+    #11: PacketSessionHistoryData
 }
 
 

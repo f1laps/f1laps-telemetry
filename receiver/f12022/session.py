@@ -31,9 +31,7 @@ class F12022Session(SessionBase):
         # Session
         self.session_udp_uid = session_uid
         self.session_type = session_type
-        self.session_type_name = SessionType.get(session_type)
         self.track_id = track_id
-        self.track_name = Track.get(track_id)
         self.team_id = team_id
         self.is_online_game = is_online_game
         self.ai_difficulty = ai_difficulty
@@ -56,8 +54,14 @@ class F12022Session(SessionBase):
 
         # Log session init
         log.info("*************************************************")
-        log.info("New session started: %s %s (ID %s)" % (self.track_name, self.session_type_name, self.session_udp_uid))
+        log.info("New session started: %s %s (ID %s)" % (self.get_track_name(), self.get_session_type(), self.session_udp_uid))
         log.info("*************************************************")
+    
+    def get_session_type(self):
+        return SessionType.get(self.session_type)
+    
+    def get_track_name(self):
+        return Track.get(self.track_id)
 
     def update_weather(self, weather_id):
         """ Given a new weather_id from the session packet, update the session's weather set """
@@ -67,6 +71,7 @@ class F12022Session(SessionBase):
         """ 
         Return the Lap object for the given lap_number 
         If it doesn't exist, add it and return it
+        Also sync lap - 1
         """
         if lap_number not in self.lap_list:
             # Create new lap
@@ -75,15 +80,19 @@ class F12022Session(SessionBase):
             self.finish_completed_lap(lap_number - 1)
         return self.lap_list[lap_number]
     
+    def get_current_lap(self):
+        """ Return the most recent (highest) Lap object in self.lap_list """
+        return self.lap_list[max(self.lap_list)] if self.lap_list else None
+    
     def add_lap(self, lap_number):
         """ Start a new lap by creating the Lap object and adding it to the lap_list """
-        new_lap = F12022Lap(lap_number)
+        new_lap = F12022Lap(lap_number=lap_number, session_type=self.session_type)
         self.lap_list[lap_number] = new_lap
         return new_lap
     
     def finish_completed_lap(self, lap_number):
         """ Once a lap is completed, finish it """
-        pass
+        return self.sync_to_f1laps(lap_number)
 
     def can_be_synced_to_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
@@ -91,11 +100,23 @@ class F12022Session(SessionBase):
     
     def is_multi_lap_session(self):
         """ Check if this session gets synced as session or individual laps """
+        return bool(self.get_session_type() != 'time_trial')
+    
+    def add_participant(self, participant_data):
+        """ Add a driver to a session """
+        participant = ParticipantBase(**participant_data)
+        self.participants.append(participant)
+        return participant
 
     def sync_to_f1laps(self, lap_number):
         """ Send a lap or session to F1Laps, if it's ready for sync """
-        lap = self.get_lap(lap_number)
+        lap = self.lap_list.get(lap_number)
+        log.info(self.session_type)
+        if not lap:
+            log.info("Skipping sync of lap %s, lap not found" % lap_number)
+            return
         if not self.can_be_synced_to_f1laps or not lap.can_be_synced_to_f1laps():
+            log.info("Skipping sync of lap %s, not ready for sync" % lap_number)
             return
         # Send lap to F1Laps
         api = F1LapsAPI2022(self.f1laps_api_key, self.game_version)
@@ -119,7 +140,7 @@ class F12022Session(SessionBase):
             track_id              = self.track_id,
             team_id               = self.team_id,
             conditions            = self.map_weather_ids_to_f1laps_token(),
-            game_mode             = self.session_type_name,
+            game_mode             = self.get_session_type(),
             sector_1_time         = lap.sector_1_ms,
             sector_2_time         = lap.sector_2_ms,
             sector_3_time         = lap.sector_3_ms,
@@ -133,7 +154,7 @@ class F12022Session(SessionBase):
             log.info("%s failed sync to F1Laps" % lap)
         return success
     
-    def sync_session_to_f1laps(self, lap, api):
+    def sync_session_to_f1laps(self, api):
         """ Send full sessiom to F1Laps """
         success, f1l_session_id = api.session_create_or_update(
             f1laps_session_id = self.f1_laps_session_id,
@@ -141,7 +162,7 @@ class F12022Session(SessionBase):
             team_id           = self.team_id,
             session_uid       = self.session_udp_uid,
             conditions        = self.map_weather_ids_to_f1laps_token(),
-            session_type      = self.session_type_name,
+            session_type      = self.get_session_type(),
             finish_position   = self.finish_position,
             points            = self.points,
             result_status     = self.result_status, 
@@ -159,12 +180,12 @@ class F12022Session(SessionBase):
     
     def get_telemetry_string(self, lap):
         """ Get telemetry string of a specific lap for F1Laps sync """
-        return json.dumps(lap.telemetry.frame_dict) if self.telemetry_enabled else None
+        return json.dumps(lap.telemetry.frame_dict) if self.telemetry_enabled and lap.telemetry else None
     
     def get_f1laps_lap_times_list(self):
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
-            if lap_object.self.sector_1_ms and lap_object.sector_2_ms and lap_object.sector_3_ms:
+            if lap_object.sector_1_ms and lap_object.sector_2_ms and lap_object.sector_3_ms:
                 lap_times.append({
                         "lap_number"           : lap_number,
                         "sector_1_time_ms"     : lap_object.sector_1_ms,

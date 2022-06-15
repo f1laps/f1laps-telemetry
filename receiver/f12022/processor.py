@@ -30,24 +30,27 @@ class F12022Processor:
             # If we already have a session, process packet data
             if self.session:
                 packet_data = packet.serialize()
-                if not packet.get("packet_type"):
-                    pass
-                elif packet_data["packet_type"] == "session":
-                    self.process_session_packet(packet_data)
-                elif packet_data["packet_type"] == "lap":
-                    self.process_lap_packet(packet_data)
-                elif packet_data["packet_type"] == "event":
-                    pass
-                elif packet_data["packet_type"] == "participant":
-                    pass
-                elif packet_data["packet_type"] == "setup":
-                    pass
-                elif packet_data["packet_type"] == "telemetry":
-                    pass
-                elif packet_data["packet_type"] == "car_status":
-                    pass
-                elif packet_data["packet_type"] == "classification":
-                    pass
+                self.process_serialized_packet(packet_data)
+            
+    def process_serialized_packet(self, packet_data):
+        if not packet_data.get("packet_type"):
+            pass
+        elif packet_data["packet_type"] == "session":
+            self.process_session_packet(packet_data)
+        elif packet_data["packet_type"] == "lap":
+            self.process_lap_packet(packet_data)
+        elif packet_data["packet_type"] == "telemetry":
+            self.process_telemetry_packet(packet_data)
+        elif packet_data["packet_type"] == "event":
+            pass
+        elif packet_data["packet_type"] == "participant":
+            pass
+        elif packet_data["packet_type"] == "setup":
+            pass
+        elif packet_data["packet_type"] == "car_status":
+            pass
+        elif packet_data["packet_type"] == "classification":
+            pass
     
     def process_session_packet(self, packet_data):
         if packet_data["session_uid"] != self.session.session_udp_uid:
@@ -82,6 +85,32 @@ class F12022Processor:
                 "lap_time": packet_data.get("current_laptime_ms"),
             }
         )
+    
+    def process_telemetry_packet(self, packet_data):
+        # Get lap object 
+        lap = self.session.get_current_lap()
+        lap.update(
+            lap_values = {},
+            telemetry_values = {
+                "frame_identifier": packet_data.get("frame_identifier"),
+                "speed": packet_data.get("speed"),
+                "brake": packet_data.get("brake"),
+                "throttle": packet_data.get("throttle"),
+                "gear": packet_data.get("gear"),
+                "steer": packet_data.get("steer"),
+                "drs": packet_data.get("drs"),
+            }
+        )
+    
+    def process_participant_data(self, packet_data):
+        # Add user's team ID to session
+        if packet_data.get("team_id") and not self.session.team_id:
+            self.session.team_id = packet_data.get("team_id")
+        # Add all participants to session (if not already added)
+        if packet_data.get("participants") and \
+            len(self.session.participants) < packet_data.get("num_participants"):
+            for participant in packet_data.get("participants"):
+                self.session.add_participant(participant)
     
     def create_session(self, session_data):
         return F12022Session(self.f1laps_api_key, 
