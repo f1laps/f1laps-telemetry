@@ -1,4 +1,6 @@
-### TELEMETRY INDEX MAPS
+import logging
+log = logging.getLogger(__name__)
+
 
 KEY_INDEX_MAP = {
     "lap_distance": 0,
@@ -23,50 +25,41 @@ KEY_ROUND_MAP = {
 }
 
 
-
-
 class LapTelemetryBase:
     """Holds current lap telemetry data"""
-    # Lap number
-    lap_number = None
-
-    # Main frame dict
-    # Each frame is a key in this dict
-    # Each holds a list of the telemetry values
-    frame_dict = {}
-
-    # Session types matter:
-    # Time trial lets you restart a lap
-    # Other game modes have outlaps (TT doesnt)
-    # This distinction is important because for outlaps, we dont want the outlap frames
-    # But for restart, we want the new lap frames
-    session_type = None
-    SESSION_TYPES_WITHOUT_OUTLAP = [1, 2, 3, 4, 13]
-
-    # Last lap distance
-    # Ensure we're incrementing lap distance
-    # If we don't, we need to remove the dict
-    last_lap_distance = None
-
-    # Popped frames list
-    # Store which frames got popped 
-    frames_popped_list = []
-
     MAX_FLASHBACK_DISTANCE_METERS = 1500
     MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
 
-
     def __init__(self, lap_number, session_type=None):
-        # Set values
+        # Lap number
         self.lap_number = lap_number
+
+        # Session types matter:
+        # Time trial lets you restart a lap
+        # Other game modes have outlaps (TT doesnt)
+        # This distinction is important because for outlaps, we dont want the outlap frames
+        # But for restart, we want the new lap frames
         self.session_type = session_type
+        SESSION_TYPES_WITHOUT_OUTLAP = [1, 2, 3, 4, 13]
+
+        # Main frame dict
+        # Each frame is a key in this dict
+        # Each holds a list of the telemetry values
+        self.frame_dict = {}
+
+        # Last lap distance
+        # Ensure we're incrementing lap distance
+        # If we don't, we need to remove the dict
+        self.last_lap_distance = None
+
+        # Popped frames list
+        # Store which frames got popped 
+        self.frames_popped_list = []
     
     def update(self, telemetry_dict):
         """ Update this LapTelemetry object's frame dict"""
-        frame_number = telemetry_dict["frame_identifier"]
-        frame = self.get_frame()
-        if frame is None:
-            return None
+        frame_number = telemetry_dict.pop("frame_identifier")
+        frame = self.get_frame(frame_number)
         for key, value in telemetry_dict.items():
             frame_index    = KEY_INDEX_MAP[key]
             decimal_points = KEY_ROUND_MAP[key]
@@ -90,8 +83,6 @@ class LapTelemetryBase:
         """
         frame = self.frame_dict.get(frame_number)
         current_distance = None
-        if not frame:
-            return
 
         # Check if we popped this frame before - if so, don't populate it again
         if frame_number in self.frames_popped_list:

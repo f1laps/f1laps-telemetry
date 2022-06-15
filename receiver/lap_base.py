@@ -8,33 +8,33 @@ from receiver.f12022.types import SESSION_TYPES_WITH_OUTLAP, \
 
 
 class LapBase:
-    """Holds all information about a lap"""
-    # Session info
-    session_type = None
-
-    # Lap info
-    lap_number = None
-    pit_status = None
-    car_race_position = None
-    is_valid = True
-    sector_1_ms = None
-    sector_2_ms = None
-    sector_3_ms = None
-
-    # Telemetry
-    telemetry = None
-    telemetry_model = LapTelemetryBase
-
+    """Holds all information about a lap""" 
     # Settings
     MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
 
     def __init__(self, lap_number, session_type):
-        # Set variables
-        self.lap_number = lap_number
+        # Session info
         self.session_type = session_type
 
+        # Lap info
+        self.lap_number = lap_number
+        self.sector_1_ms = None
+        self.sector_2_ms = None
+        self.sector_3_ms = None
+        self.pit_status = None
+        self.car_race_position = None
+        self.is_valid = True
+        self.tyre_compound_visual = None
+
+        # Telemetry
+        self.telemetry = None
+        self.telemetry_model = LapTelemetryBase
+
+        # F1Laps sync
+        self.has_been_synced_to_f1l = False
+
         # Log lap init
-        log.info("### %s started" % self)
+        log.info("-----> %s started" % self)
 
     def __str__(self):
         return "Lap #%s" % self.lap_number
@@ -46,30 +46,30 @@ class LapBase:
         if self.is_in_or_outlap(current_distance):
             # Don't update values for in or outlaps
             pass
-        elif self.lap_is_complete(new_sector_1_time):
-            # Don't update values for completed laps
+        elif not self.new_lap_data_should_be_written(new_sector_1_time):
+            # Don't update values for laps that already have full data
             pass
         else:
             # Init telemetry if we don't have it yet
             if not self.telemetry:
                 self.telemetry = self.telemetry_model(self.lap_number, self.session_type)
             # Update this lap object
-            for key, value in lap_values:
+            for key, value in lap_values.items():
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
     
-    def lap_is_complete(self, new_sector_1_time):
+    def new_lap_data_should_be_written(self, new_sector_1_time):
         """
-        Check if the current lap is complete, i.e. has all sector times, 
+        Check if the current lap has all sector times, 
         in which case we don't overwrite it anymore
         """
         if self.session_type in SESSION_TYPES_TIME_TRIAL:
-            return False
+            return True
         all_sectors_set = bool(self.sector_1_ms and self.sector_2_ms and self.sector_3_ms)
         if all_sectors_set and new_sector_1_time in ["0", 0, None, ""]:
-            return True
-        return False
+            return False
+        return True
     
     def is_in_or_outlap(self, current_distance):
         """Check if the current lap is an inlap or outlap"""
@@ -116,3 +116,12 @@ class LapBase:
     def process_flashback_event(self, frame_id_flashed_back_to):
         """ Update telemetry frame dict after a flashback """
         self.telemetry.process_flashback_event(frame_id_flashed_back_to)
+    
+    def can_be_synced_to_f1laps(self):
+        """ Check if lap has all sectors and has not been synced to F1Laps before"""
+        return bool(self.sector_1_ms and self.sector_2_ms and self.sector_3_ms) and not self.has_been_synced_to_f1l
+
+
+
+
+        

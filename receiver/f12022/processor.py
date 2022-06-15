@@ -79,7 +79,7 @@ class F12022Processor:
             telemetry_values = {
                 "lap_distance": packet_data.get("lap_distance"),
                 "frame_identifier": packet_data.get("frame_identifier"),
-                "current_laptime_ms": packet_data.get("current_laptime_ms"),
+                "lap_time": packet_data.get("current_laptime_ms"),
             }
         )
     
