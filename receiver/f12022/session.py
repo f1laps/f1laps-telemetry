@@ -108,14 +108,19 @@ class F12022Session(SessionBase):
         self.participants.append(participant)
         return participant
 
-    def sync_to_f1laps(self, lap_number):
+    def sync_to_f1laps(self, lap_number=None, sync_entire_session=False):
         """ Send a lap or session to F1Laps, if it's ready for sync """
-        lap = self.lap_list.get(lap_number)
-        log.info(self.session_type)
-        if not lap:
-            log.info("Skipping sync of lap %s, lap not found" % lap_number)
-            return
-        if not self.can_be_synced_to_f1laps or not lap.can_be_synced_to_f1laps():
+        # When we complete individual lap, we are only looking to sync 
+        # in the context of that lap completion
+        lap = None
+        if not sync_entire_session:
+            lap = self.lap_list.get(lap_number)
+            log.info(self.session_type)
+            if not lap:
+                log.info("Skipping sync of lap %s, lap not found" % lap_number)
+                return
+        # For entire session syncs, or for validated individual lap syncs, proceed now
+        if (not self.can_be_synced_to_f1laps) or (lap and not lap.can_be_synced_to_f1laps()):
             log.info("Skipping sync of lap %s, not ready for sync" % lap_number)
             return
         # Send lap to F1Laps

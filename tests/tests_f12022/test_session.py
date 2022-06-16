@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from receiver.f12022.session import F12022Session
 
@@ -75,13 +75,20 @@ class F12022SessionTest(TestCase):
         mock_session_sync.assert_called_once_with(f1laps_session_id=None, track_id=1, team_id=1, session_uid='uid_123', conditions='dry', session_type='race', finish_position=None, points=None, result_status=None, lap_times=[{'lap_number': 1, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'telemetry_data_string': None}], setup_data={}, is_online_game=False, ai_difficulty=90, classifications=[])        
         self.assertEqual(mock_lap_sync.call_count, 0)
         self.assertFalse(lap.has_been_synced_to_f1l)
-        # Second test time triak session (syncs single lap)
+        # Second test time trial session (syncs single lap)
         session.session_type = 13
         session.sync_to_f1laps(1)
         self.assertEqual(mock_session_sync.call_count, 1)
         self.assertEqual(mock_lap_sync.call_count, 1)
         self.assertTrue(lap.has_been_synced_to_f1l)
         mock_lap_sync.assert_called_once_with(track_id=1, team_id=1, conditions='dry', game_mode='time_trial', sector_1_time=1, sector_2_time=2, sector_3_time=3, setup_data={}, is_valid=True, telemetry_data_string=None)        
+        # Third test sync_entire_session flag
+        # Needs race session type
+        session.session_type = 10
+        session.sync_to_f1laps(lap_number=None, sync_entire_session=True)
+        self.assertEqual(mock_session_sync.call_count, 2)
+        self.assertEqual(mock_lap_sync.call_count, 1)
+
         
 
 

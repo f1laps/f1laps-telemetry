@@ -3,6 +3,7 @@ log = logging.getLogger(__name__)
 
 from receiver.f12022.packets.helpers import unpack_udp_packet
 from receiver.f12022.session import F12022Session
+from receiver.f12022.penalty import F12022Penalty
 
 
 class F12022Processor:
@@ -34,30 +35,39 @@ class F12022Processor:
             
     def process_serialized_packet(self, packet_data):
         if not packet_data.get("packet_type"):
-            pass
+            return False
         elif packet_data["packet_type"] == "session":
             self.process_session_packet(packet_data)
         elif packet_data["packet_type"] == "lap":
             self.process_lap_packet(packet_data)
         elif packet_data["packet_type"] == "telemetry":
             self.process_telemetry_packet(packet_data)
-        elif packet_data["packet_type"] == "event":
-            pass
         elif packet_data["packet_type"] == "participant":
-            pass
+            self.process_participant_data(packet_data)
         elif packet_data["packet_type"] == "setup":
-            pass
+            self.process_setup_packet(packet_data)
+        elif packet_data["packet_type"] == "final_classification":
+            self.process_final_classifictation_packet(packet_data)
+        elif packet_data["packet_type"] == "event":
+            self.process_event_packet(packet_data)
         elif packet_data["packet_type"] == "car_status":
-            pass
-        elif packet_data["packet_type"] == "classification":
-            pass
+            self.process_car_status_packet(packet_data)
+        return True
     
     def process_session_packet(self, packet_data):
         if packet_data["session_uid"] != self.session.session_udp_uid:
             # Update session if UDP changed
             log.info("Session UDP has changed from %s to %s. Creating new session." \
                 % (self.session.session_udp_uid, packet_data["session_uid"]))
-            self.session = self.create_session(packet_data)
+            self.session = F12022Session(self.f1laps_api_key, 
+                                         self.telemetry_enabled, 
+                                         packet_data["session_uid"],
+                                         packet_data["session_type"],
+                                         packet_data["track_id"],
+                                         packet_data["is_online_game"],
+                                         packet_data["ai_difficulty"],
+                                         packet_data["weather_id"]
+                                        )
         else:
             # Update session weather 
             self.session.update_weather(packet_data["weather_id"])
@@ -112,13 +122,87 @@ class F12022Processor:
             for participant in packet_data.get("participants"):
                 self.session.add_participant(participant)
     
-    def create_session(self, session_data):
-        return F12022Session(self.f1laps_api_key, 
-                             self.telemetry_enabled, 
-                             session_data["session_uid"],
-                             session_data["session_type"],
-                             session_data["track_id"],
-                             session_data["is_online_game"],
-                             session_data["ai_difficulty"],
-                             session_data["weather_id"]
-                            )
+    def process_setup_packet(self, packet_data):
+        """
+        Add setup to session
+        Update it continuously in case the user made changes
+        """
+        self.session.setup = {
+            "front_wing": packet_data.get("front_wing"),
+            "rear_wing": packet_data.get("rear_wing"),
+            "diff_adjustment_on_throttle": packet_data.get("diff_adjustment_on_throttle"),
+            "diff_adjustment_off_throttle": packet_data.get("diff_adjustment_off_throttle"),
+            "front_camber": packet_data.get("front_camber"),
+            "rear_camber": packet_data.get("rear_camber"),
+            "front_toe": packet_data.get("front_toe"),
+            "rear_toe": packet_data.get("rear_toe"),
+            "front_suspension": packet_data.get("front_suspension"),
+            "rear_suspension": packet_data.get("rear_suspension"),
+            "front_antiroll_bar": packet_data.get("front_antiroll_bar"),
+            "rear_antiroll_bar": packet_data.get("rear_antiroll_bar"),
+            "front_ride_height": packet_data.get("front_ride_height"),
+            "rear_ride_height": packet_data.get("rear_ride_height"),
+            "brake_pressure": packet_data.get("brake_pressure"),
+            "front_brake_bias": packet_data.get("front_brake_bias"),
+            "front_right_tyre_pressure": packet_data.get("front_right_tyre_pressure"),
+            "front_left_tyre_pressure": packet_data.get("front_left_tyre_pressure"),
+            "rear_right_tyre_pressure": packet_data.get("rear_right_tyre_pressure"),
+            "rear_left_tyre_pressure": packet_data.get("rear_left_tyre_pressure"),
+        }
+    
+    def process_final_classifictation_packet(self, packet_data):
+        # Set session final classification data
+        self.session.finish_position = packet_data.get("finish_position")
+        self.session.result_status   = packet_data.get("result_status")
+        self.session.points          = packet_data.get("points")
+        # Set each participant's final classification data
+        for index, classification in packet_data.get("all_participants_results").items():
+            try:
+                participant = self.session.participants[int(index)]
+            except:
+                continue
+            participant.points = classification.get("points")
+            participant.finish_position = classification.get("finish_position")
+            participant.grid_position = classification.get("grid_position")
+            participant.result_status = classification.get("result_status")
+            participant.lap_time_best = classification.get("lap_time_best")
+            participant.penalties_number = classification.get("penalties_number")
+            participant.race_time_total = classification.get("race_time_total")
+            participant.penalties_time_total = classification.get("penalties_time_total")
+        # Sync to F1L
+        self.session.sync_to_f1laps(lap_number=None, sync_entire_session=True)
+    
+    def process_event_packet(self, packet_data):
+        """ Process various types of ad-hoc game events """
+        if not packet_data.get("event_type"):
+            return
+        elif packet_data.get("event_type") == "flashback":
+            self.process_flashback_event_packet(packet_data)
+        elif packet_data.get("event_type") == "penalty":
+            self.process_penalty_event_packet(packet_data)
+    
+    def process_flashback_event_packet(self, packet_data):
+        """ Call current lap's process_flashback_event_packet method """
+        frame_id = packet_data.get("frame_identifier")
+        session_time = packet_data.get("session_time")
+        log.info("Event: Flashback happened to frame %s and session time %s. Deleting frames." % (frame_id, session_time))
+        self.session.get_current_lap().process_flashback_event(frame_id)
+    
+    def process_penalty_event_packet(self, packet_data):
+        """ Create Penalty object and send it to F1Laps """
+        penalty = F12022Penalty()
+        penalty.penalty_type = packet_data.get("penalty_type")
+        penalty.infringement_type = packet_data.get("infringement_type")
+        penalty.vehicle_index = packet_data.get("vehicle_index")
+        penalty.other_vehicle_index = packet_data.get("other_vehicle_index")
+        penalty.time_spent_gained = packet_data.get("time_spent_gained")
+        penalty.lap_number = packet_data.get("lap_number")
+        penalty.places_gained = packet_data.get("places_gained")
+        penalty.session = self.session
+        log.info("Processing %s" % penalty)
+        penalty.send_to_f1laps()
+    
+    def process_car_status_packet(self, packet_data):
+        """ Update tyres used for the current lap """
+        current_lap = self.session.get_current_lap()
+        current_lap.tyre_compound_visual = packet_data.get("tyre_compound_visual")
