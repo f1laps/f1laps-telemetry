@@ -141,12 +141,12 @@ class RaceReceiver(threading.Thread):
                     if not self.processor or not isinstance(self.processor, F12020Processor):
                         log.info("Detected F1 2020 game version, starting F1 2020 processor.")
                         self.processor = F12020Processor(self.f1laps_api_key, self.telemetry_enabled)
+                #elif game_version == "f12021":
+                #    if not self.processor or not isinstance(self.processor, F12021Processor):
+                #        log.info("Detected F1 2021 game version, starting F1 2021 processor.")
+                #        self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
                 elif game_version == "f12021":
-                    if not self.processor or not isinstance(self.processor, F12021Processor):
-                        log.info("Detected F1 2021 game version, starting F1 2021 processor.")
-                        self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
-                elif game_version == "f12022":
-                    if not self.processor or not isinstance(self.processor, F12021Processor):
+                    if not self.processor or not isinstance(self.processor, F12022Processor):
                         log.info("Detected F1 2022 game version, starting F1 2022 processor.")
                         self.processor = F12022Processor(self.f1laps_api_key, self.telemetry_enabled)
                 else:

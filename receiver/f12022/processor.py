@@ -34,6 +34,7 @@ class F12022Processor:
                 self.process_serialized_packet(packet_data)
             
     def process_serialized_packet(self, packet_data):
+        """ Given a serialized packet, process it """
         if not packet_data.get("packet_type"):
             return False
         elif packet_data["packet_type"] == "session":
@@ -55,6 +56,10 @@ class F12022Processor:
         return True
     
     def process_session_packet(self, packet_data):
+        """ 
+        Start new session if UDP ID changes
+        Update weather info for running sessions
+        """
         if packet_data["session_uid"] != self.session.session_udp_uid:
             # Update session if UDP changed
             log.info("Session UDP has changed from %s to %s. Creating new session." \
@@ -113,6 +118,10 @@ class F12022Processor:
         )
     
     def process_participant_data(self, packet_data):
+        """
+        Add team ID to session if it isn't set yet
+        Add participants to session if not all are set yet
+        """
         # Add user's team ID to session
         if packet_data.get("team_id") and not self.session.team_id:
             self.session.team_id = packet_data.get("team_id")

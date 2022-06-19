@@ -1,5 +1,9 @@
 # Change Log
 
+## 3.0.0 - 2022-07-XX
+
+Support for F1 2022 including a major refactoring of how UDP packets are read and processed.
+
 ## 2.4.0 - 2021-12-31
 
 Support for penalties and grid position, and fix for qualifying lap telemetry.
