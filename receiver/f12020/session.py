@@ -82,7 +82,7 @@ class Session(SessionBase):
                         is_valid              = self.lap_list[lap_number].get("is_valid", True),
                         telemetry_data_string = self.get_lap_telemetry_data(lap_number)
                     )
-        if response.status_code == 201:
+        if response and response.status_code == 201:
             log.info("Lap #%s successfully created in F1Laps" % lap_number)
             return True
         else:
