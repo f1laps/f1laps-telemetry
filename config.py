@@ -15,4 +15,4 @@ App Config
 - You shouldn't change these settings unless you know what they do
 #################################################################"""
 
-VERSION = "2.4.0"
+VERSION = "3.0.0"

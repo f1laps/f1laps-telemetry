@@ -31,7 +31,8 @@ class F12022Processor:
             # If we already have a session, process packet data
             if self.session:
                 packet_data = packet.serialize()
-                self.process_serialized_packet(packet_data)
+                if packet_data:
+                    self.process_serialized_packet(packet_data)
             
     def process_serialized_packet(self, packet_data):
         """ Given a serialized packet, process it """
@@ -43,7 +44,7 @@ class F12022Processor:
             self.process_lap_packet(packet_data)
         elif packet_data["packet_type"] == "telemetry":
             self.process_telemetry_packet(packet_data)
-        elif packet_data["packet_type"] == "participant":
+        elif packet_data["packet_type"] == "participants":
             self.process_participant_data(packet_data)
         elif packet_data["packet_type"] == "setup":
             self.process_setup_packet(packet_data)
@@ -64,18 +65,21 @@ class F12022Processor:
             # Update session if UDP changed
             log.info("Session UDP has changed from %s to %s. Creating new session." \
                 % (self.session.session_udp_uid, packet_data["session_uid"]))
-            self.session = F12022Session(self.f1laps_api_key, 
-                                         self.telemetry_enabled, 
-                                         packet_data["session_uid"],
-                                         packet_data["session_type"],
-                                         packet_data["track_id"],
-                                         packet_data["is_online_game"],
-                                         packet_data["ai_difficulty"],
-                                         packet_data["weather_id"]
-                                        )
+            self.session = self.create_session(packet_data)
         else:
             # Update session weather 
             self.session.update_weather(packet_data["weather_id"])
+        
+    def create_session(self, packet_data):
+        return F12022Session(self.f1laps_api_key, 
+                             self.telemetry_enabled, 
+                             packet_data["session_uid"],
+                             packet_data["session_type"],
+                             packet_data["track_id"],
+                             packet_data["is_online_game"],
+                             packet_data["ai_difficulty"],
+                             packet_data["weather_id"]
+                            )
     
     def process_lap_packet(self, packet_data):
         lap_number = packet_data.get("lap_number")
@@ -123,7 +127,7 @@ class F12022Processor:
         Add participants to session if not all are set yet
         """
         # Add user's team ID to session
-        if packet_data.get("team_id") and not self.session.team_id:
+        if packet_data.get("team_id") is not None and self.session.team_id is None:
             self.session.team_id = packet_data.get("team_id")
         # Add all participants to session (if not already added)
         if packet_data.get("participants") and \

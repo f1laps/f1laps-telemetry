@@ -42,9 +42,10 @@ class F12022LapTelemetryTest(TestCase):
         self.assertEqual(len(processor.session.participants), 0)
         self.assertEqual(processor.session.team_id, None)
         # Set team_id and participants
+        # Test team ID 0 specifically as it's an edge case (none/0)
         processor.process_participant_data({
             "packet_type": "participants",
-            "team_id": 2,
+            "team_id": 0,
             "num_participants": 2,
             "participants": [
                 {"driver": 5, "driver_index": 1, "name": "Seb", "team": 1},
@@ -52,7 +53,7 @@ class F12022LapTelemetryTest(TestCase):
             ]
         })
         self.assertEqual(len(processor.session.participants), 2)
-        self.assertEqual(processor.session.team_id, 2)
+        self.assertEqual(processor.session.team_id, 0)
         # Try again, should not change anything
         processor.process_participant_data({
             "packet_type": "participants",
@@ -64,7 +65,7 @@ class F12022LapTelemetryTest(TestCase):
             ]
         })
         self.assertEqual(len(processor.session.participants), 2)
-        self.assertEqual(processor.session.team_id, 2)
+        self.assertEqual(processor.session.team_id, 0)
     
     @patch("receiver.f12022.processor.F12022Session.sync_to_f1laps")
     def test_process_final_classifictation_packet(self, mock_f1l_sync):

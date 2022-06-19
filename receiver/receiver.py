@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 from receiver.f12020.processor import F12020Processor
 from receiver.f12021.processor import F12021Processor
-from receiver.f12021.processor import F12022Processor
+from receiver.f12022.processor import F12022Processor
 from receiver.helpers import get_local_ip
 from receiver.game_version import parse_game_version_from_udp_packet
 import config
@@ -141,11 +141,11 @@ class RaceReceiver(threading.Thread):
                     if not self.processor or not isinstance(self.processor, F12020Processor):
                         log.info("Detected F1 2020 game version, starting F1 2020 processor.")
                         self.processor = F12020Processor(self.f1laps_api_key, self.telemetry_enabled)
-                #elif game_version == "f12021":
-                #    if not self.processor or not isinstance(self.processor, F12021Processor):
-                #        log.info("Detected F1 2021 game version, starting F1 2021 processor.")
-                #        self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
                 elif game_version == "f12021":
+                    if not self.processor or not isinstance(self.processor, F12021Processor):
+                        log.info("Detected F1 2021 game version, starting F1 2021 processor.")
+                        self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
+                elif game_version == "f12022":
                     if not self.processor or not isinstance(self.processor, F12022Processor):
                         log.info("Detected F1 2022 game version, starting F1 2022 processor.")
                         self.processor = F12022Processor(self.f1laps_api_key, self.telemetry_enabled)
@@ -156,5 +156,3 @@ class RaceReceiver(threading.Thread):
             except Exception as ex:
                 log.info("Unknown main receiver exception: %s" % ex)
                 sentry_sdk.capture_exception(ex)
-            
-

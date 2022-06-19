@@ -26,6 +26,7 @@ class F12022Session(SessionBase):
         # Meta
         self.f1laps_api_key = f1laps_api_key
         self.telemetry_enabled = telemetry_enabled
+        # Game version also defines API base URL
         self.game_version = "f12022"
         
         # Session
@@ -62,6 +63,10 @@ class F12022Session(SessionBase):
     
     def get_track_name(self):
         return Track.get(self.track_id)
+    
+    def is_time_trial(self):
+        """ Called by PenaltyBase """
+        return not self.is_multi_lap_session()
 
     def update_weather(self, weather_id):
         """ Given a new weather_id from the session packet, update the session's weather set """
@@ -115,7 +120,6 @@ class F12022Session(SessionBase):
         lap = None
         if not sync_entire_session:
             lap = self.lap_list.get(lap_number)
-            log.info(self.session_type)
             if not lap:
                 log.info("Skipping sync of lap %s, lap not found" % lap_number)
                 return

@@ -138,7 +138,6 @@ class F12021TelemetryLapTests(TestCase):
         telemetry.set(1003, speed=303, lap_distance=13)
         telemetry.set(1004, speed=304, lap_distance=14)
         telemetry.set(1005, speed=305, lap_distance=15)
-        print(tl.frame_dict)
         self.assertEqual(tl.frame_dict, {
              100: [  13, None, 297, None, None, None, None, None],
              101: [  14, None, 298, None, None, None, None, None],
