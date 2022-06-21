@@ -55,3 +55,21 @@ Track = {
     28: "Portimão",
     29: "Jeddah",
 }
+
+
+GameMode = {
+     0: "Event Mode",
+     3: "Grand Prix",
+     5: "Time Trial",
+     6: "Splitscreen",
+     7: "Online Custom",
+     8: "Online League",
+    11: "Career Invitational",
+    12: "Championship Invitational",
+    13: "Championship",
+    14: "Online Championship",
+    15: "Online Weekly Event",
+    19: "Career 2022",
+    20: "Career 2022 Online",
+   127: "Benchmark",
+}

@@ -37,6 +37,8 @@ class PacketSessionData(PacketBase):
         # 10 = R, 11 = R2, 12 = R3, 13 = Time Trial
         ("trackId", ctypes.c_int8),
         ("formula", ctypes.c_uint8),
+        # 0 = F1 Modern, 1 = F1 Classic, 2 = F2,
+        # 3 = F1 Generic, 4 = Beta, 5 = Supercars    
         ("sessionTimeLeft", ctypes.c_uint16),
         ("sessionDuration", ctypes.c_uint16),
         ("pitSpeedLimit", ctypes.c_uint8),
@@ -67,6 +69,12 @@ class PacketSessionData(PacketBase):
         ("DRSAssist", ctypes.c_uint8),
         ("dynamicRacingLine", ctypes.c_uint8),
         ("dynamicRacingLineType", ctypes.c_uint8),
+        ("gameMode", ctypes.c_uint8),
+        ("ruleSet", ctypes.c_uint8),
+        ("timeOfDay", ctypes.c_uint32),
+        ("sessionLength", ctypes.c_uint8),
+        # 0 = None, 2 = Very Short, 3 = Short, 4 = Medium
+        # 5 = Medium Long, 6 = Long, 7 = Full
     ]
 
     def serialize(self):

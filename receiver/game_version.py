@@ -19,7 +19,8 @@ class CrossGamePacketHeader(ctypes.LittleEndianStructure):
 
 UDP_PACKET_FORMAT_TO_GAME_VERSION_MAP = {
     2020: "f12020",
-    2021: "f12021"
+    2021: "f12021",
+    2022: "f12022"
 }
 
 

@@ -50,6 +50,8 @@ class PacketLapData(PacketBase):
     _fields_ = [
         ("header", PacketHeader),  # Header
         ("lapData", LapData * 22),  # Lap data for all cars on track
+        ("timeTrialPBCarIdx", ctypes.c_uint8), # Index of Personal Best car in time trial (255 if invalid)
+        ("timeTrialRivalCarIdx", ctypes.c_uint8), # Index of Rival car in time trial (255 if invalid)
     ]
 
     def serialize(self):

@@ -18,6 +18,7 @@ class FinalClassificationData(PacketBase):
         ("numTyreStints", ctypes.c_uint8),
         ("tyreStintsActual", ctypes.c_uint8 * 8),
         ("tyreStintsVisual", ctypes.c_uint8 * 8),
+        ("tyreStintsEndLaps", ctypes.c_uint8 * 8),
     ]
 
 
