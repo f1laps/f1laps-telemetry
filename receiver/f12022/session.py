@@ -4,7 +4,7 @@ log = logging.getLogger(__name__)
 
 from receiver.session_base import SessionBase, ParticipantBase
 from receiver.f12022.lap import F12022Lap
-from receiver.f12022.types import SessionType, Track
+from receiver.f12022.types import SessionType, Track, map_game_mode_to_f1laps
 from receiver.f12022.api import F1LapsAPI2022
 
 
@@ -21,6 +21,7 @@ class F12022Session(SessionBase):
                  is_online_game,
                  ai_difficulty,
                  weather_id,
+                 game_mode,
                  team_id=None,
                 ):
         # Meta
@@ -37,6 +38,7 @@ class F12022Session(SessionBase):
         self.is_online_game = is_online_game
         self.ai_difficulty = ai_difficulty
         self.weather_ids = set([weather_id]) # set() maintains uniqueness
+        self.game_mode = self.map_game_mode(game_mode)
 
         # Laps
         self.lap_list = {}
@@ -72,6 +74,34 @@ class F12022Session(SessionBase):
         """ Given a new weather_id from the session packet, update the session's weather set """
         self.weather_ids.add(weather_id)
     
+    def map_game_mode(self, game_mode):
+        """ Map the UDP game_mode value to the F1Laps value """
+        return map_game_mode_to_f1laps(game_mode)
+    
+    def set_team_id(self, team_id):
+        """ 
+        Set the session's team ID
+        We could just do this outside a method, but good to keep it here
+        as we also update the game_mode. So let's make it explicit.
+        """
+        if self.team_id is not None:
+            return 
+        self.team_id = team_id
+        self.update_game_mode_with_team_id()
+    
+    def update_game_mode_with_team_id(self):
+        """ 
+        The UDP data game_mode only has "career", it doesn't break out MyTeam vs Driver Career
+        Once we have both the game_mode and the team_id, we can pick and update game_mode
+        """
+        # Team_id needs to be tested against None (not 0, which is a valid value)
+        if self.team_id is None or self.game_mode != "career":
+            return
+        elif self.team_id == 255:
+            self.game_mode = "my_team"
+        else:
+            self.game_mode = "driver_career"
+    
     def get_lap(self, lap_number):
         """ 
         Return the Lap object for the given lap_number 
@@ -101,7 +131,7 @@ class F12022Session(SessionBase):
 
     def can_be_synced_to_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
-        return self.team_id and self.session_type
+        return self.team_id is not None and self.session_type
     
     def is_multi_lap_session(self):
         """ Check if this session gets synced as session or individual laps """
@@ -149,7 +179,9 @@ class F12022Session(SessionBase):
             track_id              = self.track_id,
             team_id               = self.team_id,
             conditions            = self.map_weather_ids_to_f1laps_token(),
-            game_mode             = self.get_session_type(),
+            # game_mode should always be time_trial
+            # instead of hardcoding, we keep it dynamic to debug when needed
+            game_mode             = self.game_mode,
             sector_1_time         = lap.sector_1_ms,
             sector_2_time         = lap.sector_2_ms,
             sector_3_time         = lap.sector_3_ms,
@@ -172,6 +204,7 @@ class F12022Session(SessionBase):
             session_uid       = self.session_udp_uid,
             conditions        = self.map_weather_ids_to_f1laps_token(),
             session_type      = self.get_session_type(),
+            game_mode         = self.game_mode,
             finish_position   = self.finish_position,
             points            = self.points,
             result_status     = self.result_status, 

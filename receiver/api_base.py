@@ -80,7 +80,13 @@ class F1LapsAPIBase:
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
                        is_online_game, **extra_params):
-        """ Create a Session in F1Laps """
+        """ 
+        Create a Session in F1Laps 
+        Known extra_params: 
+        - game_mode
+        (didn't systematically review the code yet for others)
+        (also need to decide if we go with explicit params or **extra_params across the board)
+        """
         endpoint = "grandprixs/sessions/"
         method   = "POST"
         params   = {

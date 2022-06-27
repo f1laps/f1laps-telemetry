@@ -57,6 +57,11 @@ class F12021Session(SessionBase):
         log.info("*************************************************")
 
     def set_session_type(self, session_type):
+        """
+        F2 Sprint & Feature: Sprint = 10 (R), Feature = 12 (R3)
+        F2 2x Sprint & Feature: Sprint 1 = 10 (R), Sprint 2 = 11 (R2), Feature = 12 (R3)
+        F1 Feature only = 10 (R)
+        """
         self.session_type = session_type
         self.telemetry.session_type = session_type
 

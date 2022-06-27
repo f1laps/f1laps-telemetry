@@ -1,3 +1,6 @@
+from math import gamma
+
+
 SessionType = {
      0: "unknown",
      1: "practice_1",
@@ -73,3 +76,20 @@ GameMode = {
     20: "Career 2022 Online",
    127: "Benchmark",
 }
+
+def map_game_mode_to_f1laps(game_mode): 
+    """ Fallback is Solo Grand Prix, so we only map as needed """
+    return {
+        3: "solo_grand_prix",
+        5: "time_trial",
+        6: "solo_grand_prix", # split_screen not supported in F1Laps
+        7: "multiplayer",
+        8: "multiplayer",
+       11: "solo_grand_prix", # invitational not supported in F1Laps
+       12: "solo_grand_prix", # invitational not supported in F1Laps
+       13: "championship",
+       14: "multiplayer",
+       15: "multiplayer",
+       19: "career",
+       20: "career",
+    }.get(game_mode)

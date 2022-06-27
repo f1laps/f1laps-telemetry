@@ -78,7 +78,8 @@ class F12022Processor:
                              packet_data["track_id"],
                              packet_data["is_online_game"],
                              packet_data["ai_difficulty"],
-                             packet_data["weather_id"]
+                             packet_data["weather_id"],
+                             packet_data["game_mode"]
                             )
     
     def process_lap_packet(self, packet_data):
@@ -127,8 +128,9 @@ class F12022Processor:
         Add participants to session if not all are set yet
         """
         # Add user's team ID to session
+        # Team_ids need to be tested against None (not 0, which is a valid value)
         if packet_data.get("team_id") is not None and self.session.team_id is None:
-            self.session.team_id = packet_data.get("team_id")
+            self.session.set_team_id(packet_data["team_id"])
         # Add all participants to session (if not already added)
         if packet_data.get("participants") and \
             len(self.session.participants) < packet_data.get("num_participants"):

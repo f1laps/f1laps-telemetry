@@ -86,7 +86,8 @@ class PacketSessionData(PacketBase):
             "is_online_game": bool(self.networkGame == 1),
             "ai_difficulty": self.aiDifficulty,
             "weather_id": self.weather,
-            "is_spectating": self.isSpectating
+            "is_spectating": self.isSpectating,
+            "game_mode": self.gameMode
         }
 
 

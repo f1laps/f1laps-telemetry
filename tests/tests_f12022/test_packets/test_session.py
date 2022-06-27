@@ -16,7 +16,8 @@ class PacketSessionDataTest(TestCase):
             'session_type': 10,
             'session_uid': 123456,
             'track_id': 2,
-            'weather_id': 2
+            'weather_id': 2,
+            'game_mode': 7
         })
         
 
@@ -37,5 +38,6 @@ class MockPacketSessionData(PacketSessionData):
     seasonLinkIdentifier = 1
     weekendLinkIdentifier = 2
     sessionLinkIdentifier = 3
+    gameMode = 7
 
 

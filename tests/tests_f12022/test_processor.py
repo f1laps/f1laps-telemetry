@@ -5,7 +5,7 @@ from receiver.f12022.processor import F12022Processor
 from receiver.f12022.session import F12022Session
 
 
-class F12022LapTelemetryTest(TestCase):
+class F12022SessionTest(TestCase):
     def test_setup_packet_via_generic_process(self):
         """ Test setup package sets session's setup. Use main process method to test cover it too. """
         setup = {
@@ -14,7 +14,7 @@ class F12022LapTelemetryTest(TestCase):
             "rear_wing": 1
         }
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         success = processor.process_serialized_packet(setup)
         self.assertTrue(success)
         self.assertEqual(len(processor.session.setup), 20)
@@ -22,7 +22,7 @@ class F12022LapTelemetryTest(TestCase):
 
     def test_process_telemetry_packet_new_lap(self):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         processor.session.add_lap(1)
         processor.process_telemetry_packet({
             "packet_type": "telemetry",
@@ -38,7 +38,7 @@ class F12022LapTelemetryTest(TestCase):
     
     def test_process_participant_data(self):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         self.assertEqual(len(processor.session.participants), 0)
         self.assertEqual(processor.session.team_id, None)
         # Set team_id and participants
@@ -70,7 +70,7 @@ class F12022LapTelemetryTest(TestCase):
     @patch("receiver.f12022.processor.F12022Session.sync_to_f1laps")
     def test_process_final_classifictation_packet(self, mock_f1l_sync):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         # Add 2 participants
         processor.process_participant_data({
             "packet_type": "participants",
@@ -123,7 +123,7 @@ class F12022LapTelemetryTest(TestCase):
     @patch("receiver.f12022.processor.F12022Session.get_current_lap")
     def test_process_flashback_event_packet(self, mock_lap):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         mock_flashback = MagicMock()
         mock_lap.return_value.process_flashback_event = mock_flashback
         processor.process_event_packet({
@@ -138,7 +138,7 @@ class F12022LapTelemetryTest(TestCase):
     @patch("receiver.f12022.processor.F12022Penalty.send_to_f1laps")
     def test_process_flashback_event_packet(self, mock_f1l_sync):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         processor.process_event_packet({
             "packet_type": "event",
             "event_type": "penalty",
@@ -154,7 +154,7 @@ class F12022LapTelemetryTest(TestCase):
     
     def test_process_car_status_packet(self):
         processor = F12022Processor("key_123", True)
-        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         processor.session.add_lap(1)
         processor.process_car_status_packet({
             "packet_type": "car_status",
