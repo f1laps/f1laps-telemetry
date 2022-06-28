@@ -80,16 +80,18 @@ GameMode = {
 def map_game_mode_to_f1laps(game_mode): 
     """ Fallback is Solo Grand Prix, so we only map as needed """
     return {
+        0: "other",
         3: "solo_grand_prix",
         5: "time_trial",
-        6: "solo_grand_prix", # split_screen not supported in F1Laps
+        6: "split_screen", 
         7: "multiplayer",
         8: "multiplayer",
-       11: "solo_grand_prix", # invitational not supported in F1Laps
-       12: "solo_grand_prix", # invitational not supported in F1Laps
+       11: "invitational",
+       12: "invitational",
        13: "championship",
        14: "multiplayer",
        15: "multiplayer",
        19: "career",
        20: "career",
-    }.get(game_mode)
+      127: "other"
+    }[game_mode]
