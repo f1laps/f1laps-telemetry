@@ -1,9 +1,9 @@
 import platform
 import requests
 import json
-
 import config
-from lib.logger import log
+import logging
+log = logging.getLogger(__name__)
 
 
 class F1LapsAPIBase:
@@ -214,7 +214,7 @@ class F1LapsAPIBase:
                 log.error("%s failed (400): %s" % (descriptor, error_message))
             return False
         else:
-            log.error("%s failed (500)" % descriptor, extra=dict(message=self._get_error_message(response.content)))
+            log.error("%s failed (500)" % descriptor, extra=dict(api_response_content=self._get_error_message(response.content)))
             return False
     
     def _get_error_message(self, response_content):

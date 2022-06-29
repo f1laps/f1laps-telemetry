@@ -1,6 +1,6 @@
-import json
+import logging
+log = logging.getLogger(__name__)
 
-from lib.logger import log
 from receiver.session_base import SessionBase, ParticipantBase
 from .types import SessionType, Track
 from .api import F1LapsAPI2021
