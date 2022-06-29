@@ -211,10 +211,10 @@ class F1LapsAPIBase:
             if error_message == 'You need an active subscription to use the F1Laps Telemetry App.':
                 log.info("%s failed: no active F1Laps subscription" % descriptor)
             else:
-                log.error("%s failed: %s" % (descriptor, error_message))
+                log.error("%s failed (400): %s" % (descriptor, error_message))
             return False
         else:
-            log.error("%s failed: %s" % (descriptor, self._get_error_message(response.content)))
+            log.error("%s failed (500)" % descriptor, extra=dict(message=self._get_error_message(response.content)))
             return False
     
     def _get_error_message(self, response_content):
