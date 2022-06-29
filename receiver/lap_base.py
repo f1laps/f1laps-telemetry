@@ -41,13 +41,21 @@ class LapBase:
     
     def update(self, lap_values=None, telemetry_values=None):
         """Update the lap with new data"""
+        # Get certain values that are needed later on 
         current_distance = telemetry_values.get("lap_distance")
-        new_sector_1_time = telemetry_values.get("sector_1_ms")
-        if self.is_in_or_outlap(current_distance):
+        new_sector_1_time = lap_values.get("sector_1_ms")
+        new_pit_value = lap_values.get("pit_status")
+
+        # Check in/out lap
+        if self.is_in_or_outlap(current_distance, new_pit_value):
             # Don't update values for in or outlaps
+            log.debug("%s is an inlap or outlap, not storing data" % self)
             pass
-        elif not self.new_lap_data_should_be_written(new_sector_1_time):
+        elif lap_values and not self.new_lap_data_should_be_written(new_sector_1_time):
             # Don't update values for laps that already have full data
+            # This only applies to payloads with lap_data
+            # Telemetry data should be written regardless
+            log.debug("%s has all values set, not storing data" % self)
             pass
         else:
             # Init telemetry if we don't have it yet
@@ -71,13 +79,13 @@ class LapBase:
             return False
         return True
     
-    def is_in_or_outlap(self, current_distance):
+    def is_in_or_outlap(self, current_distance, new_pit_value):
         """Check if the current lap is an inlap or outlap"""
         if self.session_type in SESSION_TYPES_WITH_OUTLAP:
             return self.is_race_inlap(current_distance)
         # Quali sessions have inlaps and outlaps
         elif self.session_type in SESSION_TYPES_WITH_IN_AND_OUT_LAP:
-            return self.is_quali_out_or_inlap()
+            return self.is_quali_out_or_inlap(new_pit_value)
         else: # time trial, practice
             """ Todo: time trial outlaps """
             return False
@@ -94,13 +102,13 @@ class LapBase:
             return True
         return False
     
-    def is_quali_out_or_inlap(self):
+    def is_quali_out_or_inlap(self, new_pit_value):
         """
         Check if the current lap is an in- or outlap in quali (where it's more complicated)
         Reason: for qualifying sessions (non-OSQ), the inlap and outlaps need to be ignored
         Logic: We check this based on pit status -- if no pits on entire lap, it's a real lap
         """
-        return bool(self.pit_status and self.pit_status > 0)
+        return bool(new_pit_value is not None and new_pit_value > 0)
     
     def set_pit_status(self, pit_status):
         """
@@ -120,6 +128,10 @@ class LapBase:
     def can_be_synced_to_f1laps(self):
         """ Check if lap has all sectors and has not been synced to F1Laps before"""
         return bool(self.sector_1_ms and self.sector_2_ms and self.sector_3_ms) and not self.has_been_synced_to_f1l
+    
+    def recompute_sector_3_time(self, last_lap_time):
+        """ After a lap is finished, we need to recompute S3 to make it accurate """
+        self.sector_3_ms = last_lap_time - self.sector_1_ms - self.sector_2_ms
 
 
 

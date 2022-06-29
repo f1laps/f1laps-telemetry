@@ -15,7 +15,11 @@ class F12021Processor:
         super(F12021Processor, self).__init__()
 
     def process(self, unpacked_packet):
-        packet = unpack_udp_packet(unpacked_packet)
+        try:
+            packet = unpack_udp_packet(unpacked_packet)
+        except Exception as ex:
+            log.info("Couldn't unpack packet due to %s" % ex)
+            packet = None
         if packet:
             # Process packet if we already have a session
             # or if packet sets a new session (i.e. the session packet)

@@ -76,6 +76,7 @@ class F12022SessionTest(TestCase):
             "packet_type": "participants",
             "team_id": 2,
             "num_participants": 2,
+            "best_lap_time": 67890,
             "participants": [
                 {"driver": 5, "driver_index": 0, "name": "Seb", "team": 1},
                 {"driver": 6, "driver_index": 1, "name": "Lewis", "team": 2},

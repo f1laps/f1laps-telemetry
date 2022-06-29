@@ -17,20 +17,24 @@ class F12020Processor:
         super(F12020Processor, self).__init__()
 
     def process(self, unpacked_packet):
-        packet = f1_2020_telemetry.packets.unpack_udp_packet(unpacked_packet)
+        try:
+            packet = f1_2020_telemetry.packets.unpack_udp_packet(unpacked_packet)
+        except Exception as ex:
+            log.info("Couldn't unpack packet due to %s" % ex)
+            packet = None
 
         # process session packets first
         # the session packet class returns a session object 
         # it doesn't change the session for existing sessions
         # it returns a new session object for new sessions
-        if isinstance(packet, f1_2020_telemetry.packets.PacketSessionData_V1):
+        if packet and isinstance(packet, f1_2020_telemetry.packets.PacketSessionData_V1):
             self.session = SessionPacket().process(packet, self.session)
             if self.session:
                 self.session.f1laps_api_key = self.f1laps_api_key
                 self.session.telemetry_enabled = self.telemetry_enabled
 
         # dont do anything else if there isnt a session set
-        if self.session:
+        if packet and self.session:
 
             # Now we listen to the actual race information
             # Each package gets processed in real-time as it comes in

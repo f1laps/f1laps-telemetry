@@ -66,6 +66,7 @@ class PacketLapData(PacketBase):
             "pit_status": lap_data.pitStatus,
             "is_valid": bool(lap_data.currentLapInvalid != 1),
             "current_laptime_ms": lap_data.currentLapTimeInMS,
+            "last_laptime_ms": lap_data.lastLapTimeInMS,
             "sector_1_ms": lap_data.sector1TimeInMS,
             "sector_2_ms": lap_data.sector2TimeInMS,
             "sector_3_ms": self.get_sector_3_ms(lap_data),
@@ -74,5 +75,7 @@ class PacketLapData(PacketBase):
         }
     
     def get_sector_3_ms(self, lap_data):
+        if not (lap_data.sector1TimeInMS and lap_data.sector2TimeInMS):
+            return None
         sector_3_time = lap_data.currentLapTimeInMS - lap_data.sector1TimeInMS - lap_data.sector2TimeInMS
         return round(sector_3_time) if sector_3_time else None

@@ -12,6 +12,10 @@ SessionType = {
      7: "qualifying_3",
      8: "qualifying", # short
      9: "qualifying", # OSQ
+     # Sprint race logic
+     # F1
+     # - No sprint: race = 10
+     # - With sprint: sprint = 10, race = 11
     10: "race",
     11: "race",
     12: "race",
@@ -24,6 +28,7 @@ SESSION_TYPES_WITH_OUTLAP = [10, 11, 12, 9]
 SESSION_TYPES_WITH_IN_AND_OUT_LAP = [5, 6, 7, 8]
 # Time trial IDs (needed because they have their own lap rules)
 SESSION_TYPES_TIME_TRIAL = [13]
+SESSION_TYPE_OSQ = 9
 
 
 Track = {

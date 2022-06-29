@@ -57,7 +57,7 @@ class F12022Session(SessionBase):
 
         # Log session init
         log.info("*************************************************")
-        log.info("New session started: %s %s (ID %s)" % (self.get_track_name(), self.get_session_type(), self.session_udp_uid))
+        log.info("New session started: %s" % self)
         log.info("*************************************************")
     
     def get_session_type(self):
@@ -102,17 +102,17 @@ class F12022Session(SessionBase):
         else:
             self.game_mode = "driver_career"
     
-    def get_lap(self, lap_number):
+    def get_lap(self, lap_number, last_lap_time=None):
         """ 
         Return the Lap object for the given lap_number 
         If it doesn't exist, add it and return it
-        Also sync lap - 1
+        Also sync lap - 1 (we need the last_lap_time to accurately calculate sector 3)
         """
         if lap_number not in self.lap_list:
             # Create new lap
             self.add_lap(lap_number)
             # Finish completed (previous) lap
-            self.finish_completed_lap(lap_number - 1)
+            self.finish_completed_lap(lap_number - 1, last_lap_time)
         return self.lap_list[lap_number]
     
     def get_current_lap(self):
@@ -125,9 +125,31 @@ class F12022Session(SessionBase):
         self.lap_list[lap_number] = new_lap
         return new_lap
     
-    def finish_completed_lap(self, lap_number):
-        """ Once a lap is completed, finish it """
+    def finish_completed_lap(self, lap_number, last_lap_time):
+        """ 
+        Once a lap is completed, finish it 
+        Use last_lap_time to re-compute the final sector 3 time
+        """
+        if lap_number not in self.lap_list:
+            return
+        # Update sector 3 time
+        self.recompute_sector_3_lap_time(lap_number, last_lap_time)
+        # Send to F1Laps
         return self.sync_to_f1laps(lap_number)
+    
+    def recompute_sector_3_lap_time(self, lap_number, final_lap_time):
+        """ 
+        Recompute the sector 3 lap time for the given lap_number 
+        Called when:
+        - a lap is finished, next lap started, and we update the last lap (via finish_completed_lap here)
+        - in OSQ via the final classification packet processing
+        """
+        if not lap_number or not final_lap_time:
+            return
+        lap = self.lap_list[lap_number]
+        if lap:
+            lap.recompute_sector_3_time(final_lap_time)
+
 
     def can_be_synced_to_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
@@ -170,6 +192,8 @@ class F12022Session(SessionBase):
     
     def sync_lap_to_f1laps(self, lap, api):
         """ Send individual lap to F1Laps """
+        if not lap:
+            return False
         # Mark the lap as synced to F1Laps
         # Technically it depends on the API call, and we should mark it on success only
         # Unclear what the side effects are though 
@@ -193,6 +217,13 @@ class F12022Session(SessionBase):
             log.info("%s successfully synced to F1Laps" % lap)
         else:
             log.info("%s failed sync to F1Laps" % lap)
+        return success
+    
+    def send_session_to_f1laps(self):
+        """ Legacy method called by PenaltyBase """
+        api = F1LapsAPI2022(self.f1laps_api_key, self.game_version)
+        success, f1l_session_id = self.sync_session_to_f1laps(api)
+        self.f1_laps_session_id = f1l_session_id
         return success
     
     def sync_session_to_f1laps(self, api):
@@ -269,5 +300,9 @@ class F12022Session(SessionBase):
             return False
         last_participant = self.participants[participants_count-1]
         return bool(last_participant.result_status)
+    
+    def has_ended(self):
+        """ Legacy method needed by PenaltyBase """
+        return bool(self.finish_position is not None)
         
     

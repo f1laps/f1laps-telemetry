@@ -135,7 +135,10 @@ class RaceReceiver(threading.Thread):
                 incoming_udp_packet = self.udp_socket.recv(2048)
                 # Get game version -- raises if unknown or not found
                 # Do this for every packet so that we can handle game switches in flight
-                game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
+                try:
+                    game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
+                except:
+                    game_version = None
                 if game_version == "f12020":
                     # Only start processor if it's not set yet or has switched
                     if not self.processor or not isinstance(self.processor, F12020Processor):

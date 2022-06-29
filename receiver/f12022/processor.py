@@ -4,6 +4,7 @@ log = logging.getLogger(__name__)
 from receiver.f12022.packets.helpers import unpack_udp_packet
 from receiver.f12022.session import F12022Session
 from receiver.f12022.penalty import F12022Penalty
+from receiver.f12022.types import SESSION_TYPE_OSQ
 
 
 class F12022Processor:
@@ -18,7 +19,12 @@ class F12022Processor:
         super(F12022Processor, self).__init__()
 
     def process(self, unpacked_packet):
-        packet = unpack_udp_packet(unpacked_packet)
+        try:
+            packet = unpack_udp_packet(unpacked_packet)
+        except Exception as ex:
+            log.info("Couldn't unpack packet due to %s" % ex)
+            packet = None
+
         if packet:
             # If we don't have a session yet, we only process the 
             # Session packet (identified via packet.creates_session_object)
@@ -88,7 +94,8 @@ class F12022Processor:
             # If we can't retrieve lap number, we can't do anything
             return 
         # Get lap object 
-        lap = self.session.get_lap(lap_number)
+        last_lap_time = packet_data.get("last_laptime_ms")
+        lap = self.session.get_lap(lap_number, last_lap_time)
         # Update lap
         lap.update(
             lap_values = {
@@ -184,6 +191,13 @@ class F12022Processor:
             participant.penalties_number = classification.get("penalties_number")
             participant.race_time_total = classification.get("race_time_total")
             participant.penalties_time_total = classification.get("penalties_time_total")
+        # For OSQ, update the best lap time
+        # Needed because OSQ don't send the lastLapTimeMS in the lap packet
+        # So we need this for an accurate sector 3 time
+        best_lap_time = packet_data.get("user_lap_time_best")
+        if self.session.session_type == SESSION_TYPE_OSQ and best_lap_time:
+            osq_lap_number = 1
+            self.session.recompute_sector_3_lap_time(osq_lap_number, best_lap_time)
         # Sync to F1L
         self.session.sync_to_f1laps(lap_number=None, sync_entire_session=True)
     

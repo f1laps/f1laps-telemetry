@@ -53,4 +53,7 @@ class PacketFinalClassificationData(PacketBase):
                 "race_time_total": int(classification.totalRaceTime*1000) if classification.totalRaceTime else None,
                 "penalties_time_total": int(classification.penaltiesTime*1000) if classification.penaltiesTime else None,
             }
+            # Set user best lap time in main dict too
+            if index == self.header.playerCarIndex:
+                serialized_dict["user_lap_time_best"] = classification.bestLapTimeInMS
         return serialized_dict

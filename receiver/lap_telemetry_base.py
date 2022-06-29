@@ -58,6 +58,7 @@ class LapTelemetryBase:
     
     def update(self, telemetry_dict):
         """ Update this LapTelemetry object's frame dict"""
+        # Pop frame_id out of the dict because we'll set all attributes later and cant set the id
         frame_number = telemetry_dict.pop("frame_identifier")
         frame = self.get_frame(frame_number)
         for key, value in telemetry_dict.items():
@@ -73,7 +74,7 @@ class LapTelemetryBase:
         """
         if frame_number not in self.frame_dict:
             self.frame_dict[frame_number] = []
-            for i in range(0, len(KEY_INDEX_MAP)):
+            for _ in range(0, len(KEY_INDEX_MAP)):
                 self.frame_dict[frame_number].append(None)
         return self.frame_dict[frame_number]
 
@@ -102,6 +103,7 @@ class LapTelemetryBase:
 
         # Reset telemetry when we are pre session FIRST LINE CROSS start
         if current_distance < 0:
+            log.debug("Resetting telemetry because we are pre session first line cross")
             self.frame_dict = {}
             # In F1 2021, in an outlap in TT, the first frame sends a positive value (e.g. distance of 126)
             # Then switches to negative values as expected in an outlap
@@ -128,7 +130,7 @@ class LapTelemetryBase:
         
         # Reset last lap distance
         self.last_lap_distance = None
-        log.info("Removed frames that were flashbacked away (flbk to %s; max was %s; deleted %s)" % (
+        log.debug("Removed frames that were flashbacked away (flbk to %s; max was %s; deleted %s)" % (
             frame_id_flashed_back_to,
             current_frame_max,
             deleted_frame_count
