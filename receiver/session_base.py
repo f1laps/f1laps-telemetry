@@ -7,8 +7,8 @@ class SessionBase:
     def __str__(self):
         return "%s %s %s (ID %s-%s%s)" % (
             self.get_track_name(),
-            self.game_mode.replace("_", " ").title(),
-            self.get_session_type().title(),
+            (self.game_mode.replace("_", " ").title() if hasattr(self, 'game_mode') else ""),
+            (self.get_session_type().replace("_", " ").title() if self.get_session_type() else ""),
             self.game_version.upper(),
             self.session_udp_uid,
             (", team %s" % self.team_id if self.team_id else "")

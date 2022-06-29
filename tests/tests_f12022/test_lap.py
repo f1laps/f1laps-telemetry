@@ -7,7 +7,7 @@ class F12022SessionTest(TestCase):
     def test_create(self):
         lap = F12022Lap(lap_number=2, session_type=11)
         self.assertEqual(lap.lap_number, 2)
-        self.assertFalse(lap.is_in_or_outlap(500))
+        self.assertFalse(lap.is_in_or_outlap(500, None))
         
     def test_is_in_or_outlap(self):
         # Set session type to one with outlaps (11 = race)
@@ -16,10 +16,10 @@ class F12022SessionTest(TestCase):
         lap.sector_2_ms = 2
         lap.sector_3_ms = 3
         # All sectors set and < 200 is inlap
-        self.assertTrue(lap.is_in_or_outlap(100))
+        self.assertTrue(lap.is_in_or_outlap(100, 0))
         self.assertTrue(lap.is_race_inlap(100))
         # All sectors set and > 200 is not outlap
-        self.assertFalse(lap.is_in_or_outlap(300))
+        self.assertFalse(lap.is_in_or_outlap(300, 0))
         self.assertFalse(lap.is_race_inlap(300))
         # Not all sectors set is never inlap
         lap.sector_1_ms = 1
@@ -32,16 +32,14 @@ class F12022SessionTest(TestCase):
         # Set session type to one with in/outlaps (5 = Q1)
         lap = F12022Lap(lap_number=2, session_type=5)
         # No pit status is not an in/outlap
-        self.assertFalse(lap.is_in_or_outlap(500))
-        self.assertFalse(lap.is_quali_out_or_inlap())
+        self.assertFalse(lap.is_in_or_outlap(500, None))
+        self.assertFalse(lap.is_quali_out_or_inlap(None))
         # Pit status = 0 is not an in/outlap
-        lap.pit_status = 0
-        self.assertFalse(lap.is_in_or_outlap(500))
-        self.assertFalse(lap.is_quali_out_or_inlap())
+        self.assertFalse(lap.is_in_or_outlap(500, 0))
+        self.assertFalse(lap.is_quali_out_or_inlap(0))
         # Pit status = 1 is an in/outlap
-        lap.pit_status = 1
-        self.assertTrue(lap.is_in_or_outlap(500))
-        self.assertTrue(lap.is_quali_out_or_inlap())
+        self.assertTrue(lap.is_in_or_outlap(500, 1))
+        self.assertTrue(lap.is_quali_out_or_inlap(1))
     
     def test_set_pit_status(self):
         lap = F12022Lap(lap_number=2, session_type=11)
