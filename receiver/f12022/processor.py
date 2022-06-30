@@ -75,6 +75,11 @@ class F12022Processor:
         else:
             # Update session weather 
             self.session.update_weather(packet_data["weather_id"])
+            # Add session type if it's not set
+            # This should never happen but we have seen sessions without session type
+            # So let's just make sure
+            if not self.session.session_type and packet_data["session_type"] is not None:
+                self.session.session_type = packet_data["session_type"]
         
     def create_session(self, packet_data):
         return F12022Session(self.f1laps_api_key, 
