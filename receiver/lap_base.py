@@ -98,7 +98,6 @@ class LapBase:
         """
         if (current_distance and current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP) and \
            self.sector_1_ms and self.sector_2_ms and self.sector_3_ms:
-            log.info("%s is a race inlap" % self)
             return True
         return False
     
