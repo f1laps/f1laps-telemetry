@@ -1,9 +1,9 @@
 import platform
 import requests
 import json
-
 import config
-from lib.logger import log
+import logging
+log = logging.getLogger(__name__)
 
 
 class F1LapsAPIBase:
@@ -80,7 +80,13 @@ class F1LapsAPIBase:
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,
                        is_online_game, **extra_params):
-        """ Create a Session in F1Laps """
+        """ 
+        Create a Session in F1Laps 
+        Known extra_params: 
+        - game_mode
+        (didn't systematically review the code yet for others)
+        (also need to decide if we go with explicit params or **extra_params across the board)
+        """
         endpoint = "grandprixs/sessions/"
         method   = "POST"
         params   = {
@@ -205,10 +211,10 @@ class F1LapsAPIBase:
             if error_message == 'You need an active subscription to use the F1Laps Telemetry App.':
                 log.info("%s failed: no active F1Laps subscription" % descriptor)
             else:
-                log.error("%s failed: %s" % (descriptor, error_message))
+                log.error("%s failed (400): %s" % (descriptor, error_message))
             return False
         else:
-            log.error("%s failed: %s" % (descriptor, self._get_error_message(response.content)))
+            log.error("%s failed (500)" % descriptor, extra=dict(api_response_content=self._get_error_message(response.content)))
             return False
     
     def _get_error_message(self, response_content):

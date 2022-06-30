@@ -1,6 +1,10 @@
-from lib.logger import log
-from lib.file_handler import get_path_executable_parent
-import json
+"""
+THIS IS AN OLD FILE THAT IS ONLY USED BY F12021 and F12022
+"""
+
+import logging
+log = logging.getLogger(__name__)
+
 
 KEY_INDEX_MAP = {
     "lap_distance": 0,

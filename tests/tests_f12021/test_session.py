@@ -9,11 +9,13 @@ class F12021SessionTest(TestCase):
         session = F12021Session(123)
         session.team_id = 1
         session.lap_list = {2: []}
-        self.assertEqual(str(session), "F12021 Session 123 (None, team 1, type None, offline, 1 laps)")
+        self.assertEqual(str(session), "None   (ID F12021-123, team 1)")
         session.track_id = 2
-        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type None, offline, 1 laps)")
+        self.assertEqual(str(session), "Shanghai   (ID F12021-123, team 1)")
         session.session_type = 6
-        self.assertEqual(str(session), "F12021 Session 123 (Shanghai, team 1, type qualifying_2, offline, 1 laps)")
+        self.assertEqual(str(session), "Shanghai  Qualifying 2 (ID F12021-123, team 1)")
+        session.game_mode = "Championship"
+        self.assertEqual(str(session), "Shanghai Championship Qualifying 2 (ID F12021-123, team 1)")
 
     def test_get_track_name(self):
         session = F12021Session(123)

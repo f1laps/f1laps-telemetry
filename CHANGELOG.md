@@ -1,5 +1,21 @@
 # Change Log
 
+
+## 3.0.1 - 2022-06-30
+
+Support for F1 2022 including a major refactoring of how UDP packets are read and processed.
+
+### Changed
+- API errors are now formatted more consistently
+
+### Fixed
+- Session type is set continuously as long as it's missing
+
+
+## 3.0.0 - 2022-06-29
+
+Support for F1 2022 including a major refactoring of how UDP packets are read and processed.
+
 ## 2.4.0 - 2021-12-31
 
 Support for penalties and grid position, and fix for qualifying lap telemetry.
@@ -16,6 +32,7 @@ Support for penalties and grid position, and fix for qualifying lap telemetry.
 - Removed old SessionHistory lap update logic
 - Stopped logging subscription warning as error
 
+
 ## 2.3.0 - 2021-11-15
 
 Added support for different port values. Fixed qualification session in- and outlaps
@@ -26,12 +43,14 @@ Added support for different port values. Fixed qualification session in- and out
 ### Fixed
 - Inlaps and outlaps in qualification sessions are now ignored by the app, allowing for correct import of actual quali laps
 
+
 ## 2.2.0 - 2021-09-15
 
 Starting the collection of Final Classification data
 
 ### Added
 - Final Classification data is now saved for all players in a session
+
 
 ## 2.1.2 - 2021-08-20
 
