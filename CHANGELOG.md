@@ -1,6 +1,12 @@
 # Change Log
 
 
+## 3.0.2 - 2022-07-01
+
+### Fixed
+- Time trial telemetry data now shown correctly after "Restart lap" is used
+
+
 ## 3.0.1 - 2022-06-30
 
 Support for F1 2022 including a major refactoring of how UDP packets are read and processed.

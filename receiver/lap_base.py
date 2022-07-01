@@ -44,19 +44,29 @@ class LapBase:
         # Get certain values that are needed later on 
         current_distance = telemetry_values.get("lap_distance")
         new_sector_1_time = lap_values.get("sector_1_ms")
+        total_lap_time = telemetry_values.get("lap_time")
         new_pit_value = lap_values.get("pit_status")
 
         # Check in/out lap
         if self.is_in_or_outlap(current_distance, new_pit_value):
             # Don't update values for in or outlaps
             log.debug("%s is an inlap or outlap, not storing data" % self)
-            pass
-        elif lap_values and not self.new_lap_data_should_be_written(new_sector_1_time):
+            
+        elif lap_values and not self.new_lap_data_should_be_written(new_sector_1_time, total_lap_time):
             # Don't update values for laps that already have full data
             # This only applies to payloads with lap_data
             # Telemetry data should be written regardless
             log.debug("%s has all values set, not storing data" % self)
-            pass
+            self.reset_lap_telemetry()
+            
+        elif not lap_values and not self.telemetry:
+            # Telemetry data gets sent in two packages
+            # Lap packages -> has lap data and hence knows if telemetry data should be written
+            # Telemetry package -> has no lap data and hence doesn't know if we can write it
+            # So if we get telemetry data only, we only write if we had started to write already
+            log.debug("%s has no telemetry data yet, not adding new telemetry data" % self)
+            self.reset_lap_telemetry()
+            
         else:
             # Init telemetry if we don't have it yet
             if not self.telemetry:
@@ -67,17 +77,39 @@ class LapBase:
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
     
-    def new_lap_data_should_be_written(self, new_sector_1_time):
+    def reset_lap_telemetry(self):
+        """ 
+        In time trial, we need to reset lap telemetry when using the "restart lap"
+        It's not clear yet if this applies to other game modes too
+        We're doing it for TT only for now
+        """
+        if self.session_type in SESSION_TYPES_TIME_TRIAL:
+            # Reset telemetry
+            self.telemetry = None
+            log.debug("Reset telemetry for %s" % self)
+
+    def new_lap_data_should_be_written(self, new_sector_1_time, total_lap_time):
         """
         Check if the current lap has all sector times, 
         in which case we don't overwrite it anymore
         """
         if self.session_type in SESSION_TYPES_TIME_TRIAL:
-            return True
+            return not self.is_restart_lap_time_trial(total_lap_time)
         all_sectors_set = bool(self.sector_1_ms and self.sector_2_ms and self.sector_3_ms)
         if all_sectors_set and new_sector_1_time in ["0", 0, None, ""]:
             return False
         return True
+    
+    def is_restart_lap_time_trial(self, total_lap_time):
+        """
+        In F1 22 Time Trial, when hitting "Restart Lap", the lap counter stays on the current lap,
+        even though in-game it shows as lap-1 until finish line cross
+        The lap distance remains positive.
+        The current lap time stays 0 however, so we use that to check for restart laps
+        """
+        if not total_lap_time:
+            return True
+        return False
     
     def is_in_or_outlap(self, current_distance, new_pit_value):
         """Check if the current lap is an inlap or outlap"""
@@ -98,6 +130,7 @@ class LapBase:
         """
         if (current_distance and current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP) and \
            self.sector_1_ms and self.sector_2_ms and self.sector_3_ms:
+            log.debug("%s is a race inlap" % self)
             return True
         return False
     

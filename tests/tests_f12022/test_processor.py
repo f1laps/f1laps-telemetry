@@ -24,7 +24,7 @@ class F12022SessionTest(TestCase):
         processor = F12022Processor("key_123", True)
         processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         processor.session.add_lap(1)
-        processor.process_telemetry_packet({
+        serialized_telemetry_data = {
             "packet_type": "telemetry",
             "frame_identifier": 1000,
             "speed": 100,
@@ -33,8 +33,28 @@ class F12022SessionTest(TestCase):
             "gear": 4,
             "steer": 0.1,
             "drs": 0,
-        })
-        self.assertEqual(processor.session.get_current_lap().telemetry.frame_dict, {1000: [None, None, 100, 0, 0.9, 4, 0.1, 0]})
+        }
+        # If we have no telemetry data yet, adding new one should do nothing
+        processor.process_telemetry_packet(serialized_telemetry_data)
+        self.assertEqual(processor.session.get_current_lap().telemetry, None)
+        # So lets send lap data first to start telemetry
+        serialized_lap_data = {
+            "packet_type": "lap",
+            "lap_number": 1,
+            "car_race_position": None,
+            "pit_status": 0,
+            "is_valid": True,
+            "current_laptime_ms": 111,
+            "last_laptime_ms": 444,
+            "sector_1_ms": 1,
+            "sector_2_ms": 2,
+            "sector_3_ms": None,
+            "lap_distance": 123,
+            "frame_identifier": 1000
+        }
+        processor.process_lap_packet(serialized_lap_data)
+        processor.process_telemetry_packet(serialized_telemetry_data)
+        self.assertEqual(processor.session.get_current_lap().telemetry.frame_dict, {1000: [123, 111, 100, 0, 0.9, 4, 0.1, 0]})
     
     def test_process_participant_data(self):
         processor = F12022Processor("key_123", True)
