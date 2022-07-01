@@ -3,7 +3,7 @@ from unittest import TestCase
 from receiver.f12022.lap import F12022Lap
 
 
-class F12022SessionTest(TestCase):
+class F12022LapTest(TestCase):
     def test_create(self):
         lap = F12022Lap(lap_number=2, session_type=11)
         self.assertEqual(lap.lap_number, 2)
@@ -50,22 +50,23 @@ class F12022SessionTest(TestCase):
         self.assertEqual(lap.set_pit_status(2), 3)
         self.assertEqual(lap.pit_status, 3)
     
-    def test_new_lap_data_should_be_written(self):
-        # Time trial is never complete -> should always be false
+    def test_new_lap_data_should_be_writte(self):
+        # Test time trial first
         lap = F12022Lap(lap_number=2, session_type=13)
         # Set values so that they should be true except for TT
         lap.sector_1_ms = 1
         lap.sector_2_ms = 2
         lap.sector_3_ms = 3
-        self.assertTrue(lap.new_lap_data_should_be_written(0))
+        self.assertTrue(lap.new_lap_data_should_be_written(0, 123))
+        self.assertFalse(lap.new_lap_data_should_be_written(0, 0))
         # Set session type to non-time-trial (5 = race)
         lap.session_type = 5
-        self.assertFalse(lap.new_lap_data_should_be_written(0))
+        self.assertFalse(lap.new_lap_data_should_be_written(0, 100))
         # Non-null value should be false
-        self.assertTrue(lap.new_lap_data_should_be_written(5))
+        self.assertTrue(lap.new_lap_data_should_be_written(5, 0))
         # Not all sectors set is never complete
         lap.sector_3_ms = None
-        self.assertTrue(lap.new_lap_data_should_be_written(0))
+        self.assertTrue(lap.new_lap_data_should_be_written(0, 0))
     
     def test_lap_update(self):
         # Start time trial lap (avoids the in/out lap dependencies)
