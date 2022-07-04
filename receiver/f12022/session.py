@@ -146,7 +146,7 @@ class F12022Session(SessionBase):
         """
         if not lap_number or not final_lap_time:
             return
-        lap = self.lap_list[lap_number]
+        lap = self.lap_list.get(lap_number)
         if lap:
             lap.recompute_sector_3_time(final_lap_time)
 

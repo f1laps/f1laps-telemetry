@@ -47,7 +47,6 @@ class PacketFinalClassificationData(PacketBase):
         session.points          = classification_data.points
 
     def update_participants(self, session):
-        num_participants = len(session.participants)
         for index, classification in enumerate(self.classificationData):
             try:
                 participant = session.participants[index]
@@ -59,10 +58,15 @@ class PacketFinalClassificationData(PacketBase):
             participant.result_status = classification.resultStatus
             participant.lap_time_best = classification.bestLapTimeInMS
             participant.penalties_number = classification.numPenalties
-            if classification.totalRaceTime:
-                participant.race_time_total = int(classification.totalRaceTime*1000)
-            if classification.penaltiesTime:
-                participant.penalties_time_total = int(classification.penaltiesTime*1000)
+            try:
+                # Wrapped in try/except because we've seen totalRaceTime be 
+                # sent as 'nan' which throws an int ValueError
+                if classification.totalRaceTime:
+                    participant.race_time_total = int(classification.totalRaceTime*1000)
+                if classification.penaltiesTime:
+                    participant.penalties_time_total = int(classification.penaltiesTime*1000)
+            except:
+                pass
 
 
 
