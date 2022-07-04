@@ -153,7 +153,7 @@ class F12022Session(SessionBase):
 
     def can_be_synced_to_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
-        return self.team_id is not None and self.session_type
+        return self.team_id != None and self.session_type
     
     def is_multi_lap_session(self):
         """ Check if this session gets synced as session or individual laps """
@@ -176,7 +176,7 @@ class F12022Session(SessionBase):
                 log.info("Skipping sync of lap %s, lap not found" % lap_number)
                 return
         # For entire session syncs, or for validated individual lap syncs, proceed now
-        if (not self.can_be_synced_to_f1laps) or (lap and not lap.can_be_synced_to_f1laps()):
+        if not self.can_be_synced_to_f1laps or (lap and not lap.can_be_synced_to_f1laps()):
             log.info("Skipping sync of lap %s, not ready for sync" % lap_number)
             return
         # Send lap to F1Laps

@@ -40,7 +40,7 @@ class F12022SessionTest(TestCase):
         # No team ID
         self.assertFalse(session.can_be_synced_to_f1laps())
         # With team ID
-        session.team_id = 1
+        session.team_id = 0
         self.assertTrue(session.can_be_synced_to_f1laps())
     
     def test_is_multi_lap_session(self):

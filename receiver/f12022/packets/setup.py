@@ -52,10 +52,12 @@ class PacketCarSetupData(PacketBase):
             "rear_wing": setup_data.rearWing,
             "diff_adjustment_on_throttle": setup_data.onThrottle,
             "diff_adjustment_off_throttle": setup_data.offThrottle,
-            "front_camber": setup_data.frontCamber,
-            "rear_camber": setup_data.rearCamber,
-            "front_toe": setup_data.frontToe,
-            "rear_toe": setup_data.rearToe,
+            # Round float values to 2 decimal places
+            # Otherwise they come with 20+ decimal places
+            "front_camber": round(setup_data.frontCamber, 2) if setup_data.frontCamber else None,
+            "rear_camber": round(setup_data.rearCamber, 2) if setup_data.rearCamber else None,
+            "front_toe": round(setup_data.frontToe, 2) if setup_data.frontToe else None,
+            "rear_toe": round(setup_data.rearToe, 2) if setup_data.rearToe else None,
             "front_suspension": setup_data.frontSuspension,
             "rear_suspension": setup_data.rearSuspension,
             "front_antiroll_bar": setup_data.frontAntiRollBar,
