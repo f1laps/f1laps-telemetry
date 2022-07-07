@@ -154,8 +154,10 @@ class F12022Session(SessionBase):
     def can_be_synced_to_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
         if self.team_id is None:
+            log.info("Session can't be synced to F1Laps because it has no team ID set")
             return False
         elif self.session_type is None:
+            log.info("Session can't be synced to F1Laps because it has no session type set")
             return False
         return True 
     
