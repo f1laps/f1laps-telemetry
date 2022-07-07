@@ -40,6 +40,9 @@ class F12022SessionTest(TestCase):
         # No team ID
         self.assertFalse(session.can_be_synced_to_f1laps())
         # With team ID
+        session.team_id = 2
+        self.assertTrue(session.can_be_synced_to_f1laps())
+        # With team ID of 0 (Mercedes)
         session.team_id = 0
         self.assertTrue(session.can_be_synced_to_f1laps())
     
@@ -90,6 +93,20 @@ class F12022SessionTest(TestCase):
         session.sync_to_f1laps(lap_number=None, sync_entire_session=True)
         self.assertEqual(mock_session_sync.call_count, 2)
         self.assertEqual(mock_lap_sync.call_count, 1)
+
+    @patch('receiver.f12022.session.F1LapsAPI2022.session_create_or_update')
+    @patch('receiver.f12022.session.F1LapsAPI2022.lap_create')
+    def test_sync_to_f1laps_doesnt_sync_without_team_id(self, mock_lap_sync, mock_session_sync):
+        session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
+        session.team_id = None
+        lap = session.add_lap(1)
+        session.lap_list[1].sector_1_ms = 1
+        session.lap_list[1].sector_2_ms = 2
+        session.lap_list[1].sector_3_ms = 3
+        session.sync_to_f1laps(1)
+        self.assertEqual(mock_session_sync.call_count, 0)
+        self.assertEqual(mock_lap_sync.call_count, 0)
+        self.assertFalse(lap.has_been_synced_to_f1l)
     
     def test_set_team_id_and_game_mode_update(self):
         # Time trial session
