@@ -121,6 +121,8 @@ class F12022Processor:
     def process_telemetry_packet(self, packet_data):
         # Get lap object 
         lap = self.session.get_current_lap()
+        if not lap:
+            return
         lap.update(
             lap_values = {},
             telemetry_values = {
@@ -239,4 +241,5 @@ class F12022Processor:
     def process_car_status_packet(self, packet_data):
         """ Update tyres used for the current lap """
         current_lap = self.session.get_current_lap()
-        current_lap.tyre_compound_visual = packet_data.get("tyre_compound_visual")
+        if current_lap:
+            current_lap.tyre_compound_visual = packet_data.get("tyre_compound_visual")

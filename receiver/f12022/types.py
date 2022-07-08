@@ -76,6 +76,7 @@ GameMode = {
     15: "Online Weekly Event",
     19: "Career 2022",
     20: "Career 2022 Online",
+   100: "Unknown",
    127: "Benchmark",
 }
 
@@ -95,5 +96,6 @@ def map_game_mode_to_f1laps(game_mode):
        15: "multiplayer",
        19: "career",
        20: "career",
+      100: "other",
       127: "other"
     }[game_mode]

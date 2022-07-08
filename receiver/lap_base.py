@@ -163,6 +163,8 @@ class LapBase:
     
     def recompute_sector_3_time(self, last_lap_time):
         """ After a lap is finished, we need to recompute S3 to make it accurate """
+        if not last_lap_time or not self.sector_1_ms or not self.sector_2_ms:
+            return None
         self.sector_3_ms = last_lap_time - self.sector_1_ms - self.sector_2_ms
 
 

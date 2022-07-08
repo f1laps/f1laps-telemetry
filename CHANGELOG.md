@@ -1,6 +1,16 @@
 # Change Log
 
 
+## 3.0.3 - 2022-07-08
+
+### Fixed
+- Final classification total race time doesn't raise when value is not an integer
+- Telemetry and car status packages don't raise when no lap is set
+- Added unknown game mode 100
+- Round setup float values
+- Fixed lap sector 3 recompute type issue
+
+
 ## 3.0.2 - 2022-07-01
 
 ### Fixed
