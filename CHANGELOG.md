@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 3.0.3 - 2022-07-XX
+## 3.0.3 - 2022-07-08
 
 ### Fixed
 - Final classification total race time doesn't raise when value is not an integer
