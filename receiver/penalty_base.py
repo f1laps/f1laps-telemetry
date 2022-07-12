@@ -29,9 +29,12 @@ class PenaltyBase:
         if self.session.is_time_trial():
             log.info("Skipping F1Laps sync because it's Time Trial, for %s" % self)
             return None
+        if self.session.can_be_synced_to_f1laps():
+            log.info("Skipping F1Laps sync because session can't be synced yet, for %s" % self)
+            return None
         if not self.f1laps_api_class:
             log.error("No F1Laps API class defined for %s" % self)
-            return None
+            return None       
         if self.session.has_ended():
             log.info("Skipping F1Laps sync because session has ended, for %s" % self)
             return None

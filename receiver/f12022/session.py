@@ -197,7 +197,10 @@ class F12022Session(SessionBase):
         return success
     
     def sync_lap_to_f1laps(self, lap, api):
-        """ Send individual lap to F1Laps """
+        """ 
+        Send individual lap to F1Laps 
+        ! Gets called from sync_to_f1laps() and from PenaltyBase.send_to_f1laps()
+        """
         if not lap:
             return False
         # Mark the lap as synced to F1Laps
