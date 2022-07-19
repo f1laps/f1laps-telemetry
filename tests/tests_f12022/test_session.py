@@ -35,16 +35,16 @@ class F12022SessionTest(TestCase):
         lap = session.get_lap(1)
         self.assertEqual(lap.lap_number, 1)
     
-    def test_can_be_synced_to_f1laps(self):
+    def test_is_valid_for_f1laps(self):
         session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         # No team ID
-        self.assertFalse(session.can_be_synced_to_f1laps())
+        self.assertFalse(session.is_valid_for_f1laps())
         # With team ID
         session.team_id = 2
-        self.assertTrue(session.can_be_synced_to_f1laps())
+        self.assertTrue(session.is_valid_for_f1laps())
         # With team ID of 0 (Mercedes)
         session.team_id = 0
-        self.assertTrue(session.can_be_synced_to_f1laps())
+        self.assertTrue(session.is_valid_for_f1laps())
     
     def test_is_multi_lap_session(self):
         # Session type 10 = race 
