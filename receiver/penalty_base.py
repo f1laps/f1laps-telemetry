@@ -34,7 +34,7 @@ class PenaltyBase:
             return None
         if not self.f1laps_api_class:
             log.error("No F1Laps API class defined for %s" % self)
-            return None       
+            return None
         if self.session.has_ended():
             log.info("Skipping F1Laps sync because session has ended, for %s" % self)
             return None
