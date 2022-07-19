@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.4 - 2022-07-19
+
+### Fixed
+- Classifications without result status don't get synced, which led to an error response
+- Penalties for sessions without team_id don't get synced, which led to an error response
+
 
 ## 3.0.3 - 2022-07-08
 
