@@ -130,6 +130,31 @@ class F12022SessionTest(TestCase):
         session.set_team_id(255)
         self.assertEqual(session.team_id, 4)
         self.assertEqual(session.game_mode, "driver_career")
+    
+    def test_get_classification_list(self):
+        """ 
+        Test that we get the right classification list 
+        Starting F1 22, we exclude participants without result_status
+        So the list should only return the 2 participants with result_status
+        """
+        session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
+        classifications = session.get_classification_list()
+        self.assertEqual(classifications, [])
+        session.add_participant(dict(name="Player", team=0, driver=255, driver_index=0))
+        session.participants[0].result_status = 5
+        session.participants[0].position = 20
+        session.add_participant(dict(name="No Result Status should get skipped", team=1, driver=2, driver_index=2))
+        session.participants[1].position = 6
+        session.participants[1].points = 8
+        session.participants[1].grid_position = 18
+        session.add_participant(dict(name="Mick Schumi", team=1, driver=1, driver_index=3))
+        session.participants[2].result_status = 4
+        session.participants[2].position = 5
+        session.participants[2].points = 10
+        session.participants[2].grid_position = 19
+        classifications = session.get_classification_list()
+        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'points': None, 'finish_position': None, 'grid_position': None, 'result_status': 5, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}, {'driver': 1, 'driver_index': 3, 'team': 1, 'points': 10, 'finish_position': None, 'grid_position': 19, 'result_status': 4, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}])
+
 
         
 

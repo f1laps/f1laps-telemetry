@@ -285,6 +285,9 @@ class F12022Session(SessionBase):
             return []
         classifications = []
         for participant in self.participants:
+            # Only send participants that have a result_status
+            if participant.result_status is None:
+                continue
             classifications.append({
                 "driver": participant.driver,
                 "driver_index": participant.driver_index,
