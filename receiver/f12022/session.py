@@ -151,7 +151,7 @@ class F12022Session(SessionBase):
             lap.recompute_sector_3_time(final_lap_time)
 
 
-    def can_be_synced_to_f1laps(self):
+    def is_valid_for_f1laps(self):
         """ Check if this session has all required data to be sent to F1Laps """
         if self.team_id is None:
             log.info("Session can't be synced to F1Laps because it has no team ID set")
@@ -182,7 +182,7 @@ class F12022Session(SessionBase):
                 log.info("Skipping sync of lap %s, lap not found" % lap_number)
                 return
         # For entire session syncs, or for validated individual lap syncs, proceed now
-        if not self.can_be_synced_to_f1laps() or (lap and not lap.can_be_synced_to_f1laps()):
+        if not self.is_valid_for_f1laps() or (lap and not lap.can_be_synced_to_f1laps()):
             log.info("Skipping sync of lap %s, not ready for sync" % lap_number)
             return
         # Send lap to F1Laps
@@ -197,7 +197,10 @@ class F12022Session(SessionBase):
         return success
     
     def sync_lap_to_f1laps(self, lap, api):
-        """ Send individual lap to F1Laps """
+        """ 
+        Send individual lap to F1Laps 
+        ! Gets called from sync_to_f1laps() and from PenaltyBase.send_to_f1laps()
+        """
         if not lap:
             return False
         # Mark the lap as synced to F1Laps
@@ -282,6 +285,9 @@ class F12022Session(SessionBase):
             return []
         classifications = []
         for participant in self.participants:
+            # Only send participants that have a result_status
+            if participant.result_status is None:
+                continue
             classifications.append({
                 "driver": participant.driver,
                 "driver_index": participant.driver_index,

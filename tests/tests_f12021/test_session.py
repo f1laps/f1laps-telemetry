@@ -93,19 +93,28 @@ class F12021SessionTest(TestCase):
         self.assertEqual(session.has_final_classification(), True)
 
     def test_get_classification_list(self):
+        """ 
+        Test that we get the right classification list 
+        Starting F1 22, we exclude participants without result_status
+        This tests F1 2021, so we should get all 3 participants
+        """
         session = F12021Session(123)
         classifications = session.get_classification_list()
         self.assertEqual(classifications, [])
         session.add_participant(name="Player", team=0, driver=255, driver_index=0)
         session.participants[0].result_status = 5
         session.participants[0].position = 20
-        session.add_participant(name="Mick Schumi", team=1, driver=1, driver_index=1)
-        session.participants[1].result_status = 4
-        session.participants[1].position = 5
-        session.participants[1].points = 10
-        session.participants[1].grid_position = 19
+        session.add_participant(name="No Result Status should get skipped", team=1, driver=2, driver_index=2)
+        session.participants[1].position = 6
+        session.participants[1].points = 8
+        session.participants[1].grid_position = 18
+        session.add_participant(name="Mick Schumi", team=1, driver=1, driver_index=3)
+        session.participants[2].result_status = 4
+        session.participants[2].position = 5
+        session.participants[2].points = 10
+        session.participants[2].grid_position = 19
         classifications = session.get_classification_list()
-        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'points': None, 'finish_position': None, 'grid_position': None, 'result_status': 5, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}, {'driver': 1, 'driver_index': 1, 'team': 1, 'points': 10, 'finish_position': None, 'grid_position': 19, 'result_status': 4, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}])
+        self.assertEqual(classifications, [{'driver': 255, 'driver_index': 0, 'team': 0, 'result_status': 5, 'points': None, 'finish_position': None, 'grid_position': None, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}, {'driver': 2, 'driver_index': 2, 'team': 1, 'result_status': None, 'points': 8, 'finish_position': None, 'grid_position': 18, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}, {'driver': 1, 'driver_index': 3, 'team': 1, 'result_status': 4, 'points': 10, 'finish_position': None, 'grid_position': 19, 'lap_time_best': None, 'race_time_total': None, 'penalties_time_total': None, 'penalties_number': None}])
 
         
 
