@@ -1,5 +1,13 @@
 # Change Log
 
+
+## 3.1.0 - 2022-07-XX
+
+### Changed
+- Penalties are sent as part of the Session API call, to avoid duplicate Sessions and duplicate Penalties
+- Sentry only runs on currently maintained game versions
+
+
 ## 3.0.4 - 2022-07-19
 
 ### Fixed
