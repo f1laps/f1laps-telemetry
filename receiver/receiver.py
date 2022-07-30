@@ -86,7 +86,9 @@ class RaceReceiver(threading.Thread):
             "key": self.f1laps_api_key,
             "telemetry_enabled": self.telemetry_enabled
         })
+
         # Set sentry to running so that we don't re-enable it each time
+        log.info("Initiated Sentry")
         self.sentry_running = True
 
 
@@ -158,6 +160,8 @@ class RaceReceiver(threading.Thread):
                     if not self.processor or not isinstance(self.processor, F12021Processor):
                         log.info("Detected F1 2021 game version, starting F1 2021 processor.")
                         self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
+                        # Start Sentry (temporarily for F1 2021)
+                        self.start_sentry()
                 elif game_version == "f12022":
                     if not self.processor or not isinstance(self.processor, F12022Processor):
                         log.info("Detected F1 2022 game version, starting F1 2022 processor.")

@@ -174,7 +174,7 @@ class LapBase:
     
     def json_serialize(self):
         """ Convert self to JSON """
-        return {
+        serialized_lap = {
             "lap_number": self.lap_number,
             "sector_1_time_ms": self.sector_1_ms,
             "sector_2_time_ms": self.sector_2_ms,
@@ -182,8 +182,12 @@ class LapBase:
             "pit_status": self.pit_status,
             "car_race_position": self.car_race_position,
             "tyre_compound_visual" : self.tyre_compound_visual,
-            "telemetry_data_string": self.get_telemetry_string()
+            "telemetry_data_string": self.get_telemetry_string(),
+            "penalties": []
         }
+        for penalty in self.penalties:
+            serialized_lap["penalties"].append(penalty.json_serialize())
+        return serialized_lap
 
     def get_telemetry_string(self):
         """ Get telemetry string of this lap for F1Laps sync """
