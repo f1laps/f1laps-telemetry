@@ -236,7 +236,7 @@ class F12022Processor:
         penalty.places_gained = packet_data.get("places_gained")
         penalty.session = self.session
         log.info("Processing %s" % penalty)
-        penalty.send_to_f1laps()
+        penalty.add_to_lap()
     
     def process_car_status_packet(self, packet_data):
         """ Update tyres used for the current lap """

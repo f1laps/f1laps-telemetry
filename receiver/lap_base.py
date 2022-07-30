@@ -1,3 +1,4 @@
+import json
 import logging
 log = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ class LapBase:
     # Settings
     MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
 
-    def __init__(self, lap_number, session_type):
+    def __init__(self, lap_number, session_type, telemetry_enabled):
         # Session info
         self.session_type = session_type
 
@@ -30,8 +31,12 @@ class LapBase:
         self.telemetry = None
         self.telemetry_model = LapTelemetryBase
 
+        # Penalties
+        self.penalties = []
+
         # F1Laps sync
         self.has_been_synced_to_f1l = False
+        self.telemetry_enabled = telemetry_enabled
 
         # Log lap init
         log.info("-----> %s started" % self)
@@ -166,8 +171,20 @@ class LapBase:
         if not last_lap_time or not self.sector_1_ms or not self.sector_2_ms:
             return None
         self.sector_3_ms = last_lap_time - self.sector_1_ms - self.sector_2_ms
+    
+    def json_serialize(self):
+        """ Convert self to JSON """
+        return {
+            "lap_number": self.lap_number,
+            "sector_1_time_ms": self.sector_1_ms,
+            "sector_2_time_ms": self.sector_2_ms,
+            "sector_3_time_ms": self.sector_3_ms,
+            "pit_status": self.pit_status,
+            "car_race_position": self.car_race_position,
+            "tyre_compound_visual" : self.tyre_compound_visual,
+            "telemetry_data_string": self.get_telemetry_string()
+        }
 
-
-
-
-        
+    def get_telemetry_string(self):
+        """ Get telemetry string of this lap for F1Laps sync """
+        return json.dumps(self.telemetry.frame_dict) if self.telemetry and self.telemetry_enabled else None

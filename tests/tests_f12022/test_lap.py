@@ -5,13 +5,13 @@ from receiver.f12022.lap import F12022Lap
 
 class F12022LapTest(TestCase):
     def test_create(self):
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         self.assertEqual(lap.lap_number, 2)
         self.assertFalse(lap.is_in_or_outlap(500, None))
         
     def test_is_in_or_outlap(self):
         # Set session type to one with outlaps (11 = race)
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         lap.sector_1_ms = 1
         lap.sector_2_ms = 2
         lap.sector_3_ms = 3
@@ -30,7 +30,7 @@ class F12022LapTest(TestCase):
     
     def test_is_quali_out_or_inlap(self):
         # Set session type to one with in/outlaps (5 = Q1)
-        lap = F12022Lap(lap_number=2, session_type=5)
+        lap = F12022Lap(lap_number=2, session_type=5, telemetry_enabled=True)
         # No pit status is not an in/outlap
         self.assertFalse(lap.is_in_or_outlap(500, None))
         self.assertFalse(lap.is_quali_out_or_inlap(None))
@@ -42,7 +42,7 @@ class F12022LapTest(TestCase):
         self.assertTrue(lap.is_quali_out_or_inlap(1))
     
     def test_set_pit_status(self):
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         self.assertEqual(lap.set_pit_status(1), 1)
         self.assertEqual(lap.pit_status, 1)
         self.assertEqual(lap.set_pit_status(3), 3)
@@ -52,7 +52,7 @@ class F12022LapTest(TestCase):
     
     def test_new_lap_data_should_be_writte(self):
         # Test time trial first
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         # Set values so that they should be true except for TT
         lap.sector_1_ms = 1
         lap.sector_2_ms = 2
@@ -70,7 +70,7 @@ class F12022LapTest(TestCase):
     
     def test_lap_update(self):
         # Start time trial lap (avoids the in/out lap dependencies)
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         lap.update(
             lap_values = {
                 "sector_1_ms": 100,
@@ -97,7 +97,7 @@ class F12022LapTest(TestCase):
         self.assertEqual(lap.telemetry.frames_popped_list, [])
     
     def test_can_be_synced_to_f1laps(self):
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         # No sync without sector times
         self.assertFalse(lap.can_be_synced_to_f1laps())
         # Ready for sync with sector times

@@ -156,8 +156,8 @@ class F12022SessionTest(TestCase):
         mock_lap.assert_called_once_with()
         mock_flashback.assert_called_once_with(123)
     
-    @patch("receiver.f12022.processor.F12022Penalty.send_to_f1laps")
-    def test_process_flashback_event_packet(self, mock_f1l_sync):
+    @patch("receiver.f12022.processor.F12022Penalty.add_to_lap")
+    def test_process_penalty_event_packet(self, mock_add_to_lap):
         processor = F12022Processor("key_123", True)
         processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         processor.process_event_packet({
@@ -171,7 +171,7 @@ class F12022SessionTest(TestCase):
             "lap_number": 6,
             "places_gained": 7
         })
-        mock_f1l_sync.assert_called_once_with()
+        mock_add_to_lap.assert_called_once_with()
     
     def test_process_car_status_packet(self):
         processor = F12022Processor("key_123", True)

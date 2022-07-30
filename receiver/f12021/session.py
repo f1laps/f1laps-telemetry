@@ -194,7 +194,7 @@ class F12021Session(SessionBase):
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
             if lap_object.get('sector_1_ms') and lap_object.get('sector_2_ms') and lap_object.get('sector_3_ms'):
-                lap_times.append({
+                serialized_lap = {
                         "lap_number"           : lap_number,
                         "sector_1_time_ms"     : lap_object['sector_1_ms'],
                         "sector_2_time_ms"     : lap_object['sector_2_ms'],
@@ -202,8 +202,13 @@ class F12021Session(SessionBase):
                         "car_race_position"    : lap_object.get('car_race_position'),
                         "pit_status"           : lap_object.get('pit_status'),
                         "tyre_compound_visual" : lap_object.get('tyre_compound_visual'),
-                        "telemetry_data_string": self.get_lap_telemetry_data(lap_number)
-                    })
+                        "telemetry_data_string": self.get_lap_telemetry_data(lap_number),
+                        "penalties"            : []
+                    }
+                if lap_object.get("penalties"):
+                    for penalty in lap_object["penalties"]:
+                        serialized_lap["penalties"].append(penalty.json_serialize())
+                lap_times.append(serialized_lap)
         return lap_times
 
     def get_classification_list(self):
