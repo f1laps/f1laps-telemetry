@@ -108,6 +108,17 @@ class F12022LapTest(TestCase):
         # No more sync when synced previously
         lap.has_been_synced_to_f1l = True
         self.assertFalse(lap.can_be_synced_to_f1laps())
+    
+    def test_json_serialize_and_telemetry_enabled(self):
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        lap.sector_1_ms = 1
+        lap.sector_2_ms = 2
+        lap.sector_3_ms = 3
+        lap.telemetry = lap.telemetry_model(lap.lap_number, lap.session_type)
+        lap.telemetry.frame_dict = {1000: [5, 50, None, None, None, None, None, None]}
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
+        lap.telemetry_enabled = False
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'telemetry_data_string': None})
 
         
 
