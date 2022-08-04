@@ -17,14 +17,6 @@ class PenaltyBase:
     # Link to API class, update with current version
     f1laps_api_class = None
 
-    def __init__(self):
-        # Set frame_id to current timpestamp
-        # This is a workaround because we don't have the actual frame ID
-        # We just need some sort of UID to de-dupe Penalties once they hit the server
-        # We remove the first 4 digits to keep the number small enough to fit in int fields
-        timestamp_ms = int(round(time.time() * 1000))
-        self.frame_id = int(str(timestamp_ms)[4:])
-
     def __str__(self):
         return "Penalty (type %s, infringement %s, vehicle %s, lap %s)" % (
             self.penalty_type,

@@ -8,13 +8,6 @@ from receiver.f12022.session import F12022Session
 
 class PenaltyBaseTest(TestCase):
 
-    def test_penalty_frame_id(self):
-        penalty_1 = PenaltyBase()
-        self.assertTrue(penalty_1.frame_id)
-        time.sleep(0.001)
-        penalty_2 = PenaltyBase()
-        self.assertTrue(penalty_2.frame_id > penalty_1.frame_id)
-    
     def test_add_to_lap_f12021(self):
         session = F12021Session(123)
         session.start_new_lap(1)

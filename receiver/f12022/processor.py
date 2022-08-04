@@ -234,6 +234,7 @@ class F12022Processor:
         penalty.time_spent_gained = packet_data.get("time_spent_gained")
         penalty.lap_number = packet_data.get("lap_number")
         penalty.places_gained = packet_data.get("places_gained")
+        penalty.frame_id = packet_data.get("frame_identifier")
         penalty.session = self.session
         log.info("Processing %s" % penalty)
         penalty.add_to_lap()
