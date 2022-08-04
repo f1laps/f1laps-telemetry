@@ -1,9 +1,6 @@
 import ctypes
-import logging
-log = logging.getLogger(__name__)
 
 from receiver.f12021.packets.base import PacketBase, PacketHeader
-from receiver.f12021.penalty import F12021Penalty
 
 
 class FlashbackData(PacketBase):
