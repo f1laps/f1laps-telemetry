@@ -1,5 +1,4 @@
 from unittest import TestCase
-import time
 
 from receiver.penalty_base import PenaltyBase
 from receiver.f12021.session import F12021Session
