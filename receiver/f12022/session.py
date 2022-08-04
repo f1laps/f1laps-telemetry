@@ -21,6 +21,7 @@ class F12022Session(SessionBase):
                  ai_difficulty,
                  weather_id,
                  game_mode,
+                 season_identifier=None,
                  team_id=None,
                 ):
         # Meta
@@ -38,6 +39,7 @@ class F12022Session(SessionBase):
         self.ai_difficulty = ai_difficulty
         self.weather_ids = set([weather_id]) # set() maintains uniqueness
         self.game_mode = self.map_game_mode(game_mode)
+        self.season_identifier = season_identifier
 
         # Laps
         self.lap_list = {}
@@ -251,7 +253,8 @@ class F12022Session(SessionBase):
             setup_data        = self.setup,
             is_online_game    = self.is_online_game,
             ai_difficulty     = self.ai_difficulty or None,
-            classifications   = self.get_classification_list()
+            classifications   = self.get_classification_list(),
+            season_identifier = self.season_identifier
         )
         if success:
             log.info("%s successfully synced to F1Laps" % self)

@@ -88,7 +88,7 @@ class F12022SessionTest(TestCase):
         self.assertEqual(processor.session.team_id, 0)
     
     @patch("receiver.f12022.processor.F12022Session.sync_to_f1laps")
-    def test_process_final_classifictation_packet(self, mock_f1l_sync):
+    def test_process_final_classification_packet(self, mock_f1l_sync):
         processor = F12022Processor("key_123", True)
         processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
         # Add 2 participants
@@ -131,7 +131,7 @@ class F12022SessionTest(TestCase):
                 }
             }
         }
-        processor.process_final_classifictation_packet(classification_data)
+        processor.process_final_classification_packet(classification_data)
         self.assertEqual(processor.session.finish_position, 3)
         self.assertEqual(processor.session.result_status, 6)
         self.assertEqual(processor.session.points, 15)

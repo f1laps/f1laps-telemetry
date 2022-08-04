@@ -87,7 +87,8 @@ class PacketSessionData(PacketBase):
             "ai_difficulty": self.aiDifficulty,
             "weather_id": self.weather,
             "is_spectating": self.isSpectating,
-            "game_mode": self.gameMode
+            "game_mode": self.gameMode,
+            "season_link_identifier": self.seasonLinkIdentifier,
         }
 
 

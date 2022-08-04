@@ -17,7 +17,8 @@ class PacketSessionDataTest(TestCase):
             'session_uid': 123456,
             'track_id': 2,
             'weather_id': 2,
-            'game_mode': 7
+            'game_mode': 7,
+            'season_link_identifier': 1
         })
         
 
