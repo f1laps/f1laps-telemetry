@@ -1,5 +1,4 @@
 from lib.logger import log
-import time
 
 
 class PenaltyBase:
