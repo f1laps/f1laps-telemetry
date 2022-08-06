@@ -127,9 +127,17 @@ class F12022LapTest(TestCase):
         lap.penalties = [penalty]
         self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
 
-
-        
-
+    def test_process_flashback_event_removes_penalties(self):
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        penalty = F12022Penalty()
+        penalty.penalty_type = 1
+        penalty.frame_id = 1001
+        penalty_2 = F12022Penalty()
+        penalty_2.penalty_type = 1
+        penalty_2.frame_id = 1003
+        lap.penalties = [penalty, penalty_2]
+        lap.process_flashback_event(1002)
+        self.assertEqual(lap.penalties, [penalty])
         
 
 

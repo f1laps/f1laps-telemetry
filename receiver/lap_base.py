@@ -161,7 +161,8 @@ class LapBase:
     def process_flashback_event(self, frame_id_flashed_back_to):
         """ Update telemetry frame dict after a flashback """
         # Update telemetry data
-        self.telemetry.process_flashback_event(frame_id_flashed_back_to)
+        if self.telemetry:
+            self.telemetry.process_flashback_event(frame_id_flashed_back_to)
         # Remove any penalties that were flashed back
         # the [:] creates a copy of the list
         for penalty in self.penalties[:]:
