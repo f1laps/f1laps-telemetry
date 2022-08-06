@@ -160,7 +160,13 @@ class LapBase:
     
     def process_flashback_event(self, frame_id_flashed_back_to):
         """ Update telemetry frame dict after a flashback """
+        # Update telemetry data
         self.telemetry.process_flashback_event(frame_id_flashed_back_to)
+        # Remove any penalties that were flashed back
+        # the [:] creates a copy of the list
+        for penalty in self.penalties[:]:
+            if penalty.frame_id > frame_id_flashed_back_to:
+                self.penalties.remove(penalty)
     
     def can_be_synced_to_f1laps(self):
         """ Check if lap has all sectors and has not been synced to F1Laps before"""
