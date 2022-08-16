@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 3.1.0 - 2022-08-XX
+## 3.1.0 - 2022-08-16
 
 ### Changed
 - Penalties are sent as part of the Session API call, to avoid duplicate Sessions and duplicate Penalties
