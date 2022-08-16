@@ -1,4 +1,3 @@
-import json
 import logging
 log = logging.getLogger(__name__)
 
@@ -22,6 +21,7 @@ class F12022Session(SessionBase):
                  ai_difficulty,
                  weather_id,
                  game_mode,
+                 season_identifier=None,
                  team_id=None,
                 ):
         # Meta
@@ -39,6 +39,7 @@ class F12022Session(SessionBase):
         self.ai_difficulty = ai_difficulty
         self.weather_ids = set([weather_id]) # set() maintains uniqueness
         self.game_mode = self.map_game_mode(game_mode)
+        self.season_identifier = season_identifier
 
         # Laps
         self.lap_list = {}
@@ -121,7 +122,7 @@ class F12022Session(SessionBase):
     
     def add_lap(self, lap_number):
         """ Start a new lap by creating the Lap object and adding it to the lap_list """
-        new_lap = F12022Lap(lap_number=lap_number, session_type=self.session_type)
+        new_lap = F12022Lap(lap_number=lap_number, session_type=self.session_type, telemetry_enabled=self.telemetry_enabled)
         self.lap_list[lap_number] = new_lap
         return new_lap
     
@@ -220,7 +221,7 @@ class F12022Session(SessionBase):
             sector_3_time         = lap.sector_3_ms,
             setup_data            = self.setup,
             is_valid              = lap.is_valid,
-            telemetry_data_string = self.get_telemetry_string(lap)
+            telemetry_data_string = lap.get_telemetry_string()
         )
         if success:
             log.info("%s successfully synced to F1Laps" % lap)
@@ -252,7 +253,8 @@ class F12022Session(SessionBase):
             setup_data        = self.setup,
             is_online_game    = self.is_online_game,
             ai_difficulty     = self.ai_difficulty or None,
-            classifications   = self.get_classification_list()
+            classifications   = self.get_classification_list(),
+            season_identifier = self.season_identifier
         )
         if success:
             log.info("%s successfully synced to F1Laps" % self)
@@ -260,24 +262,11 @@ class F12022Session(SessionBase):
             log.info("%s failed sync to F1Laps" % self)
         return success, f1l_session_id
     
-    def get_telemetry_string(self, lap):
-        """ Get telemetry string of a specific lap for F1Laps sync """
-        return json.dumps(lap.telemetry.frame_dict) if self.telemetry_enabled and lap.telemetry else None
-    
     def get_f1laps_lap_times_list(self):
         lap_times = []
         for lap_number, lap_object in self.lap_list.items():
             if lap_object.sector_1_ms and lap_object.sector_2_ms and lap_object.sector_3_ms:
-                lap_times.append({
-                        "lap_number"           : lap_number,
-                        "sector_1_time_ms"     : lap_object.sector_1_ms,
-                        "sector_2_time_ms"     : lap_object.sector_2_ms,
-                        "sector_3_time_ms"     : lap_object.sector_3_ms,
-                        "car_race_position"    : lap_object.car_race_position,
-                        "pit_status"           : lap_object.pit_status,
-                        "tyre_compound_visual" : lap_object.tyre_compound_visual,
-                        "telemetry_data_string": self.get_telemetry_string(lap_object)
-                    })
+                lap_times.append(lap_object.json_serialize())
         return lap_times
 
     def get_classification_list(self):

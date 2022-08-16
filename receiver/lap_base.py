@@ -1,3 +1,4 @@
+import json
 import logging
 log = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ class LapBase:
     # Settings
     MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
 
-    def __init__(self, lap_number, session_type):
+    def __init__(self, lap_number, session_type, telemetry_enabled):
         # Session info
         self.session_type = session_type
 
@@ -30,8 +31,12 @@ class LapBase:
         self.telemetry = None
         self.telemetry_model = LapTelemetryBase
 
+        # Penalties
+        self.penalties = []
+
         # F1Laps sync
         self.has_been_synced_to_f1l = False
+        self.telemetry_enabled = telemetry_enabled
 
         # Log lap init
         log.info("-----> %s started" % self)
@@ -155,7 +160,14 @@ class LapBase:
     
     def process_flashback_event(self, frame_id_flashed_back_to):
         """ Update telemetry frame dict after a flashback """
-        self.telemetry.process_flashback_event(frame_id_flashed_back_to)
+        # Update telemetry data
+        if self.telemetry:
+            self.telemetry.process_flashback_event(frame_id_flashed_back_to)
+        # Remove any penalties that were flashed back
+        # the [:] creates a copy of the list
+        for penalty in self.penalties[:]:
+            if penalty.frame_id > frame_id_flashed_back_to:
+                self.penalties.remove(penalty)
     
     def can_be_synced_to_f1laps(self):
         """ Check if lap has all sectors and has not been synced to F1Laps before"""
@@ -166,8 +178,24 @@ class LapBase:
         if not last_lap_time or not self.sector_1_ms or not self.sector_2_ms:
             return None
         self.sector_3_ms = last_lap_time - self.sector_1_ms - self.sector_2_ms
+    
+    def json_serialize(self):
+        """ Convert self to JSON """
+        serialized_lap = {
+            "lap_number": self.lap_number,
+            "sector_1_time_ms": self.sector_1_ms,
+            "sector_2_time_ms": self.sector_2_ms,
+            "sector_3_time_ms": self.sector_3_ms,
+            "pit_status": self.pit_status,
+            "car_race_position": self.car_race_position,
+            "tyre_compound_visual" : self.tyre_compound_visual,
+            "telemetry_data_string": self.get_telemetry_string(),
+            "penalties": []
+        }
+        for penalty in self.penalties:
+            serialized_lap["penalties"].append(penalty.json_serialize())
+        return serialized_lap
 
-
-
-
-        
+    def get_telemetry_string(self):
+        """ Get telemetry string of this lap for F1Laps sync """
+        return json.dumps(self.telemetry.frame_dict) if self.telemetry and self.telemetry_enabled else None

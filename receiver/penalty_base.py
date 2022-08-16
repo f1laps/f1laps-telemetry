@@ -1,7 +1,9 @@
 from lib.logger import log
 
+
 class PenaltyBase:
     # Fields
+    frame_id = None
     penalty_type = None
     infringement_type = None
     vehicle_index = None
@@ -20,41 +22,35 @@ class PenaltyBase:
             self.infringement_type,
             self.vehicle_index,
             self.lap_number
-            )
-    
-    def send_to_f1laps(self):
+            ) 
+        
+    def add_to_lap(self):
+        """ Add a newly created Penalty to the current lap """
+        # A penalty should always have a session, but just in case...
         if not self.session:
             log.error("No session defined for %s" % self)
             return None
-        if self.session.is_time_trial():
-            log.info("Skipping F1Laps sync because it's Time Trial, for %s" % self)
-            return None
-        if not self.session.is_valid_for_f1laps():
-            log.info("Skipping F1Laps sync because session can't be synced yet, for %s" % self)
-            return None
-        if not self.f1laps_api_class:
-            log.error("No F1Laps API class defined for %s" % self)
-            return None
-        if self.session.has_ended():
-            log.info("Skipping F1Laps sync because session has ended, for %s" % self)
-            return None
-        if not self.session.f1_laps_session_id:
-            success = self.session.send_session_to_f1laps()
-            if not success:
-                log.warning("No session ID defined for %s" % self)
-                return None
-        api = self.f1laps_api_class(self.session.f1laps_api_key, self.session.game_version)
-        success = api.penalty_create(
-            f1_laps_session_id = self.session.f1_laps_session_id,
-            penalty_type = self.penalty_type,
-            infringement_type = self.infringement_type,
-            vehicle_index = self.vehicle_index,
-            other_vehicle_index = self.other_vehicle_index,
-            time_spent_gained = self.time_spent_gained,
-            lap_number = self.lap_number,
-            places_gained = self.places_gained,
-        )
-        log.info("Penalty %s successfully created in F1Laps" % self) if success else log.info("Penalty %s not created in F1Laps" % self)
-        return success
-
+        # For F1 2021, lap_list is still a freestyle dict
+        # For F1 2022+, it's an array of a class
+        if self.session.game_version == "f12021":
+            lap = self.session.lap_list[self.lap_number]
+            # We might not have the penalties array yet, let's create it if not
+            if not lap.get("penalties"):
+                lap["penalties"] = []
+            lap["penalties"].append(self)
+        else:
+            self.session.lap_list[self.lap_number].penalties.append(self)
+    
+    def json_serialize(self):
+        """ Convert object to JSON """
+        return {
+            "frame_id": self.frame_id,
+            "penalty_type": self.penalty_type,
+            "infringement_type": self.infringement_type,
+            "vehicle_index": self.vehicle_index,
+            "other_vehicle_index": self.other_vehicle_index,
+            "time_spent_gained": self.time_spent_gained,
+            "lap_number": self.lap_number,
+            "places_gained": self.places_gained,
+        }
     

@@ -68,14 +68,7 @@ class F1LapsAPIBase:
         response = self.call_api(method, endpoint, params)
         success = self._log_f1laps_response_status(response, descriptor="Lap_create")
         return success
-    
-    def penalty_create(self, **params):
-        """ Create a Penalty in F1Laps """
-        endpoint = "penalties/"
-        method   = "POST"
-        response = self.call_api(method, endpoint, params)
-        success = self._log_f1laps_response_status(response, descriptor="Penalty_create")
-        return success
+        
 
     def session_create(self, track_id, team_id, session_uid, conditions, session_type, 
                        finish_position, points, result_status, lap_times, setup_data,

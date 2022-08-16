@@ -1,6 +1,7 @@
 import ctypes
+import logging
+log = logging.getLogger(__name__)
 
-from lib.logger import log
 from .base import PacketBase, PacketHeader
 from receiver.f12021.penalty import F12021Penalty
 
@@ -74,6 +75,7 @@ class PacketEventData(PacketBase):
         penalty.lap_number = self.eventDetails.penalty.lapNum
         penalty.places_gained = self.eventDetails.penalty.placesGained
         penalty.session = session
+        penalty.frame_id = self.header.frameIdentifier
         log.info("Processing %s" % penalty)
-        penalty.send_to_f1laps()
+        penalty.add_to_lap()
         return penalty

@@ -1,6 +1,6 @@
 import ctypes
 
-from .base import PacketBase, PacketHeader
+from receiver.f12021.packets.base import PacketBase, PacketHeader
 
 
 class FlashbackData(PacketBase):
@@ -61,6 +61,7 @@ class PacketEventData(PacketBase):
             return {
                 "packet_type": "event",
                 "event_type": "penalty",
+                "frame_identifier": self.header.frameIdentifier,
                 "penalty_type": self.eventDetails.penalty.penaltyType,
                 "infringement_type": self.eventDetails.penalty.infringementType,
                 "vehicle_index": self.eventDetails.penalty.vehicleIdx,
@@ -69,30 +70,3 @@ class PacketEventData(PacketBase):
                 "lap_number": self.eventDetails.penalty.lapNum,
                 "places_gained": self.eventDetails.penalty.placesGained
             }
-
-    def process(self, session):
-        if self.eventStringCode == b"FLBK":
-            self.process_flashback(session)
-        elif self.eventStringCode == b"PENA":
-            self.process_pentalty(session)
-        return session
-    
-    def process_flashback(self, session):
-        frame_id = self.eventDetails.flashback.flashbackFrameIdentifier
-        session_time = self.eventDetails.flashback.flashbackSessionTime
-        log.info("Event: Flashback happened to frame %s and session time %s. Deleting frames." % (frame_id, session_time))
-        session.telemetry.process_flashback_event(frame_id)
-    
-    def process_pentalty(self, session):
-        penalty = F12021Penalty()
-        penalty.penalty_type = self.eventDetails.penalty.penaltyType
-        penalty.infringement_type = self.eventDetails.penalty.infringementType
-        penalty.vehicle_index = self.eventDetails.penalty.vehicleIdx
-        penalty.other_vehicle_index = self.eventDetails.penalty.otherVehicleIdx
-        penalty.time_spent_gained = self.eventDetails.penalty.time
-        penalty.lap_number = self.eventDetails.penalty.lapNum
-        penalty.places_gained = self.eventDetails.penalty.placesGained
-        penalty.session = session
-        log.info("Processing %s" % penalty)
-        penalty.send_to_f1laps()
-        return penalty

@@ -1,17 +1,18 @@
 from unittest import TestCase
 
 from receiver.f12022.lap import F12022Lap
+from receiver.f12022.penalty import F12022Penalty
 
 
 class F12022LapTest(TestCase):
     def test_create(self):
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         self.assertEqual(lap.lap_number, 2)
         self.assertFalse(lap.is_in_or_outlap(500, None))
         
     def test_is_in_or_outlap(self):
         # Set session type to one with outlaps (11 = race)
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         lap.sector_1_ms = 1
         lap.sector_2_ms = 2
         lap.sector_3_ms = 3
@@ -30,7 +31,7 @@ class F12022LapTest(TestCase):
     
     def test_is_quali_out_or_inlap(self):
         # Set session type to one with in/outlaps (5 = Q1)
-        lap = F12022Lap(lap_number=2, session_type=5)
+        lap = F12022Lap(lap_number=2, session_type=5, telemetry_enabled=True)
         # No pit status is not an in/outlap
         self.assertFalse(lap.is_in_or_outlap(500, None))
         self.assertFalse(lap.is_quali_out_or_inlap(None))
@@ -42,7 +43,7 @@ class F12022LapTest(TestCase):
         self.assertTrue(lap.is_quali_out_or_inlap(1))
     
     def test_set_pit_status(self):
-        lap = F12022Lap(lap_number=2, session_type=11)
+        lap = F12022Lap(lap_number=2, session_type=11, telemetry_enabled=True)
         self.assertEqual(lap.set_pit_status(1), 1)
         self.assertEqual(lap.pit_status, 1)
         self.assertEqual(lap.set_pit_status(3), 3)
@@ -52,7 +53,7 @@ class F12022LapTest(TestCase):
     
     def test_new_lap_data_should_be_writte(self):
         # Test time trial first
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         # Set values so that they should be true except for TT
         lap.sector_1_ms = 1
         lap.sector_2_ms = 2
@@ -70,7 +71,7 @@ class F12022LapTest(TestCase):
     
     def test_lap_update(self):
         # Start time trial lap (avoids the in/out lap dependencies)
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         lap.update(
             lap_values = {
                 "sector_1_ms": 100,
@@ -97,7 +98,7 @@ class F12022LapTest(TestCase):
         self.assertEqual(lap.telemetry.frames_popped_list, [])
     
     def test_can_be_synced_to_f1laps(self):
-        lap = F12022Lap(lap_number=2, session_type=13)
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
         # No sync without sector times
         self.assertFalse(lap.can_be_synced_to_f1laps())
         # Ready for sync with sector times
@@ -108,9 +109,35 @@ class F12022LapTest(TestCase):
         # No more sync when synced previously
         lap.has_been_synced_to_f1l = True
         self.assertFalse(lap.can_be_synced_to_f1laps())
+    
+    def test_json_serialize_and_telemetry_enabled(self):
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        lap.sector_1_ms = 1
+        lap.sector_2_ms = 2
+        lap.sector_3_ms = 3
+        lap.telemetry = lap.telemetry_model(lap.lap_number, lap.session_type)
+        lap.telemetry.frame_dict = {1000: [5, 50, None, None, None, None, None, None]}
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
+        # Test without telemetry
+        lap.telemetry_enabled = False
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': None})
+        # Test with penalty
+        penalty = F12022Penalty()
+        penalty.penalty_type = 1
+        lap.penalties = [penalty]
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
 
-        
-
+    def test_process_flashback_event_removes_penalties(self):
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        penalty = F12022Penalty()
+        penalty.penalty_type = 1
+        penalty.frame_id = 1001
+        penalty_2 = F12022Penalty()
+        penalty_2.penalty_type = 1
+        penalty_2.frame_id = 1003
+        lap.penalties = [penalty, penalty_2]
+        lap.process_flashback_event(1002)
+        self.assertEqual(lap.penalties, [penalty])
         
 
 

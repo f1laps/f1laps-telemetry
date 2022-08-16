@@ -77,7 +77,7 @@ class F12022SessionTest(TestCase):
         session.lap_list[1].sector_3_ms = 3
         session.sync_to_f1laps(1)
         self.assertEqual(mock_session_sync.call_count, 1)
-        mock_session_sync.assert_called_once_with(f1laps_session_id=None, track_id=1, team_id=1, session_uid='uid_123', conditions='dry', session_type='race', game_mode='time_trial', finish_position=None, points=None, result_status=None, lap_times=[{'lap_number': 1, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'telemetry_data_string': None}], setup_data={}, is_online_game=False, ai_difficulty=90, classifications=[])        
+        mock_session_sync.assert_called_once_with(f1laps_session_id=None, track_id=1, team_id=1, session_uid='uid_123', conditions='dry', session_type='race', game_mode='time_trial', finish_position=None, points=None, result_status=None, lap_times=[{'lap_number': 1, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': None}], setup_data={}, is_online_game=False, ai_difficulty=90, classifications=[], season_identifier=None)        
         self.assertEqual(mock_lap_sync.call_count, 0)
         self.assertFalse(lap.has_been_synced_to_f1l)
         # Second test time trial session (syncs single lap)

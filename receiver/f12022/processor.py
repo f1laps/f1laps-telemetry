@@ -55,7 +55,7 @@ class F12022Processor:
         elif packet_data["packet_type"] == "setup":
             self.process_setup_packet(packet_data)
         elif packet_data["packet_type"] == "final_classification":
-            self.process_final_classifictation_packet(packet_data)
+            self.process_final_classification_packet(packet_data)
         elif packet_data["packet_type"] == "event":
             self.process_event_packet(packet_data)
         elif packet_data["packet_type"] == "car_status":
@@ -90,7 +90,8 @@ class F12022Processor:
                              packet_data["is_online_game"],
                              packet_data["ai_difficulty"],
                              packet_data["weather_id"],
-                             packet_data["game_mode"]
+                             packet_data["game_mode"],
+                             packet_data["season_link_identifier"]
                             )
     
     def process_lap_packet(self, packet_data):
@@ -179,7 +180,7 @@ class F12022Processor:
             "rear_left_tyre_pressure": packet_data.get("rear_left_tyre_pressure"),
         }
     
-    def process_final_classifictation_packet(self, packet_data):
+    def process_final_classification_packet(self, packet_data):
         # Set session final classification data
         self.session.finish_position = packet_data.get("finish_position")
         self.session.result_status   = packet_data.get("result_status")
@@ -234,9 +235,10 @@ class F12022Processor:
         penalty.time_spent_gained = packet_data.get("time_spent_gained")
         penalty.lap_number = packet_data.get("lap_number")
         penalty.places_gained = packet_data.get("places_gained")
+        penalty.frame_id = packet_data.get("frame_identifier")
         penalty.session = self.session
         log.info("Processing %s" % penalty)
-        penalty.send_to_f1laps()
+        penalty.add_to_lap()
     
     def process_car_status_packet(self, packet_data):
         """ Update tyres used for the current lap """

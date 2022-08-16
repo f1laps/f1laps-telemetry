@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
 from receiver.f12021.session import F12021Session
+from receiver.f12021.penalty import F12021Penalty
 
 
 class F12021SessionTest(TestCase):
@@ -91,6 +92,26 @@ class F12021SessionTest(TestCase):
         self.assertEqual(session.has_final_classification(), False)
         session.participants[0].result_status = 5
         self.assertEqual(session.has_final_classification(), True)
+    
+    def test_get_f1laps_lap_times_list(self):
+        session = F12021Session(123)
+        session.telemetry_enabled = False
+        # Empty array without laps
+        self.assertEqual(session.get_f1laps_lap_times_list(), [])
+        # Add lap
+        session.lap_list = {1: {'lap_number': 1, 'sector_1_ms': 11111, 'sector_2_ms': 22222, 'sector_3_ms': 33333}}
+        self.assertEqual(session.get_f1laps_lap_times_list(), [{'lap_number': 1, 'sector_1_time_ms': 11111, 'sector_2_time_ms': 22222, 'sector_3_time_ms': 33333, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'telemetry_data_string': None, 'penalties': []}])
+        # With penalty
+        penalty = F12021Penalty()
+        penalty.penalty_type = 1
+        session.lap_list[1]['penalties'] = [penalty,]
+        self.assertEqual(session.get_f1laps_lap_times_list(), [{'lap_number': 1, 'sector_1_time_ms': 11111, 'sector_2_time_ms': 22222, 'sector_3_time_ms': 33333, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'telemetry_data_string': None, 'penalties': [{'frame_id': penalty.frame_id, 'penalty_type': 1, 'infringement_type': None, 'vehicle_index': None, 'other_vehicle_index': None, 'time_spent_gained': None, 'lap_number': None, 'places_gained': None}]}])
+        # With telemetry
+        session.telemetry_enabled = True
+        telemetry = MagicMock()
+        telemetry.get_telemetry_api_dict.return_value = "justasamplestring"
+        session.telemetry = telemetry
+        self.assertEqual(session.get_f1laps_lap_times_list(), [{'lap_number': 1, 'sector_1_time_ms': 11111, 'sector_2_time_ms': 22222, 'sector_3_time_ms': 33333, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'telemetry_data_string': '"justasamplestring"', 'penalties': [{'frame_id': penalty.frame_id, 'penalty_type': 1, 'infringement_type': None, 'vehicle_index': None, 'other_vehicle_index': None, 'time_spent_gained': None, 'lap_number': None, 'places_gained': None}]}])   
 
     def test_get_classification_list(self):
         """ 

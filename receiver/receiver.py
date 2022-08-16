@@ -59,13 +59,20 @@ class RaceReceiver(threading.Thread):
         # game data processor
         self.processor = None
 
-        # Start sentry
-        self.start_sentry()
+        # Sentry manager
+        # We only run Sentry on select game versions, 
+        # because old ones are not actively maintained
+        # This flag allows us to be selective
+        self.sentry_running = False
  
         log.info("Telemetry receiver started & ready for race data")
 
 
     def start_sentry(self):
+        # Don't re-init if it's already running
+        if self.sentry_running:
+            return
+        # Actually enable Sentry
         sentry_sdk.init(
             SENTRY_DSN,
             traces_sample_rate=0,
@@ -79,6 +86,10 @@ class RaceReceiver(threading.Thread):
             "key": self.f1laps_api_key,
             "telemetry_enabled": self.telemetry_enabled
         })
+
+        # Set sentry to running so that we don't re-enable it each time
+        log.info("Initiated Sentry")
+        self.sentry_running = True
 
 
     def get_socket(self):
@@ -95,6 +106,7 @@ class RaceReceiver(threading.Thread):
             new_socket.bind((self.host_ip, self.host_port))
         log.debug("Socket opened and bound")
         return new_socket
+
 
     def get_socket_reuse_option(self):
         # The SO_REUSEPORT setting allows us to reuse sockets
@@ -148,10 +160,14 @@ class RaceReceiver(threading.Thread):
                     if not self.processor or not isinstance(self.processor, F12021Processor):
                         log.info("Detected F1 2021 game version, starting F1 2021 processor.")
                         self.processor = F12021Processor(self.f1laps_api_key, self.telemetry_enabled)
+                        # Start Sentry (temporarily for F1 2021)
+                        self.start_sentry()
                 elif game_version == "f12022":
                     if not self.processor or not isinstance(self.processor, F12022Processor):
                         log.info("Detected F1 2022 game version, starting F1 2022 processor.")
                         self.processor = F12022Processor(self.f1laps_api_key, self.telemetry_enabled)
+                        # Start Sentry (only for F1 22)
+                        self.start_sentry()
                 else:
                     log.info("Unknown packet or game version.")
                 if self.processor:
