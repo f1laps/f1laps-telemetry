@@ -75,12 +75,16 @@ class LapBase:
         else:
             # Init telemetry if we don't have it yet
             if not self.telemetry:
-                self.telemetry = self.telemetry_model(self.lap_number, self.session_type)
+                self.init_telemetry()
             # Update this lap object
             for key, value in lap_values.items():
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
+        
+    def init_telemetry(self):
+        """ Init telemetry object """
+        self.telemetry = self.telemetry_model(self.lap_number, self.session_type)
     
     def reset_lap_telemetry(self):
         """ 

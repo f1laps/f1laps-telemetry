@@ -60,6 +60,8 @@ class F12022Processor:
             self.process_event_packet(packet_data)
         elif packet_data["packet_type"] == "car_status":
             self.process_car_status_packet(packet_data)
+        elif packet_data["packet_type"] == "motion":
+            self.process_motion_packet(packet_data)
         return True
     
     def process_session_packet(self, packet_data):
@@ -245,3 +247,44 @@ class F12022Processor:
         current_lap = self.session.get_current_lap()
         if current_lap:
             current_lap.tyre_compound_visual = packet_data.get("tyre_compound_visual")
+    
+    def process_motion_packet(self, packet_data):
+        """ Logs motion data for the creation of the minimap svg """
+        # Settings
+        MOTION_LOG_ENABLED = False
+        if not MOTION_LOG_ENABLED:
+            return False
+        MINIMAP_ROUNDING = 0 # decimal points of the logged coordinates
+        MINIMAP_SPACING = 1 # min distance between 2 logged coordinates in m
+
+        # using x and z; y is height which we don't need for the 2D svg
+        xpos = packet_data.get("xpos")
+        zpos = packet_data.get("zpos")
+        current_lap_distance = None
+        last_logged_distance = self.session.last_logged_distance
+
+        # Get current lap distance from session>lap>telemetry
+        current_lap = self.session.get_current_lap()
+        if current_lap:
+            if current_lap.telemetry:
+                current_lap_distance = current_lap.telemetry.last_lap_distance
+
+        # If we don't have all values, don't log
+        if not xpos or not zpos or not current_lap_distance:
+            return False
+
+        # If the spacing is too small, don't log
+        # Only check if we have last_logged_distance - otherwise if will never start
+        if last_logged_distance:
+            spacing = current_lap_distance - last_logged_distance
+            if spacing >= 0 and spacing < MINIMAP_SPACING:
+                return False
+        
+        # Log and update last_logged_distance
+        log.info("WPMAP: %s,%s,%s" % (
+            round(current_lap_distance, MINIMAP_ROUNDING), 
+            round(xpos, MINIMAP_ROUNDING), 
+            round(zpos, MINIMAP_ROUNDING)
+        ))
+        self.session.last_logged_distance = current_lap_distance
+        return True

@@ -56,6 +56,9 @@ class F12022Session(SessionBase):
         # Data we get from F1Laps
         self.f1_laps_session_id = None
 
+        # Overhead variables
+        self.last_logged_distance = None # for minimap logging (motion packet)
+
         # Log session init
         log.info("*************************************************")
         log.info("New session started: %s" % self)
