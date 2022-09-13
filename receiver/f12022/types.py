@@ -59,6 +59,7 @@ Track = {
     27: "Imola",
     28: "Portimão",
     29: "Jeddah",
+    30: "Miami",
 }
 
 
