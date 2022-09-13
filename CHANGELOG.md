@@ -1,6 +1,15 @@
 # Change Log
 
 
+## 3.1.1 - 2022-XX-XX
+
+### Fixed
+- Adding penalties to laps that don't exist yet doesn't raise exceptions anymore
+
+### Added
+- Admin-only logging mode to get minimap data
+
+
 ## 3.1.0 - 2022-08-16
 
 ### Changed
