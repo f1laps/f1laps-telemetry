@@ -1,12 +1,12 @@
 GUI_STYLES = """
 
-QLabel#apiKeyFieldLabel, QLabel#ipValueLabel, QLabel#statusHeadingLabel, QLabel#udpRedirectValueLabel {
+QLabel#apiKeyFieldLabel, QLabel#hostValueField, QLabel#ipValueLabel, QLabel#statusHeadingLabel, QLabel#udpRedirectValueLabel {
     font-size: 14px;
     font-weight: bold;
     color: #111827;
 }
 
-QLabel#ipValueField, QLabel#redirectIPValueField, QLabel#redirectPortValueField {
+QLabel#ipValueField, QLabel#ipValueField, QLabel#redirectIPValueField, QLabel#redirectPortValueField {
     font-size: 14px;
     color: #111827;
 }

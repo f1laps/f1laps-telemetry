@@ -72,11 +72,11 @@ class TelemetrySession:
         self.session = None
         self.is_active = False
 
-    def start(self, api_key, enable_telemetry, use_udp_broadcast, port_value, redirect_host, redirect_port,
+    def start(self, api_key, enable_telemetry, use_udp_broadcast, ip_value, port_value, redirect_host, redirect_port,
               use_udp_redirect):
         receiver_thread = RaceReceiver(api_key, enable_telemetry=enable_telemetry, use_udp_broadcast=use_udp_broadcast,
-                                       host_port=port_value, redirect_host=redirect_host, redirect_port=redirect_port,
-                                       use_udp_redirect=use_udp_redirect)
+                                       host_ip=ip_value, host_port=port_value, redirect_host=redirect_host,
+                                       redirect_port=redirect_port, use_udp_redirect=use_udp_redirect)
         receiver_thread.start()
         self.session = receiver_thread
         self.is_active = True
@@ -100,6 +100,7 @@ class MainWindow(QWidget):
         self.api_key = self.user_config.get("API_KEY") or None
         self.broadcast_mode_enabled = self.user_config.get("UDP_BROADCAST_ENABLED") or False
         self.app_version = config.VERSION
+        self.ip_value = self.user_config.get("IP_VALUE") or str(get_local_ip())
         self.port_value = self.user_config.get("PORT_VALUE") or str(DEFAULT_PORT)
 
         # Redirection config info
@@ -109,15 +110,17 @@ class MainWindow(QWidget):
 
         # Draw the window UI
         self.init_ui()
-        # Show the IP to the user
-        self.set_ip()
         # Check if there's a new version
         self.check_version()
         # Track if we have an active receiver
         self.session = TelemetrySession()
+        # Disable IP field if broadcast is checked
+        self.udp_broadcast_checked()
         # Auto-start app if api key is set
         if self.api_key:
             self.start_button_click()
+
+
 
     def init_ui(self):
         # 1) Logo & heading
@@ -146,8 +149,10 @@ class MainWindow(QWidget):
             text="Open the F1 Game Settings -> Telemetry and set the IP to this value:",
             object_name="ipValueHelpTextLabel"
         )
-        self.ip_value = F1QLabel(object_name="ipValueField")
-        self.ip_value.setContentsMargins(0, 0, 0, 5)
+        self.ip_value_field = QLineEdit()
+        self.ip_value_field.setObjectName("hostValueField")
+        self.ip_value_field.setText(self.ip_value)
+
         self.port_value_help_text_label = F1QLabel(
             text="Set the port to this value (anything from 1024 to 49151, default is %s): " % DEFAULT_PORT,
             object_name="udpBroadcastHelpTextLabel"
@@ -162,6 +167,7 @@ class MainWindow(QWidget):
         )
         self.udp_broadcast_checkbox = QCheckBox("Use UDP broadcast mode")
         self.udp_broadcast_checkbox.setChecked(self.broadcast_mode_enabled)
+        self.udp_broadcast_checkbox.stateChanged.connect(lambda: self.udp_broadcast_checked())
 
         # UDP Redirection section
         udp_redirect_label = F1QLabel(
@@ -231,7 +237,7 @@ class MainWindow(QWidget):
         self.layout.addWidget(QVSpacer(0.5))
         self.layout.addWidget(ip_value_label)
         self.layout.addWidget(ip_value_help_text_label)
-        self.layout.addWidget(self.ip_value)
+        self.layout.addWidget(self.ip_value_field)
         self.layout.addWidget(self.port_value_help_text_label)
         self.layout.addWidget(self.port_value_field)
         self.layout.addWidget(udp_broadcast_help_text_label)
@@ -269,9 +275,6 @@ class MainWindow(QWidget):
         self.setFixedWidth(420)
         self.setWindowTitle("F1Laps Telemetry")
 
-    def set_ip(self):
-        self.ip_value.setText(get_local_ip())
-
     def check_version(self):
         try:
             response = requests.get(F1LAPS_VERSION_ENDPOINT)
@@ -289,11 +292,22 @@ class MainWindow(QWidget):
         except Exception as ex:
             log.warning("Couldn't get most recent version from F1Laps due to: %s" % ex)
 
+    def udp_broadcast_checked(self):
+        if self.udp_broadcast_checkbox.isChecked():
+            self.ip_value_field.setDisabled(True)
+            self.ip_value_field.setReadOnly(True)
+        else:
+            self.ip_value_field.setDisabled(False)
+            self.ip_value_field.setReadOnly(False)
+
     def start_button_click(self):
         if not self.session.is_active:
             log.info("Starting new session")
             self.start_telemetry()
+            self.api_key_field.setReadOnly(True)
             self.api_key_field.setDisabled(True)
+            self.ip_value_field.setReadOnly(True)
+            self.ip_value_field.setDisabled(True)
             self.port_value_field.setReadOnly(True)
             self.port_value_field.setDisabled(True)
             self.udp_broadcast_checkbox.setDisabled(True)
@@ -306,7 +320,10 @@ class MainWindow(QWidget):
             log.info("Stopping session...")
             self.stop_telemetry()
             self.start_button.reset()
+            self.api_key_field.setReadOnly(False)
             self.api_key_field.setDisabled(False)
+            self.ip_value_field.setReadOnly(False)
+            self.ip_value_field.setDisabled(False)
             self.port_value_field.setReadOnly(False)
             self.port_value_field.setDisabled(False)
             self.udp_broadcast_checkbox.setDisabled(False)
@@ -366,6 +383,7 @@ class MainWindow(QWidget):
             # Actually start receiver thread
             self.session.start(self.api_key, enable_telemetry=telemetry_enabled,
                                use_udp_broadcast=self.broadcast_mode_enabled,
+                               ip_value=self.get_ip_value(),
                                port_value=self.get_port_value(),
                                redirect_host=self.get_redirect_host_value(),
                                redirect_port=self.get_redirect_port_value(),
@@ -381,6 +399,19 @@ class MainWindow(QWidget):
             self.port_value_field.setReadOnly(False)
             self.udp_broadcast_checkbox.setDisabled(False)
             self.status_label.set_invalid_api_key()
+
+    def get_ip_value(self):
+        self.ip_value = self.ip_value_field.text()
+        # Make sure IP is valid, otherwise revert to default
+        try:
+            socket.inet_aton(self.ip_value)
+            # Save user value in config
+            self.user_config.set("IP_VALUE", self.ip_value)
+        except socket.error:
+            self.ip_value = get_local_ip()
+            # Update in UI if we reverted it
+            self.ip_value_field.setText(self.ip_value)
+        return str(self.ip_value)
 
     def get_port_value(self):
         self.port_value = self.port_value_field.text()
