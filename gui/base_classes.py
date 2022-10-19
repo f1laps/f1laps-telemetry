@@ -27,4 +27,4 @@ class QVSpacer(QLabel):
     def __init__(self, height):
         super().__init__()
         self.setText(" ")
-        self.setFixedHeight(height)
+        self.setFixedHeight(round(height))
