@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from receiver.f12022.processor import F12022Processor
 from receiver.f12022.session import F12022Session
+from receiver.f12022.types import map_game_mode_to_f1laps
 
 
 class F12022SessionTest(TestCase):
@@ -182,6 +183,11 @@ class F12022SessionTest(TestCase):
             "tyre_compound_visual": "soft"
         })
         self.assertEqual(processor.session.lap_list[1].tyre_compound_visual, "soft")
+    
+    def test_map_game_mode_to_f1laps(self):
+        self.assertEqual(map_game_mode_to_f1laps(3), "solo_grand_prix")
+        self.assertEqual(map_game_mode_to_f1laps(100), "other")
+        self.assertEqual(map_game_mode_to_f1laps(9999), "other")
     
     def test_process_motion_packet(self):
         return True # disabled because motion logging is normally disabled
