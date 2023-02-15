@@ -91,11 +91,11 @@ class PacketSessionData(PacketBase):
             "season_link_identifier": self.seasonLinkIdentifier,
             "track_temperature": self.trackTemperature,
             "air_temperature": self.airTemperature,
-            "rain_percentage": None,
+            "rain_percentage_forecast": None,
         }
         # Add rain percentage from last weather forecast sample, if any exist
         if self.numWeatherForecastSamples > 0:
-            serialized_packet["rain_percentage"] = self.weatherForecastSamples[
+            serialized_packet["rain_percentage_forecast"] = self.weatherForecastSamples[
                 self.numWeatherForecastSamples - 1
             ].rainPercentage
         return serialized_packet

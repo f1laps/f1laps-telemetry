@@ -31,12 +31,12 @@ class F12022SessionTest(TestCase):
         lap = session.add_lap(1)
         self.assertEqual(lap.weather_id, None)
         self.assertEqual(lap.air_temperature, None)
-        self.assertEqual(lap.rain_percentage, None)
+        self.assertEqual(lap.rain_percentage_forecast, None)
         session.update_weather(1, 10, 20, 0.0)
         self.assertEqual(session.weather_ids, {1, 2})
         self.assertEqual(lap.weather_id, 1)
         self.assertEqual(lap.air_temperature, 20)
-        self.assertEqual(lap.rain_percentage, 0.0)
+        self.assertEqual(lap.rain_percentage_forecast, 0.0)
     
     def test_get_lap(self):
         session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
@@ -85,7 +85,7 @@ class F12022SessionTest(TestCase):
         session.lap_list[1].sector_3_ms = 3
         session.sync_to_f1laps(1)
         self.assertEqual(mock_session_sync.call_count, 1)
-        mock_session_sync.assert_called_once_with(f1laps_session_id=None, track_id=1, team_id=1, session_uid='uid_123', conditions='dry', session_type='race', game_mode='time_trial', finish_position=None, points=None, result_status=None, lap_times=[{'lap_number': 1, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': None, 'air_temperature': None, 'track_temperature': None, 'rain_percentage': None, 'weather_id': None}], setup_data={}, is_online_game=False, ai_difficulty=90, classifications=[], season_identifier=None)        
+        mock_session_sync.assert_called_once_with(f1laps_session_id=None, track_id=1, team_id=1, session_uid='uid_123', conditions='dry', session_type='race', game_mode='time_trial', finish_position=None, points=None, result_status=None, lap_times=[{'lap_number': 1, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'car_race_position': None, 'pit_status': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': None, 'air_temperature': None, 'track_temperature': None, 'rain_percentage_forecast': None, 'weather_id': None}], setup_data={}, is_online_game=False, ai_difficulty=90, classifications=[], season_identifier=None)        
         self.assertEqual(mock_lap_sync.call_count, 0)
         self.assertFalse(lap.has_been_synced_to_f1l)
         # Second test time trial session (syncs single lap)
@@ -94,7 +94,7 @@ class F12022SessionTest(TestCase):
         self.assertEqual(mock_session_sync.call_count, 1)
         self.assertEqual(mock_lap_sync.call_count, 1)
         self.assertTrue(lap.has_been_synced_to_f1l)
-        mock_lap_sync.assert_called_once_with(track_id=1, team_id=1, conditions='dry', game_mode='time_trial', sector_1_time=1, sector_2_time=2, sector_3_time=3, setup_data={}, is_valid=True, telemetry_data_string=None, air_temperature= None, track_temperature= None, rain_percentage= None, weather_id= None)        
+        mock_lap_sync.assert_called_once_with(track_id=1, team_id=1, conditions='dry', game_mode='time_trial', sector_1_time=1, sector_2_time=2, sector_3_time=3, setup_data={}, is_valid=True, telemetry_data_string=None, air_temperature= None, track_temperature= None, rain_percentage_forecast= None, weather_id= None)        
         # Third test sync_entire_session flag
         # Needs race session type
         session.session_type = 10

@@ -14,7 +14,7 @@ class PacketSessionDataTest(TestCase):
             'is_online_game': False,
             'is_spectating': 0,
             'packet_type': 'session',
-            'rain_percentage': None,
+            'rain_percentage_forecast': None,
             'session_type': 10,
             'session_uid': 123456,
             'track_id': 2,

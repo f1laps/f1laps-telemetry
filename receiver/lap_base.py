@@ -30,7 +30,7 @@ class LapBase:
         # Lap conditions
         self.air_temperature = None
         self.track_temperature = None
-        self.rain_percentage = None
+        self.rain_percentage_forecast = None
         self.weather_id = None
 
         # Telemetry
@@ -203,7 +203,7 @@ class LapBase:
             "penalties": [],
             "air_temperature": None,
             "track_temperature": None,
-            "rain_percentage": None,
+            "rain_percentage_forecast": None,
             "weather_id": None
         }
         for penalty in self.penalties:

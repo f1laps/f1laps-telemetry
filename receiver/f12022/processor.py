@@ -80,7 +80,7 @@ class F12022Processor:
                 packet_data["weather_id"],
                 packet_data["track_temperature"],
                 packet_data["air_temperature"],
-                packet_data["rain_percentage"],
+                packet_data["rain_percentage_forecast"],
             )
             # Add session type if it's not set
             # This should never happen but we have seen sessions without session type

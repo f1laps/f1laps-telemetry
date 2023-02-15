@@ -74,7 +74,7 @@ class F12022Session(SessionBase):
         """ Called by PenaltyBase """
         return not self.is_multi_lap_session()
 
-    def update_weather(self, weather_id, track_temperature, air_temperature, rain_percentage):
+    def update_weather(self, weather_id, track_temperature, air_temperature, rain_percentage_forecast):
         """ Given a new weather_id from the session packet, update the session's weather set """
         self.weather_ids.add(weather_id)
         # Update values in current lap
@@ -82,7 +82,7 @@ class F12022Session(SessionBase):
         if current_lap:
             current_lap.track_temperature = track_temperature
             current_lap.air_temperature = air_temperature
-            current_lap.rain_percentage = rain_percentage
+            current_lap.rain_percentage_forecast = rain_percentage_forecast
             current_lap.weather_id = weather_id
 
     
@@ -235,7 +235,7 @@ class F12022Session(SessionBase):
             telemetry_data_string = lap.get_telemetry_string(),
             air_temperature       = None,
             track_temperature     = None,
-            rain_percentage       = None,
+            rain_percentage_forecast = None,
             weather_id            = None
         )
         if success:
