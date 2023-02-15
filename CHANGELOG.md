@@ -1,13 +1,18 @@
 # Change Log
 
 
-## 3.1.1 - 2022-XX-XX
-
-### Fixed
-- Adding penalties to laps that don't exist yet doesn't raise exceptions anymore
+## 3.2.0 - 2023-XX-XX
 
 ### Added
 - Admin-only logging mode to get minimap data
+- TODO: Collect rain % forecast data
+- TODO: Collect track and air temp data
+- TODO: Collect detailed conditions value
+- TODO: Collect tyre wear data per sector
+
+### Fixed
+- Adding penalties to laps that don't exist yet doesn't raise exceptions anymore
+- Unknown game_modes don't raise exceptions anymore but are mapped to "Other"
 
 
 ## 3.1.0 - 2022-08-16

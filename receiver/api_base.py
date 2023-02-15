@@ -49,7 +49,7 @@ class F1LapsAPIBase:
 
     def lap_create(self, track_id, team_id, conditions, game_mode, 
                    sector_1_time, sector_2_time, sector_3_time, setup_data, 
-                   is_valid, telemetry_data_string):
+                   is_valid, telemetry_data_string, **extra_params):
         """ Create a Lap in F1Laps """
         endpoint = "laps/"
         method   = "POST"
@@ -64,6 +64,7 @@ class F1LapsAPIBase:
             'setup': setup_data,
             'is_valid': is_valid,
             'telemetry_data_string': telemetry_data_string
+            **extra_params
         }
         response = self.call_api(method, endpoint, params)
         success = self._log_f1laps_response_status(response, descriptor="Lap_create")

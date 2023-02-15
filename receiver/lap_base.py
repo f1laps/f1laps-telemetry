@@ -27,6 +27,12 @@ class LapBase:
         self.is_valid = True
         self.tyre_compound_visual = None
 
+        # Lap conditions
+        self.air_temperature = None
+        self.track_temperature = None
+        self.rain_percentage = None
+        self.weather_id = None
+
         # Telemetry
         self.telemetry = None
         self.telemetry_model = LapTelemetryBase
@@ -194,7 +200,11 @@ class LapBase:
             "car_race_position": self.car_race_position,
             "tyre_compound_visual" : self.tyre_compound_visual,
             "telemetry_data_string": self.get_telemetry_string(),
-            "penalties": []
+            "penalties": [],
+            "air_temperature": None,
+            "track_temperature": None,
+            "rain_percentage": None,
+            "weather_id": None
         }
         for penalty in self.penalties:
             serialized_lap["penalties"].append(penalty.json_serialize())

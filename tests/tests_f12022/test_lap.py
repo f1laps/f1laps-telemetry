@@ -117,15 +117,15 @@ class F12022LapTest(TestCase):
         lap.sector_3_ms = 3
         lap.telemetry = lap.telemetry_model(lap.lap_number, lap.session_type)
         lap.telemetry.frame_dict = {1000: [5, 50, None, None, None, None, None, None]}
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage': None, 'track_temperature': None, 'weather_id': None, 'penalties': [], 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
         # Test without telemetry
         lap.telemetry_enabled = False
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [], 'telemetry_data_string': None})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage': None, 'track_temperature': None, 'weather_id': None, 'penalties': [], 'telemetry_data_string': None})
         # Test with penalty
         penalty = F12022Penalty()
         penalty.penalty_type = 1
         lap.penalties = [penalty]
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage': None, 'track_temperature': None, 'weather_id': None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
 
     def test_process_flashback_event_removes_penalties(self):
         lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)

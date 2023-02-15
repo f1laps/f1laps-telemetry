@@ -76,7 +76,12 @@ class F12022Processor:
             self.session = self.create_session(packet_data)
         else:
             # Update session weather 
-            self.session.update_weather(packet_data["weather_id"])
+            self.session.update_weather(
+                packet_data["weather_id"],
+                packet_data["track_temperature"],
+                packet_data["air_temperature"],
+                packet_data["rain_percentage"],
+            )
             # Add session type if it's not set
             # This should never happen but we have seen sessions without session type
             # So let's just make sure

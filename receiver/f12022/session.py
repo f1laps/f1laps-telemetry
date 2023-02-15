@@ -74,9 +74,17 @@ class F12022Session(SessionBase):
         """ Called by PenaltyBase """
         return not self.is_multi_lap_session()
 
-    def update_weather(self, weather_id):
+    def update_weather(self, weather_id, track_temperature, air_temperature, rain_percentage):
         """ Given a new weather_id from the session packet, update the session's weather set """
         self.weather_ids.add(weather_id)
+        # Update values in current lap
+        current_lap = self.get_current_lap()
+        if current_lap:
+            current_lap.track_temperature = track_temperature
+            current_lap.air_temperature = air_temperature
+            current_lap.rain_percentage = rain_percentage
+            current_lap.weather_id = weather_id
+
     
     def map_game_mode(self, game_mode):
         """ Map the UDP game_mode value to the F1Laps value """
@@ -224,7 +232,11 @@ class F12022Session(SessionBase):
             sector_3_time         = lap.sector_3_ms,
             setup_data            = self.setup,
             is_valid              = lap.is_valid,
-            telemetry_data_string = lap.get_telemetry_string()
+            telemetry_data_string = lap.get_telemetry_string(),
+            air_temperature       = None,
+            track_temperature     = None,
+            rain_percentage       = None,
+            weather_id            = None
         )
         if success:
             log.info("%s successfully synced to F1Laps" % lap)
