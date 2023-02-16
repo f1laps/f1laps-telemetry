@@ -5,10 +5,10 @@
 
 ### Added
 - Admin-only logging mode to get minimap data
-- TODO: Collect rain % forecast data
-- TODO: Collect track and air temp data
-- TODO: Collect detailed conditions value
-- TODO: Collect tyre wear data per sector
+- Collect rain % forecast data
+- Collect track and air temp data
+- Collect detailed conditions value
+- Collect tyre wear data per sector
 
 ### Fixed
 - Adding penalties to laps that don't exist yet doesn't raise exceptions anymore

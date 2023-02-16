@@ -138,6 +138,32 @@ class F12022LapTest(TestCase):
         lap.penalties = [penalty, penalty_2]
         lap.process_flashback_event(1002)
         self.assertEqual(lap.penalties, [penalty])
+    
+    def test_store_tyre_wear(self):
+        lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        # No sector times
+        lap.store_tyre_wear(1, 2, 3, 4)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
+        self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
+        self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
+        # Start S1
+        lap.sector_1_ms = 100
+        lap.store_tyre_wear(1, 2, 3, 4)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
+        self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
+        self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
+        # Start S2
+        lap.sector_2_ms = 100
+        lap.store_tyre_wear(2, 4, 6, 8)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
+        self.assertEqual(lap.sector_2_tyre_wear_front_right, 4)
+        self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
+        # Start S3
+        lap.sector_3_ms = 100
+        lap.store_tyre_wear(4, 8, 12, 16)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
+        self.assertEqual(lap.sector_2_tyre_wear_front_right, 4)
+        self.assertEqual(lap.sector_3_tyre_wear_front_right, 8)
         
 
 

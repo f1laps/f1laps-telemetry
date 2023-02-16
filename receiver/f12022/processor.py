@@ -60,6 +60,8 @@ class F12022Processor:
             self.process_event_packet(packet_data)
         elif packet_data["packet_type"] == "car_status":
             self.process_car_status_packet(packet_data)
+        elif packet_data["packet_type"] == "car_damage":
+            self.process_car_damage_packet(packet_data)
         elif packet_data["packet_type"] == "motion":
             self.process_motion_packet(packet_data)
         return True

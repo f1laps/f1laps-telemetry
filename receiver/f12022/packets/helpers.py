@@ -9,6 +9,7 @@ from receiver.f12022.packets.participants import PacketParticipantsData
 from receiver.f12022.packets.setup import PacketCarSetupData
 from receiver.f12022.packets.telemetry import PacketCarTelemetryData
 from receiver.f12022.packets.car_status import PacketCarStatusData
+from receiver.f12022.packets.car_damage import PacketCarDamageData
 from receiver.f12022.packets.final_classification import PacketFinalClassificationData
 from receiver.f12022.packets.motion import PacketMotionData
 
@@ -26,6 +27,7 @@ HeaderFieldsToPacketType = {
     6: PacketCarTelemetryData,
     7: PacketCarStatusData,
     8: PacketFinalClassificationData,
+    10: PacketCarDamageData
 }
 
 
