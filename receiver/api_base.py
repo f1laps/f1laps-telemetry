@@ -63,7 +63,7 @@ class F1LapsAPIBase:
             'sector_3_time_ms': sector_3_time,
             'setup': setup_data,
             'is_valid': is_valid,
-            'telemetry_data_string': telemetry_data_string
+            'telemetry_data_string': telemetry_data_string,
             **extra_params
         }
         response = self.call_api(method, endpoint, params)

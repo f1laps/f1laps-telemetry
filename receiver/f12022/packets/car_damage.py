@@ -48,8 +48,8 @@ class PacketCarDamageData(PacketBase):
             return None
         return {
             "packet_type": "car_damage",
-            "tyre_wear_front_left": car_damage.tyresWear[0],
-            "tyre_wear_front_right": car_damage.tyresWear[1],
-            "tyre_wear_rear_left": car_damage.tyresWear[2],
-            "tyre_wear_rear_right": car_damage.tyresWear[3]
+            "tyre_wear_front_left": car_damage.tyresWear[2],
+            "tyre_wear_front_right": car_damage.tyresWear[3],
+            "tyre_wear_rear_left": car_damage.tyresWear[0],
+            "tyre_wear_rear_right": car_damage.tyresWear[1]
         }

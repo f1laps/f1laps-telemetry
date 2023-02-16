@@ -6,7 +6,7 @@ F1Laps API Key
 - Keep the quotes around it!
 #################################################################"""
 
-F1LAPS_API_KEY = "YOUR_API_KEY"
+F1LAPS_API_KEY = "29751b5d1d883c0d8b37e1a77f6a0204c0f11d4a"
 
 
 

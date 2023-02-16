@@ -215,10 +215,22 @@ class LapBase:
             "tyre_compound_visual" : self.tyre_compound_visual,
             "telemetry_data_string": self.get_telemetry_string(),
             "penalties": [],
-            "air_temperature": None,
-            "track_temperature": None,
-            "rain_percentage_forecast": None,
-            "weather_id": None
+            "air_temperature": self.air_temperature,
+            "track_temperature": self.track_temperature,
+            "weather_id": self.weather_id,
+            "rain_percentage_forecast": self.rain_percentage_forecast,
+            "sector_1_tyre_wear_front_left": self.sector_1_tyre_wear_front_left,
+            "sector_1_tyre_wear_front_right": self.sector_1_tyre_wear_front_right,
+            "sector_1_tyre_wear_rear_left": self.sector_1_tyre_wear_rear_left,
+            "sector_1_tyre_wear_rear_right": self.sector_1_tyre_wear_rear_right,
+            "sector_2_tyre_wear_front_left": self.sector_2_tyre_wear_front_left,
+            "sector_2_tyre_wear_front_right": self.sector_2_tyre_wear_front_right,
+            "sector_2_tyre_wear_rear_left": self.sector_2_tyre_wear_rear_left,
+            "sector_2_tyre_wear_rear_right": self.sector_2_tyre_wear_rear_right,
+            "sector_3_tyre_wear_front_left": self.sector_3_tyre_wear_front_left,
+            "sector_3_tyre_wear_front_right": self.sector_3_tyre_wear_front_right,
+            "sector_3_tyre_wear_rear_left": self.sector_3_tyre_wear_rear_left,
+            "sector_3_tyre_wear_rear_right": self.sector_3_tyre_wear_rear_right,
         }
         for penalty in self.penalties:
             serialized_lap["penalties"].append(penalty.json_serialize())
@@ -227,19 +239,23 @@ class LapBase:
     def get_telemetry_string(self):
         """ Get telemetry string of this lap for F1Laps sync """
         return json.dumps(self.telemetry.frame_dict) if self.telemetry and self.telemetry_enabled else None
+    
+    def get_current_sector_number(self):
+        """ Return the current sector number as an integer """
+        # The sector logic is:
+        # When S1, all sectors have no time
+        # When in S2, only S1 has its final time
+        # When in S3, S1 and S2 have their finals times and S3 has live incrementing time
+        if not self.sector_1_ms and not self.sector_2_ms and not self.sector_3_ms:
+            return 1
+        elif self.sector_1_ms and self.sector_2_ms and self.sector_3_ms:
+            return 3
+        else:
+            return 2
 
     def store_tyre_wear(self, tyre_wear_front_left, tyre_wear_front_right, tyre_wear_rear_left, tyre_wear_rear_right):
         """ Store tyre wear data for this lap in the corresponding sector """
-        # Get current sector based on the highest sector that has a sector time != None
-        if self.sector_3_ms:
-            current_sector = 3
-        elif self.sector_2_ms:
-            current_sector = 2
-        else:
-            current_sector = 1
-        # Get key
-        attribute_sector_key = "sector_{}".format(current_sector)
-        # Set attributes for each tyre wear in this sector
+        attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
         setattr(self, "{}_tyre_wear_front_left".format(attribute_sector_key), tyre_wear_front_left)
         setattr(self, "{}_tyre_wear_front_right".format(attribute_sector_key), tyre_wear_front_right)
         setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
