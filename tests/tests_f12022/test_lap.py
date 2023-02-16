@@ -117,15 +117,15 @@ class F12022LapTest(TestCase):
         lap.sector_3_ms = 3
         lap.telemetry = lap.telemetry_model(lap.lap_number, lap.session_type)
         lap.telemetry.frame_dict = {1000: [5, 50, None, None, None, None, None, None]}
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, 'penalties': [], 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, "sector_1_tyre_wear_front_left": None, "sector_1_tyre_wear_front_right": None, "sector_1_tyre_wear_rear_left": None, "sector_1_tyre_wear_rear_right": None, "sector_2_tyre_wear_front_left": None, "sector_2_tyre_wear_front_right": None, "sector_2_tyre_wear_rear_left": None, "sector_2_tyre_wear_rear_right": None, "sector_3_tyre_wear_front_left": None, "sector_3_tyre_wear_front_right": None, "sector_3_tyre_wear_rear_left": None, "sector_3_tyre_wear_rear_right": None, 'penalties': [], 'telemetry_data_string': '{"1000": [5, 50, null, null, null, null, null, null]}'})
         # Test without telemetry
         lap.telemetry_enabled = False
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, 'penalties': [], 'telemetry_data_string': None})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, "sector_1_tyre_wear_front_left": None, "sector_1_tyre_wear_front_right": None, "sector_1_tyre_wear_rear_left": None, "sector_1_tyre_wear_rear_right": None, "sector_2_tyre_wear_front_left": None, "sector_2_tyre_wear_front_right": None, "sector_2_tyre_wear_rear_left": None, "sector_2_tyre_wear_rear_right": None, "sector_3_tyre_wear_front_left": None, "sector_3_tyre_wear_front_right": None, "sector_3_tyre_wear_rear_left": None, "sector_3_tyre_wear_rear_right": None, 'penalties': [], 'telemetry_data_string': None})
         # Test with penalty
         penalty = F12022Penalty()
         penalty.penalty_type = 1
         lap.penalties = [penalty]
-        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
+        self.assertEqual(lap.json_serialize(), {'lap_number': 2, 'sector_1_time_ms': 1, 'sector_2_time_ms': 2, 'sector_3_time_ms': 3, 'pit_status': None, 'car_race_position': None, 'tyre_compound_visual': None, 'air_temperature': None, 'rain_percentage_forecast': None, 'track_temperature': None, 'weather_id': None, "sector_1_tyre_wear_front_left": None, "sector_1_tyre_wear_front_right": None, "sector_1_tyre_wear_rear_left": None, "sector_1_tyre_wear_rear_right": None, "sector_2_tyre_wear_front_left": None, "sector_2_tyre_wear_front_right": None, "sector_2_tyre_wear_rear_left": None, "sector_2_tyre_wear_rear_right": None, "sector_3_tyre_wear_front_left": None, "sector_3_tyre_wear_front_right": None, "sector_3_tyre_wear_rear_left": None, "sector_3_tyre_wear_rear_right": None, 'penalties': [{'frame_id': penalty.frame_id, 'infringement_type': None, 'lap_number': None, 'other_vehicle_index': None, 'penalty_type': 1, 'places_gained': None, 'time_spent_gained': None, 'vehicle_index': None}], 'telemetry_data_string': None})
 
     def test_process_flashback_event_removes_penalties(self):
         lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
@@ -141,24 +141,19 @@ class F12022LapTest(TestCase):
     
     def test_store_tyre_wear(self):
         lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
-        # No sector times
-        lap.store_tyre_wear(1, 2, 3, 4)
-        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
-        self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
-        self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
-        # Start S1
-        lap.sector_1_ms = 100
+        # No sector times (means we're in S1)
         lap.store_tyre_wear(1, 2, 3, 4)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
         self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
         # Start S2
-        lap.sector_2_ms = 100
+        lap.sector_1_ms = 100
         lap.store_tyre_wear(2, 4, 6, 8)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, 4)
         self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
         # Start S3
+        lap.sector_2_ms = 100
         lap.sector_3_ms = 100
         lap.store_tyre_wear(4, 8, 12, 16)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
