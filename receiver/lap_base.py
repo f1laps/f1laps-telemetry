@@ -34,6 +34,10 @@ class LapBase:
         self.weather_id = None
 
         # Tyre wear
+        self.lap_start_tyre_wear_front_left = None
+        self.lap_start_tyre_wear_front_right = None
+        self.lap_start_tyre_wear_rear_left = None
+        self.lap_start_tyre_wear_rear_right = None
         self.sector_1_tyre_wear_front_left = None
         self.sector_1_tyre_wear_front_right = None
         self.sector_1_tyre_wear_rear_left = None
@@ -219,6 +223,10 @@ class LapBase:
             "track_temperature": self.track_temperature,
             "weather_id": self.weather_id,
             "rain_percentage_forecast": self.rain_percentage_forecast,
+            "lap_start_tyre_wear_front_left": self.lap_start_tyre_wear_front_left,
+            "lap_start_tyre_wear_front_right": self.lap_start_tyre_wear_front_right,
+            "lap_start_tyre_wear_rear_left": self.lap_start_tyre_wear_rear_left,
+            "lap_start_tyre_wear_rear_right": self.lap_start_tyre_wear_rear_right,
             "sector_1_tyre_wear_front_left": self.sector_1_tyre_wear_front_left,
             "sector_1_tyre_wear_front_right": self.sector_1_tyre_wear_front_right,
             "sector_1_tyre_wear_rear_left": self.sector_1_tyre_wear_rear_left,
@@ -255,8 +263,15 @@ class LapBase:
 
     def store_tyre_wear(self, tyre_wear_front_left, tyre_wear_front_right, tyre_wear_rear_left, tyre_wear_rear_right):
         """ Store tyre wear data for this lap in the corresponding sector """
+        # Store at the end of the applicable sector 
         attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
         setattr(self, "{}_tyre_wear_front_left".format(attribute_sector_key), tyre_wear_front_left)
         setattr(self, "{}_tyre_wear_front_right".format(attribute_sector_key), tyre_wear_front_right)
         setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
         setattr(self, "{}_tyre_wear_rear_right".format(attribute_sector_key), tyre_wear_rear_right)
+        # Store at the beginning of the lap - we just store it once and never overwrite it
+        if self.lap_start_tyre_wear_front_left is None:
+            self.lap_start_tyre_wear_front_left = tyre_wear_front_left
+            self.lap_start_tyre_wear_front_right = tyre_wear_front_right
+            self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
+            self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right
