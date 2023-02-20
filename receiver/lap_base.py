@@ -263,6 +263,9 @@ class LapBase:
 
     def store_tyre_wear(self, tyre_wear_front_left, tyre_wear_front_right, tyre_wear_rear_left, tyre_wear_rear_right):
         """ Store tyre wear data for this lap in the corresponding sector """
+        # Don't store if any of the values is 0 or None:
+        if not tyre_wear_front_left or not tyre_wear_front_right or not tyre_wear_rear_left or not tyre_wear_rear_right:
+            return
         # Store at the end of the applicable sector 
         attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
         setattr(self, "{}_tyre_wear_front_left".format(attribute_sector_key), tyre_wear_front_left)
