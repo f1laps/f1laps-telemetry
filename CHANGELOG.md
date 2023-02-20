@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 3.2.0 - 2023-XX-XX
+## 3.2.0 - 2023-02-20
 
 ### Added
 - Admin-only logging mode to get minimap data
