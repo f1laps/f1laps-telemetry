@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from receiver.f12022.processor import F12022Processor
 from receiver.f12022.session import F12022Session
+from receiver.f12022.types import map_game_mode_to_f1laps
 
 
 class F12022SessionTest(TestCase):
@@ -182,6 +183,40 @@ class F12022SessionTest(TestCase):
             "tyre_compound_visual": "soft"
         })
         self.assertEqual(processor.session.lap_list[1].tyre_compound_visual, "soft")
+    
+    def test_map_game_mode_to_f1laps(self):
+        self.assertEqual(map_game_mode_to_f1laps(3), "solo_grand_prix")
+        self.assertEqual(map_game_mode_to_f1laps(100), "other")
+        self.assertEqual(map_game_mode_to_f1laps(9999), "other")
+    
+    def test_process_motion_packet(self):
+        return True # disabled because motion logging is normally disabled
+        processor = F12022Processor("key_123", True)
+        processor.session = F12022Session("key_123", True, "uid_123", 10, 1, False, 90, 1, 5)
+        processor.session.add_lap(1)
+        packet_data = {
+            "packet_type": "motion",
+            "xpos": 1,
+            "zpos": 2
+        }
+        # No logging without lap telemetry
+        self.assertFalse(processor.process_motion_packet(packet_data))
+        # No logging without lap distance
+        processor.session.get_current_lap().init_telemetry()
+        self.assertFalse(processor.process_motion_packet(packet_data))
+        # Logging with lap distance and without previously logged distance
+        processor.session.get_current_lap().telemetry.last_lap_distance = 1000
+        self.assertTrue(processor.process_motion_packet(packet_data))
+        self.assertEqual(processor.session.last_logged_distance, 1000)
+        # Logging again doesn't work 
+        self.assertFalse(processor.process_motion_packet(packet_data))
+        # Updating lap distance smaller than spacing doesn't work
+        processor.session.get_current_lap().telemetry.last_lap_distance = 1000.5
+        self.assertFalse(processor.process_motion_packet(packet_data))
+        # Updating lap distance bigger than spacing works
+        processor.session.get_current_lap().telemetry.last_lap_distance = 1001
+        self.assertTrue(processor.process_motion_packet(packet_data))
+
     
     
 

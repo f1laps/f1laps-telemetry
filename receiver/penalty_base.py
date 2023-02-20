@@ -39,7 +39,14 @@ class PenaltyBase:
                 lap["penalties"] = []
             lap["penalties"].append(self)
         else:
-            self.session.lap_list[self.lap_number].penalties.append(self)
+            lap = self.session.lap_list.get(self.lap_number)
+            if lap:
+                lap.penalties.append(self)
+            else:
+                # Penalty couldn't be added because lap doesn't exist
+                # Can happen e.g. when pausing mid-session and restarting
+                # We're not solving for this use case for now
+                log.info("Penalty couldn't be added to lap %s" % self.lap_number)
     
     def json_serialize(self):
         """ Convert object to JSON """

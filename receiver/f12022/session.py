@@ -56,6 +56,9 @@ class F12022Session(SessionBase):
         # Data we get from F1Laps
         self.f1_laps_session_id = None
 
+        # Overhead variables
+        self.last_logged_distance = None # for minimap logging (motion packet)
+
         # Log session init
         log.info("*************************************************")
         log.info("New session started: %s" % self)
@@ -71,9 +74,17 @@ class F12022Session(SessionBase):
         """ Called by PenaltyBase """
         return not self.is_multi_lap_session()
 
-    def update_weather(self, weather_id):
+    def update_weather(self, weather_id, track_temperature, air_temperature, rain_percentage_forecast):
         """ Given a new weather_id from the session packet, update the session's weather set """
         self.weather_ids.add(weather_id)
+        # Update values in current lap
+        current_lap = self.get_current_lap()
+        if current_lap:
+            current_lap.track_temperature = track_temperature
+            current_lap.air_temperature = air_temperature
+            current_lap.rain_percentage_forecast = rain_percentage_forecast
+            current_lap.weather_id = weather_id
+
     
     def map_game_mode(self, game_mode):
         """ Map the UDP game_mode value to the F1Laps value """
@@ -210,18 +221,38 @@ class F12022Session(SessionBase):
         lap.has_been_synced_to_f1l = True
         # Send to API
         success = api.lap_create(
-            track_id              = self.track_id,
-            team_id               = self.team_id,
-            conditions            = self.map_weather_ids_to_f1laps_token(),
+            track_id = self.track_id,
+            team_id = self.team_id,
+            conditions = self.map_weather_ids_to_f1laps_token(),
             # game_mode should always be time_trial
             # instead of hardcoding, we keep it dynamic to debug when needed
-            game_mode             = self.game_mode,
-            sector_1_time         = lap.sector_1_ms,
-            sector_2_time         = lap.sector_2_ms,
-            sector_3_time         = lap.sector_3_ms,
-            setup_data            = self.setup,
-            is_valid              = lap.is_valid,
-            telemetry_data_string = lap.get_telemetry_string()
+            game_mode = self.game_mode,
+            sector_1_time = lap.sector_1_ms,
+            sector_2_time = lap.sector_2_ms,
+            sector_3_time = lap.sector_3_ms,
+            setup_data = self.setup,
+            is_valid = lap.is_valid,
+            telemetry_data_string = lap.get_telemetry_string(),
+            air_temperature = lap.air_temperature,
+            track_temperature = lap.track_temperature,
+            rain_percentage_forecast = lap.rain_percentage_forecast,
+            weather_id = lap.weather_id,
+            lap_start_tyre_wear_front_left = lap.lap_start_tyre_wear_front_left,
+            lap_start_tyre_wear_front_right = lap.lap_start_tyre_wear_front_right,
+            lap_start_tyre_wear_rear_left = lap.lap_start_tyre_wear_rear_left,
+            lap_start_tyre_wear_rear_right = lap.lap_start_tyre_wear_rear_right,
+            sector_1_tyre_wear_front_left = lap.sector_1_tyre_wear_front_left,
+            sector_1_tyre_wear_front_right = lap.sector_1_tyre_wear_front_right,
+            sector_1_tyre_wear_rear_left = lap.sector_1_tyre_wear_rear_left,
+            sector_1_tyre_wear_rear_right = lap.sector_1_tyre_wear_rear_right,
+            sector_2_tyre_wear_front_left = lap.sector_2_tyre_wear_front_left,
+            sector_2_tyre_wear_front_right = lap.sector_2_tyre_wear_front_right,
+            sector_2_tyre_wear_rear_left = lap.sector_2_tyre_wear_rear_left,
+            sector_2_tyre_wear_rear_right = lap.sector_2_tyre_wear_rear_right,
+            sector_3_tyre_wear_front_left = lap.sector_3_tyre_wear_front_left,
+            sector_3_tyre_wear_front_right = lap.sector_3_tyre_wear_front_right,
+            sector_3_tyre_wear_rear_left = lap.sector_3_tyre_wear_rear_left,
+            sector_3_tyre_wear_rear_right = lap.sector_3_tyre_wear_rear_right,
         )
         if success:
             log.info("%s successfully synced to F1Laps" % lap)
