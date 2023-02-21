@@ -1,6 +1,12 @@
 # Change Log
 
 
+## 3.2.1 - 2023-02-21
+
+### Fixed
+- Tyre wear of 0 should not be stored
+
+
 ## 3.2.0 - 2023-02-20
 
 ### Added

@@ -141,16 +141,20 @@ class F12022LapTest(TestCase):
     
     def test_store_tyre_wear(self):
         lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)
+        # Make sure 0 values don't count
+        lap.store_tyre_wear(0, 0, 0, 0)
+        self.assertEqual(lap.lap_start_tyre_wear_rear_right, None)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, None)
         # No sector times (means we're in S1)
-        lap.store_tyre_wear(1, 2, 3, 4)
-        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 4)
+        lap.store_tyre_wear(1, 2, 3, 0.0001)
+        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 0.0001)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
         self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
         # Start S2
         lap.sector_1_ms = 100
         lap.store_tyre_wear(2, 4, 6, 8)
-        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 4)
+        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 0.0001)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, 4)
         self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
@@ -158,7 +162,7 @@ class F12022LapTest(TestCase):
         lap.sector_2_ms = 100
         lap.sector_3_ms = 100
         lap.store_tyre_wear(4, 8, 12, 16)
-        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 4)
+        self.assertEqual(lap.lap_start_tyre_wear_rear_right, 0.0001)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, 4)
         self.assertEqual(lap.sector_3_tyre_wear_front_right, 8)
