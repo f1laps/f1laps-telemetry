@@ -1,6 +1,6 @@
 import ctypes
 
-from receiver.f12021.packets.base import PacketBase, PacketHeader
+from receiver.f12022.packets.base import PacketBase, PacketHeader
 
 
 class FlashbackData(PacketBase):
