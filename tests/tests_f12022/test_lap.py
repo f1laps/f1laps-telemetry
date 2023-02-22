@@ -96,6 +96,17 @@ class F12022LapTest(TestCase):
         self.assertEqual(lap.telemetry.session_type, 13)
         self.assertEqual(lap.telemetry.last_lap_distance, 5)
         self.assertEqual(lap.telemetry.frames_popped_list, [])
+        # Without tyre wear temp store, it should be None
+        self.assertEqual(lap.lap_start_tyre_wear_front_left, None)
+        # Without laptime tyre wear should be None
+        lap.tyre_wear_current_values_temp_store = [1, 2, 3, 4]
+        lap.update(telemetry_values = {"lap_time": 0, "frame_identifier": 1001, "lap_distance": 5}, lap_values = {})
+        self.assertEqual(lap.lap_start_tyre_wear_front_left, None)
+        # With laptime tyre wear should be set
+        lap.update(telemetry_values = {"lap_time": 12, "frame_identifier": 1002, "lap_distance": 5}, lap_values = {})
+        self.assertEqual(lap.lap_start_tyre_wear_front_left, 1)
+        # Assert temp store is cleared
+        self.assertEqual(lap.tyre_wear_current_values_temp_store, [])
     
     def test_can_be_synced_to_f1laps(self):
         lap = F12022Lap(lap_number=2, session_type=13, telemetry_enabled=True)

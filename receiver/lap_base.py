@@ -109,9 +109,7 @@ class LapBase:
             # Update tyre wear if we have it and if total_lap_time are set
             # It's important that we have total_lap_time so that we first determine if this is an 
             # in/outlap before writing the lap_start_tyre_wear
-            # Out lap driven own: negative distance, times and pit 0, lap time 0
-            # Outlap sim: distance positive (like normal), times and pit 0, lap time 0
-            if self.tyre_wear_current_values_temp_store and total_lap_time and total_lap_time >0:
+            if self.tyre_wear_current_values_temp_store and total_lap_time and total_lap_time > 0:
                 self.store_tyre_wear(*self.tyre_wear_current_values_temp_store)
         
     def init_telemetry(self):
@@ -286,6 +284,5 @@ class LapBase:
             self.lap_start_tyre_wear_front_right = tyre_wear_front_right
             self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
             self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right
-            log.info('------------------ SETTTT')
         # Clear temp store
         self.tyre_wear_current_values_temp_store = []
