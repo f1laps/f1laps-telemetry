@@ -106,8 +106,10 @@ class LapBase:
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
-            # Update tyre wear if set
-            if self.tyre_wear_current_values_temp_store:
+            # Update tyre wear if we have it and if lap_values are set
+            # It's important that we have lap_values so that we first determine if this is an 
+            # in/outlap before writing the lap_start_tyre_wear
+            if self.tyre_wear_current_values_temp_store and lap_values:
                 self.store_tyre_wear(*self.tyre_wear_current_values_temp_store)
         
     def init_telemetry(self):
