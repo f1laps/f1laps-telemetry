@@ -110,6 +110,7 @@ class LapBase:
             # It's important that we have lap_values so that we first determine if this is an 
             # in/outlap before writing the lap_start_tyre_wear
             if self.tyre_wear_current_values_temp_store and lap_values:
+                log.info(">>>>>>>>> Pit value: %s" % new_pit_value)
                 self.store_tyre_wear(*self.tyre_wear_current_values_temp_store)
         
     def init_telemetry(self):
