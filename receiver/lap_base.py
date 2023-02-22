@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from receiver.lap_telemetry_base import LapTelemetryBase
-from receiver.f12022.types import SESSION_TYPES_WITH_OUTLAP, \
+from receiver.f12022.types import SESSION_TYPES_WITH_INLAP, \
                                   SESSION_TYPES_WITH_IN_AND_OUT_LAP, \
                                   SESSION_TYPES_TIME_TRIAL
 
@@ -146,7 +146,7 @@ class LapBase:
     
     def is_in_or_outlap(self, current_distance, new_pit_value):
         """Check if the current lap is an inlap or outlap"""
-        if self.session_type in SESSION_TYPES_WITH_OUTLAP:
+        if self.session_type in SESSION_TYPES_WITH_INLAP:
             return self.is_race_inlap(current_distance)
         # Quali sessions have inlaps and outlaps
         elif self.session_type in SESSION_TYPES_WITH_IN_AND_OUT_LAP:
@@ -273,8 +273,20 @@ class LapBase:
         setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
         setattr(self, "{}_tyre_wear_rear_right".format(attribute_sector_key), tyre_wear_rear_right)
         # Store at the beginning of the lap - we just store it once and never overwrite it
-        if self.lap_start_tyre_wear_front_left is None:
+        # Problem is outlaps: we don't have a clean way of knowing when the line was crossed
+        # We use bool(self.telemetry) as a proxy to determine if we're on an active lap (not outlap) for now
+        # Ideally we should not tie it to telemetry but have an abstract determination if we're on an active lap
+        lap_start_tyre_wear_has_not_yet_been_set = bool(self.lap_start_tyre_wear_front_left is None)
+        lap_is_active = bool(self.telemetry)
+        if lap_start_tyre_wear_has_not_yet_been_set and lap_is_active:
             self.lap_start_tyre_wear_front_left = tyre_wear_front_left
             self.lap_start_tyre_wear_front_right = tyre_wear_front_right
             self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
             self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right
+        # Depending on packet timing we may have started telemetry, set tyre wear, then reset telemetry
+        # So let's reset lap start tyre wear if we have no telemetry
+        if not lap_is_active:
+            self.lap_start_tyre_wear_front_left = None
+            self.lap_start_tyre_wear_front_right = None
+            self.lap_start_tyre_wear_rear_left = None
+            self.lap_start_tyre_wear_rear_right = None

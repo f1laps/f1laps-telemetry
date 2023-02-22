@@ -147,6 +147,14 @@ class F12022LapTest(TestCase):
         self.assertEqual(lap.sector_1_tyre_wear_front_right, None)
         # No sector times (means we're in S1)
         lap.store_tyre_wear(1, 2, 3, 0.0001)
+        # Without active telemetry we aren't setting lap start tyre wear
+        self.assertEqual(lap.lap_start_tyre_wear_rear_right, None)
+        self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
+        self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
+        self.assertEqual(lap.sector_3_tyre_wear_front_right, None)
+        # Start telemetry -> should capture tyre weak
+        lap.init_telemetry()
+        lap.store_tyre_wear(1, 2, 3, 0.0001)
         self.assertEqual(lap.lap_start_tyre_wear_rear_right, 0.0001)
         self.assertEqual(lap.sector_1_tyre_wear_front_right, 2)
         self.assertEqual(lap.sector_2_tyre_wear_front_right, None)
