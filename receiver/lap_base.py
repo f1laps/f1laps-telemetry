@@ -34,6 +34,7 @@ class LapBase:
         self.weather_id = None
 
         # Tyre wear
+        self.tyre_wear_current_values_temp_store = []
         self.lap_start_tyre_wear_front_left = None
         self.lap_start_tyre_wear_front_right = None
         self.lap_start_tyre_wear_rear_left = None
@@ -105,6 +106,9 @@ class LapBase:
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
+            # Update tyre wear if set
+            if self.tyre_wear_current_values_temp_store:
+                self.store_tyre_wear(*self.tyre_wear_current_values_temp_store)
         
     def init_telemetry(self):
         """ Init telemetry object """
@@ -273,20 +277,11 @@ class LapBase:
         setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
         setattr(self, "{}_tyre_wear_rear_right".format(attribute_sector_key), tyre_wear_rear_right)
         # Store at the beginning of the lap - we just store it once and never overwrite it
-        # Problem is outlaps: we don't have a clean way of knowing when the line was crossed
-        # We use bool(self.telemetry) as a proxy to determine if we're on an active lap (not outlap) for now
-        # Ideally we should not tie it to telemetry but have an abstract determination if we're on an active lap
-        lap_start_tyre_wear_has_not_yet_been_set = bool(self.lap_start_tyre_wear_front_left is None)
-        lap_is_active = bool(self.telemetry)
-        if lap_start_tyre_wear_has_not_yet_been_set and lap_is_active:
+        if not self.lap_start_tyre_wear_front_left:
             self.lap_start_tyre_wear_front_left = tyre_wear_front_left
             self.lap_start_tyre_wear_front_right = tyre_wear_front_right
             self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
             self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right
-        # Depending on packet timing we may have started telemetry, set tyre wear, then reset telemetry
-        # So let's reset lap start tyre wear if we have no telemetry
-        if not lap_is_active:
-            self.lap_start_tyre_wear_front_left = None
-            self.lap_start_tyre_wear_front_right = None
-            self.lap_start_tyre_wear_rear_left = None
-            self.lap_start_tyre_wear_rear_right = None
+            log.info('------------------ SETTTT')
+        # Clear temp store
+        self.tyre_wear_current_values_temp_store = []

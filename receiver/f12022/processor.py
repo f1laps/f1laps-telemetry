@@ -258,12 +258,12 @@ class F12022Processor:
     def process_car_damage_packet(self, packet_data):
         current_lap = self.session.get_current_lap()
         if current_lap:
-            current_lap.store_tyre_wear(
+            current_lap.tyre_wear_current_values_temp_store = [
                 packet_data["tyre_wear_front_left"],
                 packet_data["tyre_wear_front_right"],
                 packet_data["tyre_wear_rear_left"],
                 packet_data["tyre_wear_rear_right"],
-            )
+            ]
     
     def process_motion_packet(self, packet_data):
         """ Logs motion data for the creation of the minimap svg """
