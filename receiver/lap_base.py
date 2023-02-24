@@ -325,6 +325,8 @@ class LapBase:
         # Store at the beginning of the lap - we just store it once and never overwrite it
         if not self.lap_start_ers_store_energy:
             self.lap_start_ers_store_energy = ers_store_energy
+        # Clear temp store
+        self.ers_store_energy_temp_store = None
     
     def store_fuel_remaining(self, fuel_remaining):
         """ Store fuel remaining for this lap in the corresponding sector """
@@ -337,3 +339,5 @@ class LapBase:
         # Store at the beginning of the lap - we just store it once and never overwrite it
         if not self.lap_start_fuel_remaining:
             self.lap_start_fuel_remaining = fuel_remaining
+        # Clear temp store
+        self.fuel_remaining_temp_store = None
