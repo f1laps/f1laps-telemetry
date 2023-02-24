@@ -250,10 +250,12 @@ class F12022Processor:
         penalty.add_to_lap()
     
     def process_car_status_packet(self, packet_data):
-        """ Update tyres used for the current lap """
+        """ Update tyres used and ers store energy for the current lap """
         current_lap = self.session.get_current_lap()
         if current_lap:
             current_lap.tyre_compound_visual = packet_data.get("tyre_compound_visual")
+            current_lap.ers_store_energy_temp_store = packet_data.get("ers_store_energy")
+            current_lap.fuel_remaining_temp_store = packet_data.get("fuel_remaining")
         
     def process_car_damage_packet(self, packet_data):
         current_lap = self.session.get_current_lap()

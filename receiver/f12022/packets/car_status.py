@@ -62,5 +62,7 @@ class PacketCarStatusData(PacketBase):
             return None
         return {
             "packet_type": "car_status",
-            "tyre_compound_visual": car_status.visualTyreCompound
+            "tyre_compound_visual": car_status.visualTyreCompound,
+            "ers_store_energy": car_status.ersStoreEnergy,
+            "fuel_remaining": car_status.fuelInTank,
         }

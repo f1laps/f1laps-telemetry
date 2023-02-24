@@ -6,6 +6,10 @@
 ### Fixed
 - Fix issue with wrong tyre wear in outlaps 
 
+### Added
+- Collect ERS status for each sector
+- Collect fuel remaining for each sector
+
 
 ## 3.2.1 - 2023-02-21
 
