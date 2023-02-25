@@ -319,6 +319,7 @@ class LapBase:
         # Don't store if it's None:
         if ers_store_energy is None:
             return
+        ers_store_energy = int(ers_store_energy)
         # Store at the end of the applicable sector 
         attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
         setattr(self, "{}_ers_store_energy".format(attribute_sector_key), ers_store_energy)
