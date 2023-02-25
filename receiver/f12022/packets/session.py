@@ -78,7 +78,7 @@ class PacketSessionData(PacketBase):
     ]
 
     def serialize(self):
-        return {
+        serialized_packet = {
             "packet_type": "session",
             "session_uid": self.header.sessionUID,
             "session_type": self.sessionType,
@@ -89,6 +89,15 @@ class PacketSessionData(PacketBase):
             "is_spectating": self.isSpectating,
             "game_mode": self.gameMode,
             "season_link_identifier": self.seasonLinkIdentifier,
+            "track_temperature": self.trackTemperature,
+            "air_temperature": self.airTemperature,
+            "rain_percentage_forecast": None,
         }
+        # Add rain percentage from last weather forecast sample, if any exist
+        if self.numWeatherForecastSamples > 0:
+            serialized_packet["rain_percentage_forecast"] = self.weatherForecastSamples[
+                self.numWeatherForecastSamples - 1
+            ].rainPercentage
+        return serialized_packet
 
 

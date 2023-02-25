@@ -29,6 +29,7 @@ class LapTelemetryBase:
     """Holds current lap telemetry data"""
     MAX_FLASHBACK_DISTANCE_METERS = 1500
     MAX_DISTANCE_COUNT_AS_NEW_LAP = 200
+    SESSION_TYPES_WITHOUT_OUTLAP = [1, 2, 3, 4, 5, 6, 7, 8, 13]
 
     def __init__(self, lap_number, session_type=None):
         # Lap number
@@ -40,7 +41,6 @@ class LapTelemetryBase:
         # This distinction is important because for outlaps, we dont want the outlap frames
         # But for restart, we want the new lap frames
         self.session_type = session_type
-        SESSION_TYPES_WITHOUT_OUTLAP = [1, 2, 3, 4, 13]
 
         # Main frame dict
         # Each frame is a key in this dict
@@ -110,6 +110,34 @@ class LapTelemetryBase:
             # So we need to manually reset the last lap distance to None here
             self.last_lap_distance = None
             return
+
+        """
+        In practice, when coming out of the garage, the game shows pre-line cross that we're on lap X-1,
+        but the telemetry data sends lap X. Hence based on the data we don't recognize the line cross. 
+        We need to manually remove the telemetry pre-line cross.
+        """
+        # Check if last distance was higher (unexpected)
+        if self.last_lap_distance and self.last_lap_distance > current_distance:
+            # So if we drop the current distance down to a super small number, we assume a NEW LAP was started
+            if current_distance < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                # New in F1 2021:
+                # Sometimes, the Lap Package gets sent after finish line cross (inlap) without incrementing the lapnumber
+                # In that case, the following code would remove the entire last lap. We dont want that. 
+                # So we add the condition that we only clean the pre-line frames if that pre-line frame_dict didn't contain
+                # frames that are early in the lap (meaning it wasnt a full lap)
+                frame_dict_sorted_by_distance = sorted(self.frame_dict.copy().items(), key=lambda kv: kv[KEY_INDEX_MAP["lap_distance"]])
+                first_frame_distance_frame, first_frame_distance_values = frame_dict_sorted_by_distance[0]
+                first_frame_distance_value = first_frame_distance_values[KEY_INDEX_MAP["lap_distance"]] or 0
+                if self.session_type not in self.SESSION_TYPES_WITHOUT_OUTLAP and first_frame_distance_value < self.MAX_DISTANCE_COUNT_AS_NEW_LAP:
+                    log.info("Assuming an outlap started based on distance delta - killing all new frames (current distance %s, last distance %s, first frame distance %s)" % \
+                        (current_distance, self.last_lap_distance, first_frame_distance_value))
+                    self.remove_frame(frame_number)
+                    # Important to return here to not set the last_lap_distance to the current_distance
+                    return
+                else:
+                    log.info("Assuming a new lap started based on distance delta - killing all old frames (current distance %s, last distance %s, first frame distance %s)" % \
+                        (current_distance, self.last_lap_distance, first_frame_distance_value))
+                    self.frame_dict = {frame_number: frame}
         
         # Set the last distance value for future frames
         self.last_lap_distance = current_distance

@@ -59,6 +59,7 @@ Track = {
     27: "Imola",
     28: "Portimão",
     29: "Jeddah",
+    30: "Miami",
 }
 
 
@@ -82,6 +83,7 @@ GameMode = {
 
 def map_game_mode_to_f1laps(game_mode): 
     """ Fallback is Solo Grand Prix, so we only map as needed """
+    fallback = "other"
     return {
         0: "other",
         3: "solo_grand_prix",
@@ -97,5 +99,6 @@ def map_game_mode_to_f1laps(game_mode):
        19: "career",
        20: "career",
       100: "other",
+      123: "other",
       127: "other"
-    }[game_mode]
+    }.get(game_mode) or fallback

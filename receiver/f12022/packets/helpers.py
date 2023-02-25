@@ -9,15 +9,16 @@ from receiver.f12022.packets.participants import PacketParticipantsData
 from receiver.f12022.packets.setup import PacketCarSetupData
 from receiver.f12022.packets.telemetry import PacketCarTelemetryData
 from receiver.f12022.packets.car_status import PacketCarStatusData
+from receiver.f12022.packets.car_damage import PacketCarDamageData
 from receiver.f12022.packets.final_classification import PacketFinalClassificationData
-#from receiver.f12022.packets.motion import PacketMotionData
+from receiver.f12022.packets.motion import PacketMotionData
 
 
 HeaderFieldsToPacketType = {
-     # The Motion packet sometimes returns:
-     # 'Buffer size too small (36 instead of at least 1464 bytes)'
-     # We don't need the packet in prod, only for maps, so we're skipping it by default.
-    #0: PacketMotionData,
+    # The Motion packet sometimes returns:
+    # 'Buffer size too small (36 instead of at least 1464 bytes)'
+    # We don't need the packet in prod, only for maps, so we're skipping it by default.
+    # 0: PacketMotionData,
     1: PacketSessionData,
     2: PacketLapData,
     3: PacketEventData,
@@ -26,6 +27,7 @@ HeaderFieldsToPacketType = {
     6: PacketCarTelemetryData,
     7: PacketCarStatusData,
     8: PacketFinalClassificationData,
+    10: PacketCarDamageData
 }
 
 

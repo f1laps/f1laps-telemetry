@@ -27,6 +27,30 @@ class LapBase:
         self.is_valid = True
         self.tyre_compound_visual = None
 
+        # Lap conditions
+        self.air_temperature = None
+        self.track_temperature = None
+        self.rain_percentage_forecast = None
+        self.weather_id = None
+
+        # Tyre wear
+        self.lap_start_tyre_wear_front_left = None
+        self.lap_start_tyre_wear_front_right = None
+        self.lap_start_tyre_wear_rear_left = None
+        self.lap_start_tyre_wear_rear_right = None
+        self.sector_1_tyre_wear_front_left = None
+        self.sector_1_tyre_wear_front_right = None
+        self.sector_1_tyre_wear_rear_left = None
+        self.sector_1_tyre_wear_rear_right = None
+        self.sector_2_tyre_wear_front_left = None
+        self.sector_2_tyre_wear_front_right = None
+        self.sector_2_tyre_wear_rear_left = None
+        self.sector_2_tyre_wear_rear_right = None
+        self.sector_3_tyre_wear_front_left = None
+        self.sector_3_tyre_wear_front_right = None
+        self.sector_3_tyre_wear_rear_left = None
+        self.sector_3_tyre_wear_rear_right = None
+
         # Telemetry
         self.telemetry = None
         self.telemetry_model = LapTelemetryBase
@@ -75,12 +99,16 @@ class LapBase:
         else:
             # Init telemetry if we don't have it yet
             if not self.telemetry:
-                self.telemetry = self.telemetry_model(self.lap_number, self.session_type)
+                self.init_telemetry()
             # Update this lap object
             for key, value in lap_values.items():
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
+        
+    def init_telemetry(self):
+        """ Init telemetry object """
+        self.telemetry = self.telemetry_model(self.lap_number, self.session_type)
     
     def reset_lap_telemetry(self):
         """ 
@@ -190,7 +218,27 @@ class LapBase:
             "car_race_position": self.car_race_position,
             "tyre_compound_visual" : self.tyre_compound_visual,
             "telemetry_data_string": self.get_telemetry_string(),
-            "penalties": []
+            "penalties": [],
+            "air_temperature": self.air_temperature,
+            "track_temperature": self.track_temperature,
+            "weather_id": self.weather_id,
+            "rain_percentage_forecast": self.rain_percentage_forecast,
+            "lap_start_tyre_wear_front_left": self.lap_start_tyre_wear_front_left,
+            "lap_start_tyre_wear_front_right": self.lap_start_tyre_wear_front_right,
+            "lap_start_tyre_wear_rear_left": self.lap_start_tyre_wear_rear_left,
+            "lap_start_tyre_wear_rear_right": self.lap_start_tyre_wear_rear_right,
+            "sector_1_tyre_wear_front_left": self.sector_1_tyre_wear_front_left,
+            "sector_1_tyre_wear_front_right": self.sector_1_tyre_wear_front_right,
+            "sector_1_tyre_wear_rear_left": self.sector_1_tyre_wear_rear_left,
+            "sector_1_tyre_wear_rear_right": self.sector_1_tyre_wear_rear_right,
+            "sector_2_tyre_wear_front_left": self.sector_2_tyre_wear_front_left,
+            "sector_2_tyre_wear_front_right": self.sector_2_tyre_wear_front_right,
+            "sector_2_tyre_wear_rear_left": self.sector_2_tyre_wear_rear_left,
+            "sector_2_tyre_wear_rear_right": self.sector_2_tyre_wear_rear_right,
+            "sector_3_tyre_wear_front_left": self.sector_3_tyre_wear_front_left,
+            "sector_3_tyre_wear_front_right": self.sector_3_tyre_wear_front_right,
+            "sector_3_tyre_wear_rear_left": self.sector_3_tyre_wear_rear_left,
+            "sector_3_tyre_wear_rear_right": self.sector_3_tyre_wear_rear_right,
         }
         for penalty in self.penalties:
             serialized_lap["penalties"].append(penalty.json_serialize())
@@ -199,3 +247,34 @@ class LapBase:
     def get_telemetry_string(self):
         """ Get telemetry string of this lap for F1Laps sync """
         return json.dumps(self.telemetry.frame_dict) if self.telemetry and self.telemetry_enabled else None
+    
+    def get_current_sector_number(self):
+        """ Return the current sector number as an integer """
+        # The sector logic is:
+        # When S1, all sectors have no time
+        # When in S2, only S1 has its final time
+        # When in S3, S1 and S2 have their finals times and S3 has live incrementing time
+        if not self.sector_1_ms and not self.sector_2_ms and not self.sector_3_ms:
+            return 1
+        elif self.sector_1_ms and self.sector_2_ms and self.sector_3_ms:
+            return 3
+        else:
+            return 2
+
+    def store_tyre_wear(self, tyre_wear_front_left, tyre_wear_front_right, tyre_wear_rear_left, tyre_wear_rear_right):
+        """ Store tyre wear data for this lap in the corresponding sector """
+        # Don't store if any of the values is 0 or None:
+        if not tyre_wear_front_left or not tyre_wear_front_right or not tyre_wear_rear_left or not tyre_wear_rear_right:
+            return
+        # Store at the end of the applicable sector 
+        attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
+        setattr(self, "{}_tyre_wear_front_left".format(attribute_sector_key), tyre_wear_front_left)
+        setattr(self, "{}_tyre_wear_front_right".format(attribute_sector_key), tyre_wear_front_right)
+        setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
+        setattr(self, "{}_tyre_wear_rear_right".format(attribute_sector_key), tyre_wear_rear_right)
+        # Store at the beginning of the lap - we just store it once and never overwrite it
+        if self.lap_start_tyre_wear_front_left is None:
+            self.lap_start_tyre_wear_front_left = tyre_wear_front_left
+            self.lap_start_tyre_wear_front_right = tyre_wear_front_right
+            self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
+            self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right

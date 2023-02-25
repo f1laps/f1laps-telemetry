@@ -6,7 +6,7 @@ F1Laps API Key
 - Keep the quotes around it!
 #################################################################"""
 
-F1LAPS_API_KEY = "YOUR_API_KEY"
+F1LAPS_API_KEY = "ADD-API-KEY-HERE"
 
 
 
@@ -15,4 +15,4 @@ App Config
 - You shouldn't change these settings unless you know what they do
 #################################################################"""
 
-VERSION = "3.1.0"
+VERSION = "3.2.1"
