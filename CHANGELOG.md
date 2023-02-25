@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 3.2.2 - 2023-02-22
+## 3.2.2 - 2023-02-25
 
 ### Fixed
 - Fix issue with wrong tyre wear in outlaps 
