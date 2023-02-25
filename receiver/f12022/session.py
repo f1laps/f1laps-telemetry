@@ -253,6 +253,14 @@ class F12022Session(SessionBase):
             sector_3_tyre_wear_front_right = lap.sector_3_tyre_wear_front_right,
             sector_3_tyre_wear_rear_left = lap.sector_3_tyre_wear_rear_left,
             sector_3_tyre_wear_rear_right = lap.sector_3_tyre_wear_rear_right,
+            lap_start_ers_store_kj = lap.lap_start_ers_store_energy,
+            sector_1_ers_store_kj = lap.sector_1_ers_store_energy,
+            sector_2_ers_store_kj = lap.sector_2_ers_store_energy,
+            sector_3_ers_store_kj = lap.sector_3_ers_store_energy,
+            lap_start_fuel_remaining_kg = lap.lap_start_fuel_remaining,
+            sector_1_fuel_remaining_kg = lap.sector_1_fuel_remaining,
+            sector_2_fuel_remaining_kg = lap.sector_2_fuel_remaining,
+            sector_3_fuel_remaining_kg = lap.sector_3_fuel_remaining,
         )
         if success:
             log.info("%s successfully synced to F1Laps" % lap)

@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from receiver.lap_telemetry_base import LapTelemetryBase
-from receiver.f12022.types import SESSION_TYPES_WITH_OUTLAP, \
+from receiver.f12022.types import SESSION_TYPES_WITH_INLAP, \
                                   SESSION_TYPES_WITH_IN_AND_OUT_LAP, \
                                   SESSION_TYPES_TIME_TRIAL
 
@@ -34,6 +34,7 @@ class LapBase:
         self.weather_id = None
 
         # Tyre wear
+        self.tyre_wear_current_values_temp_store = []
         self.lap_start_tyre_wear_front_left = None
         self.lap_start_tyre_wear_front_right = None
         self.lap_start_tyre_wear_rear_left = None
@@ -50,6 +51,20 @@ class LapBase:
         self.sector_3_tyre_wear_front_right = None
         self.sector_3_tyre_wear_rear_left = None
         self.sector_3_tyre_wear_rear_right = None
+
+        # ERS
+        self.ers_store_energy_temp_store = None
+        self.lap_start_ers_store_energy = None
+        self.sector_1_ers_store_energy = None
+        self.sector_2_ers_store_energy = None
+        self.sector_3_ers_store_energy = None
+    
+        # Fuel
+        self.fuel_remaining_temp_store = None
+        self.lap_start_fuel_remaining = None
+        self.sector_1_fuel_remaining = None
+        self.sector_2_fuel_remaining = None
+        self.sector_3_fuel_remaining = None
 
         # Telemetry
         self.telemetry = None
@@ -105,6 +120,16 @@ class LapBase:
                 setattr(self, key, value)
             # Update linked LapTelemetry object
             self.telemetry.update(telemetry_values)
+            # Update tyre wear if we have it and if total_lap_time are set
+            # It's important that we have total_lap_time so that we first determine if this is an 
+            # in/outlap before writing the lap_start_tyre_wear
+            if total_lap_time and total_lap_time > 0:
+                if self.tyre_wear_current_values_temp_store:
+                    self.store_tyre_wear(*self.tyre_wear_current_values_temp_store)
+                if self.ers_store_energy_temp_store:
+                    self.store_ers_energy(self.ers_store_energy_temp_store)
+                if self.fuel_remaining_temp_store:
+                    self.store_fuel_remaining(self.fuel_remaining_temp_store)
         
     def init_telemetry(self):
         """ Init telemetry object """
@@ -146,7 +171,7 @@ class LapBase:
     
     def is_in_or_outlap(self, current_distance, new_pit_value):
         """Check if the current lap is an inlap or outlap"""
-        if self.session_type in SESSION_TYPES_WITH_OUTLAP:
+        if self.session_type in SESSION_TYPES_WITH_INLAP:
             return self.is_race_inlap(current_distance)
         # Quali sessions have inlaps and outlaps
         elif self.session_type in SESSION_TYPES_WITH_IN_AND_OUT_LAP:
@@ -239,6 +264,14 @@ class LapBase:
             "sector_3_tyre_wear_front_right": self.sector_3_tyre_wear_front_right,
             "sector_3_tyre_wear_rear_left": self.sector_3_tyre_wear_rear_left,
             "sector_3_tyre_wear_rear_right": self.sector_3_tyre_wear_rear_right,
+            "lap_start_ers_store_kj": self.lap_start_ers_store_energy,
+            "sector_1_ers_store_kj": self.sector_1_ers_store_energy,
+            "sector_2_ers_store_kj": self.sector_2_ers_store_energy,
+            "sector_3_ers_store_kj": self.sector_3_ers_store_energy,
+            "lap_start_fuel_remaining_kg": self.lap_start_fuel_remaining,
+            "sector_1_fuel_remaining_kg": self.sector_1_fuel_remaining,
+            "sector_2_fuel_remaining_kg": self.sector_2_fuel_remaining,
+            "sector_3_fuel_remaining_kg": self.sector_3_fuel_remaining,
         }
         for penalty in self.penalties:
             serialized_lap["penalties"].append(penalty.json_serialize())
@@ -273,8 +306,39 @@ class LapBase:
         setattr(self, "{}_tyre_wear_rear_left".format(attribute_sector_key), tyre_wear_rear_left)
         setattr(self, "{}_tyre_wear_rear_right".format(attribute_sector_key), tyre_wear_rear_right)
         # Store at the beginning of the lap - we just store it once and never overwrite it
-        if self.lap_start_tyre_wear_front_left is None:
+        if not self.lap_start_tyre_wear_front_left:
             self.lap_start_tyre_wear_front_left = tyre_wear_front_left
             self.lap_start_tyre_wear_front_right = tyre_wear_front_right
             self.lap_start_tyre_wear_rear_left = tyre_wear_rear_left
             self.lap_start_tyre_wear_rear_right = tyre_wear_rear_right
+        # Clear temp store
+        self.tyre_wear_current_values_temp_store = []
+    
+    def store_ers_energy(self, ers_store_energy):
+        """ Store ers energy for this lap in the corresponding sector """
+        # Don't store if it's None:
+        if ers_store_energy is None:
+            return
+        ers_store_energy = int(ers_store_energy)
+        # Store at the end of the applicable sector 
+        attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
+        setattr(self, "{}_ers_store_energy".format(attribute_sector_key), ers_store_energy)
+        # Store at the beginning of the lap - we just store it once and never overwrite it
+        if not self.lap_start_ers_store_energy:
+            self.lap_start_ers_store_energy = ers_store_energy
+        # Clear temp store
+        self.ers_store_energy_temp_store = None
+    
+    def store_fuel_remaining(self, fuel_remaining):
+        """ Store fuel remaining for this lap in the corresponding sector """
+        # Don't store if it's None:
+        if fuel_remaining is None:
+            return
+        # Store at the end of the applicable sector 
+        attribute_sector_key = "sector_{}".format(self.get_current_sector_number())
+        setattr(self, "{}_fuel_remaining".format(attribute_sector_key), fuel_remaining)
+        # Store at the beginning of the lap - we just store it once and never overwrite it
+        if not self.lap_start_fuel_remaining:
+            self.lap_start_fuel_remaining = fuel_remaining
+        # Clear temp store
+        self.fuel_remaining_temp_store = None

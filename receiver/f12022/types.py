@@ -19,8 +19,8 @@ SessionType = {
     13: "time_trial",
 }
 
-# Race and OSQ have outlaps
-SESSION_TYPES_WITH_OUTLAP = [10, 11, 12, 9]
+# Race and OSQ have inlaps
+SESSION_TYPES_WITH_INLAP = [10, 11, 12, 9]
 # Quali non-one-shot have in- and outlaps
 SESSION_TYPES_WITH_IN_AND_OUT_LAP = [5, 6, 7, 8]
 # Time trial IDs (needed because they have their own lap rules)
