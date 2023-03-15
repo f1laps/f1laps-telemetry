@@ -261,6 +261,16 @@ class F12022Session(SessionBase):
             sector_1_fuel_remaining_kg = lap.sector_1_fuel_remaining,
             sector_2_fuel_remaining_kg = lap.sector_2_fuel_remaining,
             sector_3_fuel_remaining_kg = lap.sector_3_fuel_remaining,
+            top_speed = lap.top_speed,
+            number_gear_changes = lap.number_gear_changes,
+            tyre_front_left_temp_max_surface = lap.tyre_front_left_temp_max_surface,
+            tyre_front_right_temp_max_surface = lap.tyre_front_right_temp_max_surface,
+            tyre_rear_left_temp_max_surface = lap.tyre_rear_left_temp_max_surface,
+            tyre_rear_right_temp_max_surface = lap.tyre_rear_right_temp_max_surface,
+            tyre_front_left_temp_max_inner = lap.tyre_front_left_temp_max_inner,
+            tyre_front_right_temp_max_inner = lap.tyre_front_right_temp_max_inner,
+            tyre_rear_left_temp_max_inner = lap.tyre_rear_left_temp_max_inner,
+            tyre_rear_right_temp_max_inner = lap.tyre_rear_right_temp_max_inner,
         )
         if success:
             log.info("%s successfully synced to F1Laps" % lap)

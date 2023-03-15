@@ -55,5 +55,13 @@ class PacketCarTelemetryData(PacketBase):
             "gear": telemetry_data.gear,
             "steer": telemetry_data.steer,
             "drs": telemetry_data.drs,
+            "tyre_rear_left_temp_max_surface": telemetry_data.tyresSurfaceTemperature[0],
+            "tyre_rear_right_temp_max_surface": telemetry_data.tyresSurfaceTemperature[1],
+            "tyre_front_left_temp_max_surface": telemetry_data.tyresSurfaceTemperature[2],
+            "tyre_front_right_temp_max_surface": telemetry_data.tyresSurfaceTemperature[3],
+            "tyre_rear_left_temp_max_inner": telemetry_data.tyresInnerTemperature[0],
+            "tyre_rear_right_temp_max_inner": telemetry_data.tyresInnerTemperature[1],
+            "tyre_front_left_temp_max_inner": telemetry_data.tyresInnerTemperature[2],
+            "tyre_front_right_temp_max_inner": telemetry_data.tyresInnerTemperature[3],
         }
     

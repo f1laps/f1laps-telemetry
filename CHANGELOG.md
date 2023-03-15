@@ -1,6 +1,17 @@
 # Change Log
 
 
+## 3.2.3 - 2023-03-XX
+
+### Changed
+- Adjusted Sentry headers collection
+
+### Added
+- Collect top speed
+- Collect max tyre temps (inner and surface)
+- Collect number of gear changes
+
+
 ## 3.2.2 - 2023-02-25
 
 ### Fixed

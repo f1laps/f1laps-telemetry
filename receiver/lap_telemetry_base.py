@@ -58,13 +58,14 @@ class LapTelemetryBase:
     
     def update(self, telemetry_dict):
         """ Update this LapTelemetry object's frame dict"""
-        # Pop frame_id out of the dict because we'll set all attributes later and cant set the id
-        frame_number = telemetry_dict.pop("frame_identifier")
+        frame_number = telemetry_dict["frame_identifier"]
         frame = self.get_frame(frame_number)
         for key, value in telemetry_dict.items():
-            frame_index    = KEY_INDEX_MAP[key]
-            decimal_points = KEY_ROUND_MAP[key]
-            frame[frame_index] = round(value, decimal_points)
+            # Only update keys that are in the key index map
+            if key in KEY_INDEX_MAP:
+                frame_index    = KEY_INDEX_MAP[key]
+                decimal_points = KEY_ROUND_MAP[key]
+                frame[frame_index] = round(value, decimal_points)
         self.clean_frame(frame_number)
     
     def get_frame(self, frame_number):

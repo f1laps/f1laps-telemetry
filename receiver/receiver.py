@@ -76,7 +76,8 @@ class RaceReceiver(threading.Thread):
         sentry_sdk.init(
             SENTRY_DSN,
             traces_sample_rate=0,
-            release=config.VERSION
+            release=config.VERSION,
+            send_default_pii=True
         )
         sentry_sdk.set_context("machine", {
             "system": platform.system(),

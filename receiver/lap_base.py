@@ -66,6 +66,19 @@ class LapBase:
         self.sector_2_fuel_remaining = None
         self.sector_3_fuel_remaining = None
 
+        # Other lap summary data
+        self.top_speed = 0
+        self.number_gear_changes = 0
+        self.current_gear = None
+        self.tyre_front_left_temp_max_surface = 0
+        self.tyre_front_right_temp_max_surface = 0
+        self.tyre_rear_left_temp_max_surface = 0
+        self.tyre_rear_right_temp_max_surface = 0
+        self.tyre_front_left_temp_max_inner = 0
+        self.tyre_front_right_temp_max_inner = 0
+        self.tyre_rear_left_temp_max_inner = 0
+        self.tyre_rear_right_temp_max_inner = 0
+
         # Telemetry
         self.telemetry = None
         self.telemetry_model = LapTelemetryBase
@@ -130,6 +143,8 @@ class LapBase:
                     self.store_ers_energy(self.ers_store_energy_temp_store)
                 if self.fuel_remaining_temp_store:
                     self.store_fuel_remaining(self.fuel_remaining_temp_store)
+                if telemetry_values:
+                    self.update_max_speed_max_temp_gear_changes(telemetry_values)
         
     def init_telemetry(self):
         """ Init telemetry object """
@@ -272,6 +287,16 @@ class LapBase:
             "sector_1_fuel_remaining_kg": self.sector_1_fuel_remaining,
             "sector_2_fuel_remaining_kg": self.sector_2_fuel_remaining,
             "sector_3_fuel_remaining_kg": self.sector_3_fuel_remaining,
+            "top_speed": self.top_speed,
+            "number_gear_changes": self.number_gear_changes,
+            "tyre_front_left_temp_max_surface": self.tyre_front_left_temp_max_surface,
+            "tyre_front_right_temp_max_surface": self.tyre_front_right_temp_max_surface,
+            "tyre_rear_left_temp_max_surface": self.tyre_rear_left_temp_max_surface,
+            "tyre_rear_right_temp_max_surface": self.tyre_rear_right_temp_max_surface,
+            "tyre_front_left_temp_max_inner": self.tyre_front_left_temp_max_inner,
+            "tyre_front_right_temp_max_inner": self.tyre_front_right_temp_max_inner,
+            "tyre_rear_left_temp_max_inner": self.tyre_rear_left_temp_max_inner,
+            "tyre_rear_right_temp_max_inner": self.tyre_rear_right_temp_max_inner,
         }
         for penalty in self.penalties:
             serialized_lap["penalties"].append(penalty.json_serialize())
@@ -342,3 +367,18 @@ class LapBase:
             self.lap_start_fuel_remaining = fuel_remaining
         # Clear temp store
         self.fuel_remaining_temp_store = None
+    
+    def update_max_speed_max_temp_gear_changes(self, telemetry_values):
+        """ Update max speed, max tyre temp, and gear changes for this lap """
+        if telemetry_values.get("speed") and telemetry_values["speed"] > self.top_speed:
+            self.top_speed = telemetry_values["speed"]
+        if telemetry_values.get("gear") and telemetry_values["gear"] != self.current_gear:
+            self.current_gear = telemetry_values["gear"]
+            self.number_gear_changes += 1
+        # Update lap tyre temps if new value is higher than current value, for each attribute name, 
+        tyre_attrs = ["tyre_front_left_temp_max_surface", "tyre_front_right_temp_max_surface", "tyre_rear_left_temp_max_surface", "tyre_rear_right_temp_max_surface", 
+                      "tyre_front_left_temp_max_inner", "tyre_front_right_temp_max_inner", "tyre_rear_left_temp_max_inner", "tyre_rear_right_temp_max_inner"]
+        for tyre_attr in tyre_attrs:
+            if telemetry_values.get(tyre_attr) and telemetry_values[tyre_attr] > getattr(self, tyre_attr):
+                setattr(self, tyre_attr, telemetry_values[tyre_attr])
+        
