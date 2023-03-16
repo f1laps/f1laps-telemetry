@@ -132,7 +132,10 @@ class LapBase:
             for key, value in lap_values.items():
                 setattr(self, key, value)
             # Update linked LapTelemetry object
+            # as well as lap telemetry data
             self.telemetry.update(telemetry_values)
+            if telemetry_values:
+                self.update_max_speed_max_temp_gear_changes(telemetry_values)
             # Update tyre wear if we have it and if total_lap_time are set
             # It's important that we have total_lap_time so that we first determine if this is an 
             # in/outlap before writing the lap_start_tyre_wear
@@ -143,8 +146,6 @@ class LapBase:
                     self.store_ers_energy(self.ers_store_energy_temp_store)
                 if self.fuel_remaining_temp_store:
                     self.store_fuel_remaining(self.fuel_remaining_temp_store)
-                if telemetry_values:
-                    self.update_max_speed_max_temp_gear_changes(telemetry_values)
         
     def init_telemetry(self):
         """ Init telemetry object """
