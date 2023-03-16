@@ -1,7 +1,7 @@
 # Change Log
 
 
-## 3.2.3 - 2023-03-XX
+## 3.2.3 - 2023-03-16
 
 ### Changed
 - Adjusted Sentry headers collection
