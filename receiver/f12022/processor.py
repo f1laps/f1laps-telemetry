@@ -129,21 +129,12 @@ class F12022Processor:
         )
     
     def process_telemetry_packet(self, packet_data):
-        # Get lap object 
         lap = self.session.get_current_lap()
         if not lap:
             return
         lap.update(
             lap_values = {},
-            telemetry_values = {
-                "frame_identifier": packet_data.get("frame_identifier"),
-                "speed": packet_data.get("speed"),
-                "brake": packet_data.get("brake"),
-                "throttle": packet_data.get("throttle"),
-                "gear": packet_data.get("gear"),
-                "steer": packet_data.get("steer"),
-                "drs": packet_data.get("drs"),
-            }
+            telemetry_values = packet_data
         )
     
     def process_participant_data(self, packet_data):
