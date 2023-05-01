@@ -40,7 +40,8 @@ def get_path_temporary(file_name):
 
 class ConfigFile:
     """ Read / write config file """
-    supported_config_names = ["API_KEY", "UDP_BROADCAST_ENABLED", "PORT_VALUE"]
+    supported_config_names = ["API_KEY", "UDP_BROADCAST_ENABLED", "IP_VALUE", "PORT_VALUE", "UDP_REDIRECT_ENABLED",
+                              "REDIRECT_HOST_VALUE", "REDIRECT_PORT_VALUE"]
     config_file_name = "f1laps_configuration.txt"
 
     def __init__(self):
@@ -99,18 +100,17 @@ class ConfigFile:
         if not file_lines:
             return
         try:
-            with open(get_path_executable_parent(self.config_file_name), 'w+') as f: 
+            with open(get_path_executable_parent(self.config_file_name), 'w+') as f:
                 f.writelines("%s\n" % l for l in file_lines)
         except Exception as ex:
             log.debug("Could not write to config file: %s" % ex)
 
     def _read_config(self):
         try:
-            f = open(get_path_executable_parent(self.config_file_name), "r") 
+            f = open(get_path_executable_parent(self.config_file_name), "r")
             file_content = f.readlines()
             f.close()
             return file_content
         except Exception as ex:
             log.debug("Could not read config file (%s)" % ex)
             return None
-        

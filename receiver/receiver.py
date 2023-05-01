@@ -3,6 +3,7 @@ import socket
 import sentry_sdk
 import platform
 import logging
+
 log = logging.getLogger(__name__)
 
 from receiver.f12020.processor import F12020Processor
@@ -12,16 +13,18 @@ from receiver.helpers import get_local_ip
 from receiver.game_version import parse_game_version_from_udp_packet
 import config
 
-
 DEFAULT_PORT = 20777
 SENTRY_DSN = "https://d00edba104864bee975f5f4a71025639@o615967.ingest.sentry.io/5854730"
+REDIRECT_HOST = "127.0.0.1"
+REDIRECT_PORT = 20975
 
 
 class RaceReceiver(threading.Thread):
 
-    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True, use_udp_broadcast=False):
+    def __init__(self, f1laps_api_key, enable_telemetry=True, host_ip=None, host_port=None, run_as_daemon=True,
+                 use_udp_broadcast=False, redirect_host=None, redirect_port=None, use_udp_redirect=False):
         """
-        Init the receiver with all attributes needed to 
+        Init the receiver with all attributes needed to
         push data to F1Laps
         """
 
@@ -36,21 +39,37 @@ class RaceReceiver(threading.Thread):
         self.kill_event = threading.Event()
 
         # Network settings
-        self.host_ip   = host_ip or get_local_ip()
+        self.host_ip = host_ip or get_local_ip()
         self.host_port = host_port or int(DEFAULT_PORT)
         self.use_udp_broadcast = use_udp_broadcast
 
+        # Redirect Settings
+        self.use_udp_redirect = use_udp_redirect
+        self.redirect_host = redirect_host or str(REDIRECT_HOST)
+        self.redirect_port = redirect_port or int(REDIRECT_PORT)
+
         log.info("*************************************************")
         if self.use_udp_broadcast:
-            log.info("Set your F1 game telemetry settings to broadcast mode")  
+            log.info("Set your F1 game telemetry settings to broadcast mode")
             log.info("Set your F1 game telemetry settings port to: %s" % self.host_port)
         else:
             log.info("Set your F1 game telemetry IP to:   %s" % self.host_ip)
             log.info("Set your F1 game telemetry port to: %s" % self.host_port)
+
         log.info("*************************************************")
+
+        if self.use_udp_redirect:
+            log.info("UDP Port Redirection is Enabled")
+            log.info("Redirection IP: %s" % self.redirect_host)
+            log.info("Redirection Port: %s" % self.redirect_port)
+            log.info("*************************************************")
 
         # Get previously opened socket, or create new one
         self.udp_socket = self.get_socket()
+
+        # Get previously redirect opened socket, or create new one
+        if self.use_udp_redirect:
+            self.udp_redirect_socket = self.get_redirect_socket()
 
         # f1laps api key and settings
         self.f1laps_api_key = f1laps_api_key
@@ -60,13 +79,12 @@ class RaceReceiver(threading.Thread):
         self.processor = None
 
         # Sentry manager
-        # We only run Sentry on select game versions, 
+        # We only run Sentry on select game versions,
         # because old ones are not actively maintained
         # This flag allows us to be selective
         self.sentry_running = False
- 
-        log.info("Telemetry receiver started & ready for race data")
 
+        log.info("Telemetry receiver started & ready for race data")
 
     def start_sentry(self):
         # Don't re-init if it's already running
@@ -92,7 +110,6 @@ class RaceReceiver(threading.Thread):
         log.info("Initiated Sentry")
         self.sentry_running = True
 
-
     def get_socket(self):
         # Open and bind socket
         new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -108,6 +125,13 @@ class RaceReceiver(threading.Thread):
         log.debug("Socket opened and bound")
         return new_socket
 
+    def get_redirect_socket(self):
+        # Open and bind socket
+        new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        new_socket.setsockopt(socket.SOL_SOCKET, self.get_socket_reuse_option(), 1)
+        new_socket.bind(("127.0.0.1", 49152))
+        log.debug("Redirect socket opened and bound")
+        return new_socket
 
     def get_socket_reuse_option(self):
         # The SO_REUSEPORT setting allows us to reuse sockets
@@ -118,7 +142,7 @@ class RaceReceiver(threading.Thread):
         user_os = platform.system()
         if user_os == 'Windows':
             return socket.SO_REUSEADDR
-        elif user_os == 'Darwin': # i.e. Mac
+        elif user_os == 'Darwin':  # i.e. Mac
             return socket.SO_REUSEPORT
         else:
             # TBD - SO_REUSEPORT is what we want
@@ -126,15 +150,13 @@ class RaceReceiver(threading.Thread):
             # Could change to SO_REUSEADDR
             return socket.SO_REUSEPORT
 
-
     def kill(self):
         self.kill_event.set()
         log.info("Telemetry receiver stopped")
 
-    
     def run(self):
         """
-        This method is called automatically when calling .start() on the receiver class (in race.py). 
+        This method is called automatically when calling .start() on the receiver class (in race.py).
         The caller should call .start() to not get stuck in the while True loop
 
         It's the main packet listening method.
@@ -142,7 +164,7 @@ class RaceReceiver(threading.Thread):
         # Starting an endless loop to continuously listen for UDP packets
         # until user aborts or process is terminated
         log.info("Receiver started running")
-        
+
         while not self.kill_event.is_set():
             try:
                 incoming_udp_packet = self.udp_socket.recv(2048)
@@ -150,6 +172,9 @@ class RaceReceiver(threading.Thread):
                 # Do this for every packet so that we can handle game switches in flight
                 try:
                     game_version = parse_game_version_from_udp_packet(incoming_udp_packet)
+
+
+
                 except:
                     game_version = None
                 if game_version == "f12020":
@@ -172,6 +197,9 @@ class RaceReceiver(threading.Thread):
                 else:
                     log.info("Unknown packet or game version.")
                 if self.processor:
+                    if self.use_udp_redirect:
+                        self.udp_redirect_socket.sendto(incoming_udp_packet, (self.redirect_host, self.redirect_port))
+
                     self.processor.process(incoming_udp_packet)
             except Exception as ex:
                 log.info("Unknown main receiver exception: %s" % ex)
